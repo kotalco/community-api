@@ -1,6 +1,15 @@
 package handlers
 
-import "github.com/gofiber/fiber/v2"
+import (
+	"fmt"
+	"net/http"
+
+	"github.com/gofiber/fiber/v2"
+	models "github.com/kotalco/api/models/ethereum"
+)
+
+// NodesStore is in-memory nodes store
+var NodesStore = map[string]*models.Node{}
 
 // NodeMockHandler is Ethereum node mock handler
 type NodeMockHandler struct{}
@@ -22,7 +31,22 @@ func (e *NodeMockHandler) List(c *fiber.Ctx) error {
 
 // Create creates a single Ethereum node from spec
 func (e *NodeMockHandler) Create(c *fiber.Ctx) error {
-	return c.SendString("Create mock node")
+	node := new(models.Node)
+
+	if err := c.BodyParser(node); err != nil {
+		return err
+	}
+
+	// check if node exist with this name
+	if NodesStore[node.Name] != nil {
+		return c.Status(http.StatusUnprocessableEntity).JSON(map[string]string{
+			"error": fmt.Sprintf("node by name %s already exist", node.Name),
+		})
+	}
+
+	NodesStore[node.Name] = node
+
+	return c.JSON(node)
 }
 
 // Delete deletes a single Ethereum node by name
