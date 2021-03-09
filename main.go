@@ -4,7 +4,7 @@ import (
 	"os"
 
 	"github.com/gofiber/fiber/v2"
-	"github.com/kotalco/api/handlers"
+	handlers "github.com/kotalco/api/handlers/ethereum"
 )
 
 func main() {
@@ -19,14 +19,14 @@ func main() {
 		return c.SendString("Kotal API")
 	})
 
-	var ethereumHandler handlers.Handler
+	var nodeHandler handlers.Handler
 	if os.Getenv("MOCK") == "true" {
-		ethereumHandler = handlers.NewEthereumMockHandler()
+		nodeHandler = handlers.NewNodeMockHandler()
 	} else {
-		ethereumHandler = handlers.NewEthereumHandler()
+		nodeHandler = handlers.NewNodeHandler()
 	}
 
-	ethereumHandler.Register(nodes)
+	nodeHandler.Register(nodes)
 
 	app.Listen(":3000")
 }
