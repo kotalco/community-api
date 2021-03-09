@@ -1,6 +1,8 @@
 package main
 
 import (
+	"os"
+
 	"github.com/gofiber/fiber/v2"
 	"github.com/kotalco/api/handlers"
 )
@@ -17,7 +19,13 @@ func main() {
 		return c.SendString("Kotal API")
 	})
 
-	ethereumHandler := handlers.EthereumHandler{}
+	var ethereumHandler handlers.Handler
+	if os.Getenv("MOCK") == "true" {
+		ethereumHandler = handlers.NewEthereumMockHandler()
+	} else {
+		ethereumHandler = handlers.NewEthereumHandler()
+	}
+
 	ethereumHandler.Register(nodes)
 
 	app.Listen(":3000")

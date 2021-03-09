@@ -5,6 +5,11 @@ import "github.com/gofiber/fiber/v2"
 // EthereumHandler is Ethereum handler
 type EthereumHandler struct{}
 
+// NewEthereumHandler returns new mock handler
+func NewEthereumHandler() Handler {
+	return &EthereumHandler{}
+}
+
 // Get gets a single node
 func (e *EthereumHandler) Get(c *fiber.Ctx) error {
 	return c.SendString("Get a node")
