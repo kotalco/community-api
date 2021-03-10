@@ -21,7 +21,18 @@ func NewNodeMockHandler() Handler {
 
 // Get gets a single node
 func (e *NodeMockHandler) Get(c *fiber.Ctx) error {
-	return c.SendString("Get mock node")
+	name := c.Params("name")
+	node := NodesStore[name]
+
+	if node == nil {
+		return c.Status(http.StatusNotFound).JSON(map[string]string{
+			"error": fmt.Sprintf("node by name %s doesn't exist", name),
+		})
+	}
+
+	return c.JSON(map[string]interface{}{
+		"node": node,
+	})
 }
 
 // List lists all Ethereum nodes
@@ -46,7 +57,9 @@ func (e *NodeMockHandler) Create(c *fiber.Ctx) error {
 
 	NodesStore[node.Name] = node
 
-	return c.JSON(node)
+	return c.JSON(map[string]interface{}{
+		"node": node,
+	})
 }
 
 // Delete deletes a single Ethereum node by name
@@ -56,7 +69,7 @@ func (e *NodeMockHandler) Delete(c *fiber.Ctx) error {
 
 	// check if node exist with this name doesn't exist
 	if NodesStore[name] == nil {
-		return c.Status(http.StatusUnprocessableEntity).JSON(map[string]string{
+		return c.Status(http.StatusNotFound).JSON(map[string]string{
 			"error": fmt.Sprintf("node by name %s doesn't exist", name),
 		})
 	}
