@@ -37,7 +37,16 @@ func (e *NodeMockHandler) Get(c *fiber.Ctx) error {
 
 // List lists all Ethereum nodes
 func (e *NodeMockHandler) List(c *fiber.Ctx) error {
-	return c.SendString("List all mock nodes")
+	nodes := []*models.Node{}
+
+	for _, n := range NodesStore {
+		nodes = append(nodes, n)
+	}
+
+	return c.JSON(map[string]interface{}{
+		"nodes": nodes,
+	})
+
 }
 
 // Create creates a single Ethereum node from spec
