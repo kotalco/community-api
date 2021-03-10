@@ -51,7 +51,20 @@ func (e *NodeMockHandler) Create(c *fiber.Ctx) error {
 
 // Delete deletes a single Ethereum node by name
 func (e *NodeMockHandler) Delete(c *fiber.Ctx) error {
-	return c.SendString("Delete mock node")
+
+	name := c.Params("name")
+
+	// check if node exist with this name doesn't exist
+	if NodesStore[name] == nil {
+		return c.Status(http.StatusUnprocessableEntity).JSON(map[string]string{
+			"error": fmt.Sprintf("node by name %s doesn't exist", name),
+		})
+	}
+
+	// remove node from the store
+	delete(NodesStore, name)
+
+	return c.SendStatus(http.StatusNoContent)
 }
 
 // Update updates a single node by name from new spec delta
