@@ -91,7 +91,30 @@ func (e *NodeMockHandler) Delete(c *fiber.Ctx) error {
 
 // Update updates a single node by name from new spec delta
 func (e *NodeMockHandler) Update(c *fiber.Ctx) error {
-	return c.SendString("Update mock node")
+
+	name := c.Params("name")
+
+	// check if node exist with this name doesn't exist
+	if NodesStore[name] == nil {
+		return c.Status(http.StatusNotFound).JSON(map[string]string{
+			"error": fmt.Sprintf("node by name %s doesn't exist", name),
+		})
+	}
+
+	node := new(models.Node)
+
+	if err := c.BodyParser(node); err != nil {
+		return err
+	}
+
+	// TODO: review after node defaulting
+	if node.Client != "" {
+		NodesStore[name].Client = node.Client
+	}
+
+	return c.Status(http.StatusOK).JSON(fiber.Map{
+		"node": NodesStore[name],
+	})
 }
 
 // Register registers all routes on the given router
