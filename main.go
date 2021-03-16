@@ -4,6 +4,7 @@ import (
 	"os"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/gofiber/fiber/v2/middleware/logger"
 	"github.com/gofiber/fiber/v2/middleware/recover"
 	handlers "github.com/kotalco/api/handlers/ethereum"
@@ -15,6 +16,7 @@ func main() {
 	// register middlewares
 	app.Use(logger.New())
 	app.Use(recover.New())
+	app.Use(cors.New())
 
 	// routing groups
 	api := app.Group("api")
