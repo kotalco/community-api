@@ -4,4 +4,5 @@ package params
 type Node struct {
 	Name    string `json:"name"`
 	Network string `json:"network"`
+	Client  string `json:"client"`
 }
