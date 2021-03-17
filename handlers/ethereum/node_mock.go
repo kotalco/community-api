@@ -6,10 +6,11 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 	models "github.com/kotalco/api/models/ethereum"
+	ethereumv1alpha1 "github.com/kotalco/kotal/apis/ethereum/v1alpha1"
 )
 
-// NodesStore is in-memory nodes store
-var NodesStore = map[string]*models.Node{}
+// nodesStore is in-memory nodes store
+var nodesStore = map[string]*ethereumv1alpha1.NodeSpec{}
 
 // NodeMockHandler is Ethereum node mock handler
 type NodeMockHandler struct{}
@@ -23,17 +24,22 @@ func NewNodeMockHandler() Handler {
 func (e *NodeMockHandler) Get(c *fiber.Ctx) error {
 	name := c.Params("name")
 
+	node := nodeFromSpec(nodesStore[name], name)
+	model := models.FromEthereumNode(node)
+
 	return c.JSON(map[string]interface{}{
-		"node": NodesStore[name],
+		"node": model,
 	})
 }
 
 // List lists all Ethereum nodes
 func (e *NodeMockHandler) List(c *fiber.Ctx) error {
-	nodes := []*models.Node{}
+	nodes := []models.Node{}
 
-	for _, n := range NodesStore {
-		nodes = append(nodes, n)
+	for name, spec := range nodesStore {
+		node := nodeFromSpec(spec, name)
+		model := models.FromEthereumNode(node)
+		nodes = append(nodes, *model)
 	}
 
 	return c.JSON(map[string]interface{}{
@@ -44,23 +50,30 @@ func (e *NodeMockHandler) List(c *fiber.Ctx) error {
 
 // Create creates a single Ethereum node from spec
 func (e *NodeMockHandler) Create(c *fiber.Ctx) error {
-	node := new(models.Node)
+	model := new(models.Node)
 
-	if err := c.BodyParser(node); err != nil {
+	if err := c.BodyParser(model); err != nil {
 		return err
 	}
 
 	// check if node exist with this name
-	if NodesStore[node.Name] != nil {
+	if nodesStore[model.Name] != nil {
 		return c.Status(http.StatusUnprocessableEntity).JSON(map[string]string{
-			"error": fmt.Sprintf("node by name %s already exist", node.Name),
+			"error": fmt.Sprintf("node by name %s already exist", model.Name),
 		})
 	}
 
-	NodesStore[node.Name] = node
+	nodeSpec := &ethereumv1alpha1.NodeSpec{
+		NetworkConfig: ethereumv1alpha1.NetworkConfig{
+			Join: model.Network,
+		},
+		Client: ethereumv1alpha1.EthereumClient(model.Client),
+	}
+
+	nodesStore[model.Name] = nodeSpec
 
 	return c.JSON(map[string]interface{}{
-		"node": node,
+		"node": model,
 	})
 }
 
@@ -70,7 +83,7 @@ func (e *NodeMockHandler) Delete(c *fiber.Ctx) error {
 	name := c.Params("name")
 
 	// remove node from the store
-	delete(NodesStore, name)
+	delete(nodesStore, name)
 
 	return c.SendStatus(http.StatusNoContent)
 }
@@ -80,19 +93,23 @@ func (e *NodeMockHandler) Update(c *fiber.Ctx) error {
 
 	name := c.Params("name")
 
-	node := new(models.Node)
+	model := new(models.Node)
 
-	if err := c.BodyParser(node); err != nil {
+	if err := c.BodyParser(model); err != nil {
 		return err
 	}
 
 	// TODO: review after node defaulting
-	if node.Client != "" {
-		NodesStore[name].Client = node.Client
+	if model.Client != "" {
+		nodesStore[name].Client = ethereumv1alpha1.EthereumClient(model.Client)
 	}
 
+	node := nodeFromSpec(nodesStore[name], name)
+
+	updatedModel := models.FromEthereumNode(node)
+
 	return c.Status(http.StatusOK).JSON(fiber.Map{
-		"node": NodesStore[name],
+		"node": updatedModel,
 	})
 }
 
@@ -100,7 +117,7 @@ func (e *NodeMockHandler) Update(c *fiber.Ctx) error {
 func validateNodeExist(c *fiber.Ctx) error {
 	name := c.Params("name")
 
-	if NodesStore[name] != nil {
+	if nodesStore[name] != nil {
 		return c.Next()
 	}
 	return c.Status(http.StatusNotFound).JSON(map[string]string{
