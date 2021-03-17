@@ -22,16 +22,9 @@ func NewNodeMockHandler() Handler {
 // Get gets a single node
 func (e *NodeMockHandler) Get(c *fiber.Ctx) error {
 	name := c.Params("name")
-	node := NodesStore[name]
-
-	if node == nil {
-		return c.Status(http.StatusNotFound).JSON(map[string]string{
-			"error": fmt.Sprintf("node by name %s doesn't exist", name),
-		})
-	}
 
 	return c.JSON(map[string]interface{}{
-		"node": node,
+		"node": NodesStore[name],
 	})
 }
 
@@ -76,13 +69,6 @@ func (e *NodeMockHandler) Delete(c *fiber.Ctx) error {
 
 	name := c.Params("name")
 
-	// check if node exist with this name doesn't exist
-	if NodesStore[name] == nil {
-		return c.Status(http.StatusNotFound).JSON(map[string]string{
-			"error": fmt.Sprintf("node by name %s doesn't exist", name),
-		})
-	}
-
 	// remove node from the store
 	delete(NodesStore, name)
 
@@ -93,13 +79,6 @@ func (e *NodeMockHandler) Delete(c *fiber.Ctx) error {
 func (e *NodeMockHandler) Update(c *fiber.Ctx) error {
 
 	name := c.Params("name")
-
-	// check if node exist with this name doesn't exist
-	if NodesStore[name] == nil {
-		return c.Status(http.StatusNotFound).JSON(map[string]string{
-			"error": fmt.Sprintf("node by name %s doesn't exist", name),
-		})
-	}
 
 	node := new(models.Node)
 
@@ -117,11 +96,23 @@ func (e *NodeMockHandler) Update(c *fiber.Ctx) error {
 	})
 }
 
+// validateNodeExist validate node by name exist
+func validateNodeExist(c *fiber.Ctx) error {
+	name := c.Params("name")
+
+	if NodesStore[name] != nil {
+		return c.Next()
+	}
+	return c.Status(http.StatusNotFound).JSON(map[string]string{
+		"error": fmt.Sprintf("node by name %s doesn't exist", c.Params("name")),
+	})
+}
+
 // Register registers all routes on the given router
 func (e *NodeMockHandler) Register(router fiber.Router) {
 	router.Post("/", e.Create)
 	router.Get("/", e.List)
-	router.Get("/:name", e.Get)
-	router.Put("/:name", e.Update)
-	router.Delete("/:name", e.Delete)
+	router.Get("/:name", validateNodeExist, e.Get)
+	router.Put("/:name", validateNodeExist, e.Update)
+	router.Delete("/:name", validateNodeExist, e.Delete)
 }
