@@ -72,7 +72,7 @@ func (e *NodeMockHandler) Create(c *fiber.Ctx) error {
 
 	nodesStore[model.Name] = nodeSpec
 
-	return c.JSON(map[string]interface{}{
+	return c.Status(http.StatusCreated).JSON(map[string]interface{}{
 		"node": model,
 	})
 }
