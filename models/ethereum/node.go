@@ -7,6 +7,7 @@ type Node struct {
 	Name    string `json:"name"`
 	Network string `json:"network"`
 	Client  string `json:"client"`
+	RPC     bool   `json:"rpc"`
 }
 
 func FromEthereumNode(n *ethereumv1alpha1.Node) *Node {
@@ -14,5 +15,6 @@ func FromEthereumNode(n *ethereumv1alpha1.Node) *Node {
 		Name:    n.Name,
 		Network: n.Spec.Join,
 		Client:  string(n.Spec.Client),
+		RPC:     n.Spec.RPC,
 	}
 }

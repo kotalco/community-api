@@ -72,8 +72,11 @@ func (e *NodeMockHandler) Create(c *fiber.Ctx) error {
 				Join: model.Network,
 			},
 			Client: ethereumv1alpha1.EthereumClient(model.Client),
+			RPC:    model.RPC,
 		},
 	}
+
+	// TODO: default the node
 
 	nodesStore[model.Name] = node
 
@@ -104,10 +107,11 @@ func (e *NodeMockHandler) Update(c *fiber.Ctx) error {
 		return err
 	}
 
-	// TODO: review after node defaulting
 	if model.Client != "" {
 		nodesStore[name].Spec.Client = ethereumv1alpha1.EthereumClient(model.Client)
 	}
+
+	nodesStore[name].Spec.RPC = model.RPC
 
 	updatedModel := models.FromEthereumNode(nodesStore[name])
 
