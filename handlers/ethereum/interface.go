@@ -3,6 +3,8 @@ package handlers
 import "github.com/gofiber/fiber/v2"
 
 // Handler is Ethereum node handler interface
+// Handler accepts and returns models
+// Handler process and store nodes
 type Handler interface {
 	Get(c *fiber.Ctx) error
 	Update(c *fiber.Ctx) error

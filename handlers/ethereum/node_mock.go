@@ -7,10 +7,11 @@ import (
 	"github.com/gofiber/fiber/v2"
 	models "github.com/kotalco/api/models/ethereum"
 	ethereumv1alpha1 "github.com/kotalco/kotal/apis/ethereum/v1alpha1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 // nodesStore is in-memory nodes store
-var nodesStore = map[string]*ethereumv1alpha1.NodeSpec{}
+var nodesStore = map[string]*ethereumv1alpha1.Node{}
 
 // NodeMockHandler is Ethereum node mock handler
 type NodeMockHandler struct{}
@@ -24,7 +25,7 @@ func NewNodeMockHandler() Handler {
 func (e *NodeMockHandler) Get(c *fiber.Ctx) error {
 	name := c.Params("name")
 
-	node := nodeFromSpec(nodesStore[name], name)
+	node := nodesStore[name]
 	model := models.FromEthereumNode(node)
 
 	return c.JSON(map[string]interface{}{
@@ -36,8 +37,7 @@ func (e *NodeMockHandler) Get(c *fiber.Ctx) error {
 func (e *NodeMockHandler) List(c *fiber.Ctx) error {
 	nodes := []models.Node{}
 
-	for name, spec := range nodesStore {
-		node := nodeFromSpec(spec, name)
+	for _, node := range nodesStore {
 		model := models.FromEthereumNode(node)
 		nodes = append(nodes, *model)
 	}
@@ -63,14 +63,19 @@ func (e *NodeMockHandler) Create(c *fiber.Ctx) error {
 		})
 	}
 
-	nodeSpec := &ethereumv1alpha1.NodeSpec{
-		NetworkConfig: ethereumv1alpha1.NetworkConfig{
-			Join: model.Network,
+	node := &ethereumv1alpha1.Node{
+		ObjectMeta: metav1.ObjectMeta{
+			Name: model.Name,
 		},
-		Client: ethereumv1alpha1.EthereumClient(model.Client),
+		Spec: ethereumv1alpha1.NodeSpec{
+			NetworkConfig: ethereumv1alpha1.NetworkConfig{
+				Join: model.Network,
+			},
+			Client: ethereumv1alpha1.EthereumClient(model.Client),
+		},
 	}
 
-	nodesStore[model.Name] = nodeSpec
+	nodesStore[model.Name] = node
 
 	return c.Status(http.StatusCreated).JSON(map[string]interface{}{
 		"node": model,
@@ -101,12 +106,10 @@ func (e *NodeMockHandler) Update(c *fiber.Ctx) error {
 
 	// TODO: review after node defaulting
 	if model.Client != "" {
-		nodesStore[name].Client = ethereumv1alpha1.EthereumClient(model.Client)
+		nodesStore[name].Spec.Client = ethereumv1alpha1.EthereumClient(model.Client)
 	}
 
-	node := nodeFromSpec(nodesStore[name], name)
-
-	updatedModel := models.FromEthereumNode(node)
+	updatedModel := models.FromEthereumNode(nodesStore[name])
 
 	return c.Status(http.StatusOK).JSON(fiber.Map{
 		"node": updatedModel,
