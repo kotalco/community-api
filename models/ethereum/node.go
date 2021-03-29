@@ -9,6 +9,7 @@ type Node struct {
 	Client  string   `json:"client"`
 	RPC     bool     `json:"rpc"`
 	RPCAPI  []string `json:"rpcAPI"`
+	WS      bool     `json:"ws"`
 }
 
 func FromEthereumNode(n *ethereumv1alpha1.Node) *Node {
@@ -17,6 +18,7 @@ func FromEthereumNode(n *ethereumv1alpha1.Node) *Node {
 		Network: n.Spec.Join,
 		Client:  string(n.Spec.Client),
 		RPC:     n.Spec.RPC,
+		WS:      n.Spec.WS,
 	}
 
 	// convert ethereum API into string

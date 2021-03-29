@@ -80,6 +80,7 @@ func (e *NodeMockHandler) Create(c *fiber.Ctx) error {
 			Client: ethereumv1alpha1.EthereumClient(model.Client),
 			RPC:    model.RPC,
 			RPCAPI: rpcAPI,
+			WS:     model.WS,
 		},
 	}
 
@@ -128,6 +129,8 @@ func (e *NodeMockHandler) Update(c *fiber.Ctx) error {
 	}
 
 	nodesStore[name].Spec.RPC = model.RPC
+
+	nodesStore[name].Spec.WS = model.WS
 
 	updatedModel := models.FromEthereumNode(nodesStore[name])
 
