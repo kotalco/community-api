@@ -63,6 +63,12 @@ func (e *NodeMockHandler) Create(c *fiber.Ctx) error {
 		})
 	}
 
+	// convert string into ethereum API
+	rpcAPI := []ethereumv1alpha1.API{}
+	for _, api := range model.RPCAPI {
+		rpcAPI = append(rpcAPI, ethereumv1alpha1.API(api))
+	}
+
 	node := &ethereumv1alpha1.Node{
 		ObjectMeta: metav1.ObjectMeta{
 			Name: model.Name,
@@ -73,6 +79,7 @@ func (e *NodeMockHandler) Create(c *fiber.Ctx) error {
 			},
 			Client: ethereumv1alpha1.EthereumClient(model.Client),
 			RPC:    model.RPC,
+			RPCAPI: rpcAPI,
 		},
 	}
 
@@ -109,6 +116,15 @@ func (e *NodeMockHandler) Update(c *fiber.Ctx) error {
 
 	if model.Client != "" {
 		nodesStore[name].Spec.Client = ethereumv1alpha1.EthereumClient(model.Client)
+	}
+
+	if len(model.RPCAPI) != 0 {
+		// convert string into ethereum API
+		rpcAPI := []ethereumv1alpha1.API{}
+		for _, api := range model.RPCAPI {
+			rpcAPI = append(rpcAPI, ethereumv1alpha1.API(api))
+		}
+		nodesStore[name].Spec.RPCAPI = rpcAPI
 	}
 
 	nodesStore[name].Spec.RPC = model.RPC
