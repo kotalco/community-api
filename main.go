@@ -9,6 +9,7 @@ import (
 	"github.com/gofiber/fiber/v2/middleware/recover"
 	"github.com/kotalco/api/handlers"
 	ethereumHandlers "github.com/kotalco/api/handlers/ethereum"
+	ipfsHandlers "github.com/kotalco/api/handlers/ipfs"
 )
 
 func main() {
@@ -22,22 +23,29 @@ func main() {
 	// routing groups
 	api := app.Group("api")
 	v1 := api.Group("v1")
+
 	ethereum := v1.Group("ethereum")
 	nodes := ethereum.Group("nodes")
+
+	ipfs := v1.Group("ipfs")
+	peers := ipfs.Group("peers")
 
 	// register handlers
 	app.Get("/", func(c *fiber.Ctx) error {
 		return c.SendString("Kotal API")
 	})
 
-	var nodeHandler handlers.Handler
+	var nodeHandler, ipfsHandler handlers.Handler
+
 	if os.Getenv("MOCK") == "true" {
 		nodeHandler = ethereumHandlers.NewNodeMockHandler()
 	} else {
 		nodeHandler = ethereumHandlers.NewNodeHandler()
+		ipfsHandler = ipfsHandlers.NewPeerHandler()
 	}
 
 	nodeHandler.Register(nodes)
+	ipfsHandler.Register(peers)
 
 	app.Listen(":3000")
 }
