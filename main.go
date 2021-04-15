@@ -7,7 +7,8 @@ import (
 	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/gofiber/fiber/v2/middleware/logger"
 	"github.com/gofiber/fiber/v2/middleware/recover"
-	handlers "github.com/kotalco/api/handlers/ethereum"
+	"github.com/kotalco/api/handlers"
+	ethereumHandlers "github.com/kotalco/api/handlers/ethereum"
 )
 
 func main() {
@@ -31,9 +32,9 @@ func main() {
 
 	var nodeHandler handlers.Handler
 	if os.Getenv("MOCK") == "true" {
-		nodeHandler = handlers.NewNodeMockHandler()
+		nodeHandler = ethereumHandlers.NewNodeMockHandler()
 	} else {
-		nodeHandler = handlers.NewNodeHandler()
+		nodeHandler = ethereumHandlers.NewNodeHandler()
 	}
 
 	nodeHandler.Register(nodes)

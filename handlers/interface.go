@@ -2,7 +2,7 @@ package handlers
 
 import "github.com/gofiber/fiber/v2"
 
-// Handler is Ethereum node handler interface
+// Handler is request handler interface
 // Handler accepts and returns models
 // Handler process and store nodes
 type Handler interface {

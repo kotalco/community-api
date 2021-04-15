@@ -1,12 +1,15 @@
 package handlers
 
-import "github.com/gofiber/fiber/v2"
+import (
+	"github.com/gofiber/fiber/v2"
+	"github.com/kotalco/api/handlers"
+)
 
 // NodeHandler is Ethereum node handler
 type NodeHandler struct{}
 
 // NewNodeHandler returns new Ethereum node handler
-func NewNodeHandler() Handler {
+func NewNodeHandler() handlers.Handler {
 	return &NodeHandler{}
 }
 

@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/kotalco/api/handlers"
 	models "github.com/kotalco/api/models/ethereum"
 	ethereumv1alpha1 "github.com/kotalco/kotal/apis/ethereum/v1alpha1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -17,7 +18,7 @@ var nodesStore = map[string]*ethereumv1alpha1.Node{}
 type NodeMockHandler struct{}
 
 // NewNodeMockHandler returns new Ethereum node mock handler
-func NewNodeMockHandler() Handler {
+func NewNodeMockHandler() handlers.Handler {
 	return &NodeMockHandler{}
 }
 
@@ -146,6 +147,7 @@ func (e *NodeMockHandler) Update(c *fiber.Ctx) error {
 		for _, api := range model.RPCAPI {
 			wsAPI = append(wsAPI, ethereumv1alpha1.API(api))
 		}
+		nodesStore[name].Spec.WSAPI = wsAPI
 	}
 
 	nodesStore[name].Spec.WS = model.WS
