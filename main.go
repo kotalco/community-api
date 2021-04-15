@@ -39,6 +39,7 @@ func main() {
 
 	if os.Getenv("MOCK") == "true" {
 		nodeHandler = ethereumHandlers.NewNodeMockHandler()
+		ipfsHandler = ipfsHandlers.NewPeerMockHandler()
 	} else {
 		nodeHandler = ethereumHandlers.NewNodeHandler()
 		ipfsHandler = ipfsHandlers.NewPeerHandler()
