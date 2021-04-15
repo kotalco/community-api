@@ -63,10 +63,20 @@ func (e *NodeMockHandler) Create(c *fiber.Ctx) error {
 		})
 	}
 
-	// convert string into ethereum API
-	rpcAPI := []ethereumv1alpha1.API{}
-	for _, api := range model.RPCAPI {
-		rpcAPI = append(rpcAPI, ethereumv1alpha1.API(api))
+	var rpcAPI []ethereumv1alpha1.API
+	if model.RPC {
+		rpcAPI = []ethereumv1alpha1.API{}
+		for _, api := range model.RPCAPI {
+			rpcAPI = append(rpcAPI, ethereumv1alpha1.API(api))
+		}
+	}
+
+	var wsAPI []ethereumv1alpha1.API
+	if model.WS {
+		wsAPI = []ethereumv1alpha1.API{}
+		for _, api := range model.WSAPI {
+			wsAPI = append(wsAPI, ethereumv1alpha1.API(api))
+		}
 	}
 
 	node := &ethereumv1alpha1.Node{
@@ -81,6 +91,7 @@ func (e *NodeMockHandler) Create(c *fiber.Ctx) error {
 			RPC:    model.RPC,
 			RPCAPI: rpcAPI,
 			WS:     model.WS,
+			WSAPI:  wsAPI,
 		},
 	}
 
@@ -120,7 +131,7 @@ func (e *NodeMockHandler) Update(c *fiber.Ctx) error {
 	}
 
 	if len(model.RPCAPI) != 0 {
-		// convert string into ethereum API
+
 		rpcAPI := []ethereumv1alpha1.API{}
 		for _, api := range model.RPCAPI {
 			rpcAPI = append(rpcAPI, ethereumv1alpha1.API(api))
@@ -129,6 +140,13 @@ func (e *NodeMockHandler) Update(c *fiber.Ctx) error {
 	}
 
 	nodesStore[name].Spec.RPC = model.RPC
+
+	if len(model.WSAPI) != 0 {
+		wsAPI := []ethereumv1alpha1.API{}
+		for _, api := range model.RPCAPI {
+			wsAPI = append(wsAPI, ethereumv1alpha1.API(api))
+		}
+	}
 
 	nodesStore[name].Spec.WS = model.WS
 
