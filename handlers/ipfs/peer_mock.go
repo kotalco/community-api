@@ -24,7 +24,12 @@ func NewPeerMockHandler() handlers.Handler {
 
 // Get gets a single mock IPFS peer by name
 func (p *PeerMockHandler) Get(c *fiber.Ctx) error {
-	return c.SendString("Get a mock peer")
+	name := c.Params("name")
+	peer := peersStore[name]
+	model := models.FromIPFSPeer(peer)
+	return c.Status(http.StatusOK).JSON(fiber.Map{
+		"peer": model,
+	})
 }
 
 // List returns all IPFS mock peers
