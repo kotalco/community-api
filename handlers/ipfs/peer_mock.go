@@ -34,7 +34,16 @@ func (p *PeerMockHandler) Get(c *fiber.Ctx) error {
 
 // List returns all IPFS mock peers
 func (p *PeerMockHandler) List(c *fiber.Ctx) error {
-	return c.SendString("List all mock peers")
+	peerModels := []models.Peer{}
+
+	for _, peer := range peersStore {
+		model := models.FromIPFSPeer(peer)
+		peerModels = append(peerModels, *model)
+	}
+
+	return c.Status(http.StatusOK).JSON(fiber.Map{
+		"peers": peerModels,
+	})
 }
 
 // Create creates IPFS mock peer from spec
