@@ -1,4 +1,4 @@
-package params
+package models
 
 import ethereumv1alpha1 "github.com/kotalco/kotal/apis/ethereum/v1alpha1"
 
