@@ -69,11 +69,24 @@ func (p *PeerMockHandler) Update(c *fiber.Ctx) error {
 	return c.SendString("Update a mock peer")
 }
 
+// validatePeerExist validates ipfs peer by name exist
+func validatePeerExist(c *fiber.Ctx) error {
+	name := c.Params("name")
+
+	if peersStore[name] != nil {
+		return c.Next()
+	}
+
+	return c.Status(http.StatusNotFound).JSON(fiber.Map{
+		"error": fmt.Sprintf("peer by name %s doesn't exist", c.Params("name")),
+	})
+}
+
 // Register registers all handlers on the given router
 func (p *PeerMockHandler) Register(router fiber.Router) {
 	router.Post("/", p.Create)
 	router.Get("/", p.List)
-	router.Get("/:name", p.Get)
-	router.Put("/:name", p.Update)
-	router.Delete("/:name", p.Delete)
+	router.Get("/:name", validatePeerExist, p.Get)
+	router.Put("/:name", validatePeerExist, p.Update)
+	router.Delete("/:name", validatePeerExist, p.Delete)
 }
