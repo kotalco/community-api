@@ -75,7 +75,9 @@ func (p *PeerMockHandler) Create(c *fiber.Ctx) error {
 
 // Delete deletes IPFS mock peer by name
 func (p *PeerMockHandler) Delete(c *fiber.Ctx) error {
-	return c.SendString("Delete a mock peer")
+	name := c.Params("name")
+	delete(peersStore, name)
+	return c.SendStatus(http.StatusNoContent)
 }
 
 // Update updates IPFS mock peer by name from spec
