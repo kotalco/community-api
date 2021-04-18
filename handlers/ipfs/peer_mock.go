@@ -82,7 +82,23 @@ func (p *PeerMockHandler) Delete(c *fiber.Ctx) error {
 
 // Update updates IPFS mock peer by name from spec
 func (p *PeerMockHandler) Update(c *fiber.Ctx) error {
-	return c.SendString("Update a mock peer")
+	model := new(models.Peer)
+	if err := c.BodyParser(model); err != nil {
+		return err
+	}
+
+	name := c.Params("name")
+	peer := peersStore[name]
+
+	if model.APIPort != 0 {
+		peer.Spec.APIPort = model.APIPort
+	}
+
+	updatedModel := models.FromIPFSPeer(peer)
+
+	return c.Status(http.StatusOK).JSON(fiber.Map{
+		"peer": updatedModel,
+	})
 }
 
 // validatePeerExist validates ipfs peer by name exist
