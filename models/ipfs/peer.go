@@ -7,6 +7,7 @@ type Peer struct {
 	APIPort     uint   `json:"apiPort"`
 	APIHost     string `json:"apiHost"`
 	GatewayPort uint   `json:"gatewayPort"`
+	GatewayHost string `json:"gatewayHost"`
 }
 
 // FromIPFSPeer creates peer model from IPFS peer
@@ -16,5 +17,6 @@ func FromIPFSPeer(peer *ipfsv1alpha1.Peer) *Peer {
 		APIPort:     peer.Spec.APIPort,
 		APIHost:     peer.Spec.APIHost,
 		GatewayPort: peer.Spec.GatewayPort,
+		GatewayHost: peer.Spec.GatewayHost,
 	}
 }

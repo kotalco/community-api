@@ -102,6 +102,10 @@ func (p *PeerMockHandler) Update(c *fiber.Ctx) error {
 		peer.Spec.GatewayPort = model.GatewayPort
 	}
 
+	if model.GatewayHost != "" {
+		peer.Spec.GatewayHost = model.GatewayHost
+	}
+
 	updatedModel := models.FromIPFSPeer(peer)
 
 	return c.Status(http.StatusOK).JSON(fiber.Map{
