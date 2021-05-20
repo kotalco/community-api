@@ -401,8 +401,8 @@ github.com/klauspost/crc32 v0.0.0-20161016154125-cb6bfca970f6/go.mod h1:+ZoRqAPR
 github.com/klauspost/pgzip v1.0.2-0.20170402124221-0bf5dcad4ada/go.mod h1:Ch1tH69qFZu15pkjo5kYi6mth2Zzwzt50oCQKQE9RUs=
 github.com/konsorten/go-windows-terminal-sequences v1.0.1/go.mod h1:T0+1ngSBFLxvqU3pZ+m/2kptfBszLMUkC4ZK/EgS/cQ=
 github.com/konsorten/go-windows-terminal-sequences v1.0.3/go.mod h1:T0+1ngSBFLxvqU3pZ+m/2kptfBszLMUkC4ZK/EgS/cQ=
-github.com/kotalco/kotal v0.0.0-20210418144422-d272f0dbd411 h1:od8rkBKNV1epqp4y+NGC2w4J4ifiR+2H3WPFJ0TlhgM=
-github.com/kotalco/kotal v0.0.0-20210418144422-d272f0dbd411/go.mod h1:EYjPYp3SX/U8KCZdvb1U0dK1f99OgQH9kmUPAWLH4z8=
+github.com/kotalco/kotal v0.0.0-20210520184950-9eaaa73c3fae h1:eu/z77/aozJAOFYIops9iqpzWLfmgY2640gx/bB3Xvg=
+github.com/kotalco/kotal v0.0.0-20210520184950-9eaaa73c3fae/go.mod h1:RqbBPT9Kxs24MjZFGi1PIXPS1SLrGtszlHlIz/8Iiwo=
 github.com/kr/logfmt v0.0.0-20140226030751-b84e30acd515/go.mod h1:+0opPa2QZZtGFBFZlji/RkVcI2GknAs/DXo4wKdlNEc=
 github.com/kr/pretty v0.1.0/go.mod h1:dAy3ld7l9f0ibDNOQOHHMYYIIbhfbHSm3C4ZsoJORNo=
 github.com/kr/pretty v0.2.0/go.mod h1:ipq/a2n7PKx3OHsz4KJII5eveXtPO4qwEXGdVfWzfnI=
