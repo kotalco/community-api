@@ -2,6 +2,11 @@
 
 Kotal api server listens on port `3000` and responds to versioned api calls.
 
+Running the api server against real k8s cluster requires:
+
+- [kotal operator](https://github.com/kotalco/kotal) to deployed in the cluster
+- api server to be deployed with correct role and role bindings
+
 API server is listening to calls that has the form of **HTTP METHOD** `/api/{version}/{protocol}/{resource}/?{name}` for example:
 
 - POST `/api/v1/ethereum/nodes` to create node
