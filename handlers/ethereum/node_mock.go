@@ -96,12 +96,12 @@ func (e *NodeMockHandler) Create(c *fiber.Ctx) error {
 		},
 	}
 
-	// TODO: default the node
+	node.Default()
 
 	nodesStore[model.Name] = node
 
 	return c.Status(http.StatusCreated).JSON(map[string]interface{}{
-		"node": model,
+		"node": models.FromEthereumNode(node),
 	})
 }
 
@@ -120,15 +120,15 @@ func (e *NodeMockHandler) Delete(c *fiber.Ctx) error {
 func (e *NodeMockHandler) Update(c *fiber.Ctx) error {
 
 	name := c.Params("name")
-
 	model := new(models.Node)
+	node := nodesStore[name]
 
 	if err := c.BodyParser(model); err != nil {
 		return err
 	}
 
 	if model.Client != "" {
-		nodesStore[name].Spec.Client = ethereumv1alpha1.EthereumClient(model.Client)
+		node.Spec.Client = ethereumv1alpha1.EthereumClient(model.Client)
 	}
 
 	if len(model.RPCAPI) != 0 {
@@ -137,22 +137,24 @@ func (e *NodeMockHandler) Update(c *fiber.Ctx) error {
 		for _, api := range model.RPCAPI {
 			rpcAPI = append(rpcAPI, ethereumv1alpha1.API(api))
 		}
-		nodesStore[name].Spec.RPCAPI = rpcAPI
+		node.Spec.RPCAPI = rpcAPI
 	}
 
-	nodesStore[name].Spec.RPC = model.RPC
+	node.Spec.RPC = model.RPC
 
 	if len(model.WSAPI) != 0 {
 		wsAPI := []ethereumv1alpha1.API{}
 		for _, api := range model.RPCAPI {
 			wsAPI = append(wsAPI, ethereumv1alpha1.API(api))
 		}
-		nodesStore[name].Spec.WSAPI = wsAPI
+		node.Spec.WSAPI = wsAPI
 	}
 
-	nodesStore[name].Spec.WS = model.WS
+	node.Spec.WS = model.WS
 
-	updatedModel := models.FromEthereumNode(nodesStore[name])
+	node.Default()
+
+	updatedModel := models.FromEthereumNode(node)
 
 	return c.Status(http.StatusOK).JSON(fiber.Map{
 		"node": updatedModel,

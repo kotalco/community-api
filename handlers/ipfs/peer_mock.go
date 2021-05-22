@@ -60,7 +60,6 @@ func (p *PeerMockHandler) Create(c *fiber.Ctx) error {
 		})
 	}
 
-	// TODO: default peer
 	initProfiles := []ipfsv1alpha1.Profile{}
 	for _, profile := range model.InitProfiles {
 		initProfiles = append(initProfiles, ipfsv1alpha1.Profile(profile))
@@ -86,10 +85,12 @@ func (p *PeerMockHandler) Create(c *fiber.Ctx) error {
 		},
 	}
 
+	peer.Default()
+
 	peersStore[model.Name] = peer
 
 	return c.Status(http.StatusCreated).JSON(fiber.Map{
-		"peer": model,
+		"peer": models.FromIPFSPeer(peer),
 	})
 }
 
@@ -137,6 +138,8 @@ func (p *PeerMockHandler) Update(c *fiber.Ctx) error {
 		}
 		peer.Spec.Profiles = profiles
 	}
+
+	peer.Default()
 
 	updatedModel := models.FromIPFSPeer(peer)
 
