@@ -24,7 +24,13 @@ func NewBeaconNodeMockHandler() handlers.Handler {
 
 // Get gets a single ethereum 2.0 beacon node by name
 func (p *BeaconNodeMockHandler) Get(c *fiber.Ctx) error {
-	return c.SendString("Get a mock beacon node")
+	name := c.Params("name")
+	beaconnode := beaconnodesStore[name]
+	model := models.FromEthereum2BeaconNode(beaconnode)
+
+	return c.Status(http.StatusOK).JSON(fiber.Map{
+		"beaconnnode": model,
+	})
 }
 
 // List returns all ethereum 2.0 beacon nodes
