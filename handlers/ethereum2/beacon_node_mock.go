@@ -67,7 +67,9 @@ func (p *BeaconNodeMockHandler) Create(c *fiber.Ctx) error {
 
 // Delete deletes ethereum 2.0 beacon node by name
 func (p *BeaconNodeMockHandler) Delete(c *fiber.Ctx) error {
-	return c.SendString("Delete a mock beacon node")
+	name := c.Params("name")
+	delete(beaconnodesStore, name)
+	return c.SendStatus(http.StatusNoContent)
 }
 
 // Update updates ethereum 2.0 beacon node by name from spec
