@@ -69,11 +69,23 @@ func (p *BeaconNodeMockHandler) Update(c *fiber.Ctx) error {
 	return c.SendString("Update a mock beacon node")
 }
 
+// validateBeaconNodeExist validate beacon node by name exist
+func validateBeaconNodeExist(c *fiber.Ctx) error {
+	name := c.Params("name")
+
+	if beaconnodesStore[name] != nil {
+		return c.Next()
+	}
+	return c.Status(http.StatusNotFound).JSON(map[string]string{
+		"error": fmt.Sprintf("beacon node by name %s doesn't exist", name),
+	})
+}
+
 // Register registers all handlers on the given router
 func (p *BeaconNodeMockHandler) Register(router fiber.Router) {
 	router.Post("/", p.Create)
 	router.Get("/", p.List)
-	router.Get("/:name", p.Get)
-	router.Put("/:name", p.Update)
-	router.Delete("/:name", p.Delete)
+	router.Get("/:name", validateBeaconNodeExist, p.Get)
+	router.Put("/:name", validateBeaconNodeExist, p.Update)
+	router.Delete("/:name", validateBeaconNodeExist, p.Delete)
 }
