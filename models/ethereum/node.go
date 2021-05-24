@@ -7,9 +7,9 @@ type Node struct {
 	Name    string   `json:"name"`
 	Network string   `json:"network"`
 	Client  string   `json:"client"`
-	RPC     bool     `json:"rpc"`
+	RPC     *bool    `json:"rpc"`
 	RPCAPI  []string `json:"rpcAPI"`
-	WS      bool     `json:"ws"`
+	WS      *bool    `json:"ws"`
 	WSAPI   []string `json:"wsAPI"`
 }
 
@@ -18,8 +18,8 @@ func FromEthereumNode(n *ethereumv1alpha1.Node) *Node {
 		Name:    n.Name,
 		Network: n.Spec.Join,
 		Client:  string(n.Spec.Client),
-		RPC:     n.Spec.RPC,
-		WS:      n.Spec.WS,
+		RPC:     &n.Spec.RPC,
+		WS:      &n.Spec.WS,
 	}
 
 	var rpcAPI []string

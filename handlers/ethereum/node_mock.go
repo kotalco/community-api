@@ -64,22 +64,6 @@ func (e *NodeMockHandler) Create(c *fiber.Ctx) error {
 		})
 	}
 
-	var rpcAPI []ethereumv1alpha1.API
-	if model.RPC {
-		rpcAPI = []ethereumv1alpha1.API{}
-		for _, api := range model.RPCAPI {
-			rpcAPI = append(rpcAPI, ethereumv1alpha1.API(api))
-		}
-	}
-
-	var wsAPI []ethereumv1alpha1.API
-	if model.WS {
-		wsAPI = []ethereumv1alpha1.API{}
-		for _, api := range model.WSAPI {
-			wsAPI = append(wsAPI, ethereumv1alpha1.API(api))
-		}
-	}
-
 	node := &ethereumv1alpha1.Node{
 		ObjectMeta: metav1.ObjectMeta{
 			Name: model.Name,
@@ -89,11 +73,33 @@ func (e *NodeMockHandler) Create(c *fiber.Ctx) error {
 				Join: model.Network,
 			},
 			Client: ethereumv1alpha1.EthereumClient(model.Client),
-			RPC:    model.RPC,
-			RPCAPI: rpcAPI,
-			WS:     model.WS,
-			WSAPI:  wsAPI,
 		},
+	}
+
+	var rpcAPI []ethereumv1alpha1.API
+	if model.RPC != nil {
+		rpc := *model.RPC
+		if rpc {
+			rpcAPI = []ethereumv1alpha1.API{}
+			for _, api := range model.RPCAPI {
+				rpcAPI = append(rpcAPI, ethereumv1alpha1.API(api))
+			}
+			node.Spec.RPCAPI = rpcAPI
+		}
+		node.Spec.RPC = rpc
+	}
+
+	var wsAPI []ethereumv1alpha1.API
+	if model.WS != nil {
+		ws := *model.WS
+		if ws {
+			wsAPI = []ethereumv1alpha1.API{}
+			for _, api := range model.WSAPI {
+				wsAPI = append(wsAPI, ethereumv1alpha1.API(api))
+			}
+			node.Spec.WSAPI = wsAPI
+		}
+		node.Spec.WS = ws
 	}
 
 	node.Default()
@@ -131,26 +137,33 @@ func (e *NodeMockHandler) Update(c *fiber.Ctx) error {
 		node.Spec.Client = ethereumv1alpha1.EthereumClient(model.Client)
 	}
 
-	if len(model.RPCAPI) != 0 {
-
-		rpcAPI := []ethereumv1alpha1.API{}
-		for _, api := range model.RPCAPI {
-			rpcAPI = append(rpcAPI, ethereumv1alpha1.API(api))
+	if model.RPC != nil {
+		rpc := *model.RPC
+		if rpc {
+			if len(model.RPCAPI) != 0 {
+				rpcAPI := []ethereumv1alpha1.API{}
+				for _, api := range model.RPCAPI {
+					rpcAPI = append(rpcAPI, ethereumv1alpha1.API(api))
+				}
+				node.Spec.RPCAPI = rpcAPI
+			}
 		}
-		node.Spec.RPCAPI = rpcAPI
+		node.Spec.RPC = rpc
 	}
 
-	node.Spec.RPC = model.RPC
-
-	if len(model.WSAPI) != 0 {
-		wsAPI := []ethereumv1alpha1.API{}
-		for _, api := range model.RPCAPI {
-			wsAPI = append(wsAPI, ethereumv1alpha1.API(api))
+	if model.WS != nil {
+		ws := *model.WS
+		if ws {
+			if len(model.WSAPI) != 0 {
+				wsAPI := []ethereumv1alpha1.API{}
+				for _, api := range model.WSAPI {
+					wsAPI = append(wsAPI, ethereumv1alpha1.API(api))
+				}
+				node.Spec.WSAPI = wsAPI
+			}
 		}
-		node.Spec.WSAPI = wsAPI
+		node.Spec.WS = ws
 	}
-
-	node.Spec.WS = model.WS
 
 	node.Default()
 
