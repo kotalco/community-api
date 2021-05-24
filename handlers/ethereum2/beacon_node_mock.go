@@ -37,9 +37,7 @@ func (p *BeaconNodeMockHandler) Get(c *fiber.Ctx) error {
 func (p *BeaconNodeMockHandler) List(c *fiber.Ctx) error {
 	beaconnodes := []models.BeaconNode{}
 	for _, beaconnode := range beaconnodesStore {
-		beaconnodes = append(beaconnodes, models.BeaconNode{
-			Name: beaconnode.Name,
-		})
+		beaconnodes = append(beaconnodes, *models.FromEthereum2BeaconNode(beaconnode))
 	}
 	return c.Status(http.StatusOK).JSON(fiber.Map{
 		"beaconnodes": beaconnodes,
@@ -68,7 +66,8 @@ func (p *BeaconNodeMockHandler) Create(c *fiber.Ctx) error {
 			Name: model.Name,
 		},
 		Spec: ethereum2v1alpha1.BeaconNodeSpec{
-			Join: model.Network,
+			Join:   model.Network,
+			Client: ethereum2v1alpha1.Ethereum2Client(model.Client),
 		},
 	}
 
@@ -86,7 +85,24 @@ func (p *BeaconNodeMockHandler) Delete(c *fiber.Ctx) error {
 
 // Update updates ethereum 2.0 beacon node by name from spec
 func (p *BeaconNodeMockHandler) Update(c *fiber.Ctx) error {
-	return c.SendString("Update a mock beacon node")
+	model := new(models.BeaconNode)
+	if err := c.BodyParser(model); err != nil {
+		return c.Status(http.StatusBadRequest).JSON(fiber.Map{
+			"error": "bad request",
+		})
+	}
+
+	beaconnode := beaconnodesStore[model.Name]
+
+	// TODO: default model
+
+	if model.Client != "" {
+		beaconnode.Spec.Client = ethereum2v1alpha1.Ethereum2Client(model.Client)
+	}
+
+	return c.Status(http.StatusOK).JSON(fiber.Map{
+		"beaconnode": model,
+	})
 }
 
 // validateBeaconNodeExist validate beacon node by name exist
