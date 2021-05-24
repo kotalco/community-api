@@ -60,8 +60,7 @@ func (p *BeaconNodeMockHandler) Create(c *fiber.Ctx) error {
 		})
 	}
 
-	// TODO:  default beacon node
-	beaconnodesStore[model.Name] = &ethereum2v1alpha1.BeaconNode{
+	beaconnode := &ethereum2v1alpha1.BeaconNode{
 		ObjectMeta: metav1.ObjectMeta{
 			Name: model.Name,
 		},
@@ -72,8 +71,16 @@ func (p *BeaconNodeMockHandler) Create(c *fiber.Ctx) error {
 		},
 	}
 
+	if model.REST != nil {
+		beaconnode.Spec.REST = *model.REST
+	}
+
+	beaconnode.Default()
+
+	beaconnodesStore[model.Name] = beaconnode
+
 	return c.Status(http.StatusOK).JSON(fiber.Map{
-		"beaconnode": model,
+		"beaconnode": models.FromEthereum2BeaconNode(beaconnode),
 	})
 }
 
@@ -87,15 +94,14 @@ func (p *BeaconNodeMockHandler) Delete(c *fiber.Ctx) error {
 // Update updates ethereum 2.0 beacon node by name from spec
 func (p *BeaconNodeMockHandler) Update(c *fiber.Ctx) error {
 	model := new(models.BeaconNode)
+	name := c.Params("name")
+	beaconnode := beaconnodesStore[name]
+
 	if err := c.BodyParser(model); err != nil {
 		return c.Status(http.StatusBadRequest).JSON(fiber.Map{
 			"error": "bad request",
 		})
 	}
-
-	beaconnode := beaconnodesStore[model.Name]
-
-	// TODO: default model
 
 	if model.Client != "" {
 		beaconnode.Spec.Client = ethereum2v1alpha1.Ethereum2Client(model.Client)
@@ -105,8 +111,14 @@ func (p *BeaconNodeMockHandler) Update(c *fiber.Ctx) error {
 		beaconnode.Spec.Eth1Endpoints = model.Eth1Endpoints
 	}
 
+	if model.REST != nil {
+		beaconnode.Spec.REST = *model.REST
+	}
+
+	beaconnode.Default()
+
 	return c.Status(http.StatusOK).JSON(fiber.Map{
-		"beaconnode": model,
+		"beaconnode": models.FromEthereum2BeaconNode(beaconnode),
 	})
 }
 
