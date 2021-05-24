@@ -13,6 +13,9 @@ type BeaconNode struct {
 	RPC           *bool    `json:"rpc"`
 	RPCHost       string   `json:"rpcHost"`
 	RPCPort       uint     `json:"rpcPort"`
+	GRPC          *bool    `json:"grpc"`
+	GRPCHost      string   `json:"grpcHost"`
+	GRPCPort      uint     `json:"grpcPort"`
 }
 
 func FromEthereum2BeaconNode(beaconnode *ethereum2v1alpha1.BeaconNode) *BeaconNode {
@@ -27,5 +30,8 @@ func FromEthereum2BeaconNode(beaconnode *ethereum2v1alpha1.BeaconNode) *BeaconNo
 		RPC:           &beaconnode.Spec.RPC,
 		RPCHost:       beaconnode.Spec.RPCHost,
 		RPCPort:       beaconnode.Spec.RPCPort,
+		GRPC:          &beaconnode.Spec.GRPC,
+		GRPCHost:      beaconnode.Spec.GRPCHost,
+		GRPCPort:      beaconnode.Spec.GRPCPort,
 	}
 }

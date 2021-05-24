@@ -89,6 +89,15 @@ func (p *BeaconNodeMockHandler) Create(c *fiber.Ctx) error {
 		beaconnode.Spec.RPC = rpc
 	}
 
+	if model.GRPC != nil {
+		grpc := *model.GRPC
+		if grpc {
+			beaconnode.Spec.GRPCHost = model.GRPCHost
+			beaconnode.Spec.GRPCPort = model.GRPCPort
+		}
+		beaconnode.Spec.GRPC = grpc
+	}
+
 	beaconnode.Default()
 
 	beaconnodesStore[model.Name] = beaconnode
@@ -149,6 +158,19 @@ func (p *BeaconNodeMockHandler) Update(c *fiber.Ctx) error {
 			}
 		}
 		beaconnode.Spec.RPC = rpc
+	}
+
+	if model.GRPC != nil {
+		grpc := *model.GRPC
+		if grpc {
+			if model.GRPCHost != "" {
+				beaconnode.Spec.GRPCHost = model.GRPCHost
+			}
+			if model.GRPCPort != 0 {
+				beaconnode.Spec.GRPCPort = model.GRPCPort
+			}
+		}
+		beaconnode.Spec.GRPC = grpc
 	}
 
 	beaconnode.Default()
