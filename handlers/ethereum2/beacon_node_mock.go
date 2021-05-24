@@ -66,8 +66,9 @@ func (p *BeaconNodeMockHandler) Create(c *fiber.Ctx) error {
 			Name: model.Name,
 		},
 		Spec: ethereum2v1alpha1.BeaconNodeSpec{
-			Join:   model.Network,
-			Client: ethereum2v1alpha1.Ethereum2Client(model.Client),
+			Join:          model.Network,
+			Client:        ethereum2v1alpha1.Ethereum2Client(model.Client),
+			Eth1Endpoints: model.Eth1Endpoints,
 		},
 	}
 
@@ -98,6 +99,10 @@ func (p *BeaconNodeMockHandler) Update(c *fiber.Ctx) error {
 
 	if model.Client != "" {
 		beaconnode.Spec.Client = ethereum2v1alpha1.Ethereum2Client(model.Client)
+	}
+
+	if len(model.Eth1Endpoints) != 0 {
+		beaconnode.Spec.Eth1Endpoints = model.Eth1Endpoints
 	}
 
 	return c.Status(http.StatusOK).JSON(fiber.Map{
