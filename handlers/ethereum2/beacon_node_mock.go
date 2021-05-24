@@ -72,7 +72,12 @@ func (p *BeaconNodeMockHandler) Create(c *fiber.Ctx) error {
 	}
 
 	if model.REST != nil {
-		beaconnode.Spec.REST = *model.REST
+		rest := *model.REST
+		if rest {
+			beaconnode.Spec.RESTHost = model.RESTHost
+			beaconnode.Spec.RESTPort = model.RESTPort
+		}
+		beaconnode.Spec.REST = rest
 	}
 
 	beaconnode.Default()
@@ -112,7 +117,16 @@ func (p *BeaconNodeMockHandler) Update(c *fiber.Ctx) error {
 	}
 
 	if model.REST != nil {
-		beaconnode.Spec.REST = *model.REST
+		rest := *model.REST
+		if rest {
+			if model.RESTHost != "" {
+				beaconnode.Spec.RESTHost = model.RESTHost
+			}
+			if model.RESTPort != 0 {
+				beaconnode.Spec.RESTPort = model.RESTPort
+			}
+		}
+		beaconnode.Spec.REST = rest
 	}
 
 	beaconnode.Default()

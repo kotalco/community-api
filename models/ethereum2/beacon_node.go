@@ -8,6 +8,8 @@ type BeaconNode struct {
 	Client        string   `json:"client"`
 	Eth1Endpoints []string `json:"eth1Endpoints"`
 	REST          *bool    `json:"rest"`
+	RESTHost      string   `json:"restHost"`
+	RESTPort      uint     `json:"restPort"`
 }
 
 func FromEthereum2BeaconNode(beaconnode *ethereum2v1alpha1.BeaconNode) *BeaconNode {
@@ -17,5 +19,7 @@ func FromEthereum2BeaconNode(beaconnode *ethereum2v1alpha1.BeaconNode) *BeaconNo
 		Client:        string(beaconnode.Spec.Client),
 		Eth1Endpoints: beaconnode.Spec.Eth1Endpoints,
 		REST:          &beaconnode.Spec.REST,
+		RESTHost:      beaconnode.Spec.RESTHost,
+		RESTPort:      beaconnode.Spec.RESTPort,
 	}
 }
