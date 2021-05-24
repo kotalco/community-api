@@ -35,7 +35,15 @@ func (p *BeaconNodeMockHandler) Get(c *fiber.Ctx) error {
 
 // List returns all ethereum 2.0 beacon nodes
 func (p *BeaconNodeMockHandler) List(c *fiber.Ctx) error {
-	return c.SendString("List all mock beacon nodes")
+	beaconnodes := []models.BeaconNode{}
+	for _, beaconnode := range beaconnodesStore {
+		beaconnodes = append(beaconnodes, models.BeaconNode{
+			Name: beaconnode.Name,
+		})
+	}
+	return c.Status(http.StatusOK).JSON(fiber.Map{
+		"beaconnodes": beaconnodes,
+	})
 }
 
 // Create creates ethereum 2.0 beacon node from spec
