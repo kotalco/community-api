@@ -62,9 +62,13 @@ func (p *BeaconNodeMockHandler) Create(c *fiber.Ctx) error {
 		})
 	}
 
+	// TODO:  default beacon node
 	beaconnodesStore[model.Name] = &ethereum2v1alpha1.BeaconNode{
 		ObjectMeta: metav1.ObjectMeta{
 			Name: model.Name,
+		},
+		Spec: ethereum2v1alpha1.BeaconNodeSpec{
+			Join: model.Network,
 		},
 	}
 
