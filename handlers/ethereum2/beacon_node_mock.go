@@ -80,6 +80,15 @@ func (p *BeaconNodeMockHandler) Create(c *fiber.Ctx) error {
 		beaconnode.Spec.REST = rest
 	}
 
+	if model.RPC != nil {
+		rpc := *model.RPC
+		if rpc {
+			beaconnode.Spec.RPCHost = model.RPCHost
+			beaconnode.Spec.RPCPort = model.RPCPort
+		}
+		beaconnode.Spec.RPC = rpc
+	}
+
 	beaconnode.Default()
 
 	beaconnodesStore[model.Name] = beaconnode
@@ -127,6 +136,19 @@ func (p *BeaconNodeMockHandler) Update(c *fiber.Ctx) error {
 			}
 		}
 		beaconnode.Spec.REST = rest
+	}
+
+	if model.RPC != nil {
+		rpc := *model.RPC
+		if rpc {
+			if model.RPCHost != "" {
+				beaconnode.Spec.RPCHost = model.RPCHost
+			}
+			if model.RPCPort != 0 {
+				beaconnode.Spec.RPCPort = model.RPCPort
+			}
+		}
+		beaconnode.Spec.RPC = rpc
 	}
 
 	beaconnode.Default()
