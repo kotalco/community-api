@@ -98,6 +98,19 @@ func (p *BeaconNodeMockHandler) Create(c *fiber.Ctx) error {
 		beaconnode.Spec.GRPC = grpc
 	}
 
+	if model.CPU != "" {
+		beaconnode.Spec.CPU = model.CPU
+	}
+	if model.CPULimit != "" {
+		beaconnode.Spec.CPULimit = model.CPULimit
+	}
+	if model.Memory != "" {
+		beaconnode.Spec.Memory = model.Memory
+	}
+	if model.MemoryLimit != "" {
+		beaconnode.Spec.MemoryLimit = model.MemoryLimit
+	}
+
 	beaconnode.Default()
 
 	beaconnodesStore[model.Name] = beaconnode
@@ -171,6 +184,19 @@ func (p *BeaconNodeMockHandler) Update(c *fiber.Ctx) error {
 			}
 		}
 		beaconnode.Spec.GRPC = grpc
+	}
+
+	if model.CPU != "" {
+		beaconnode.Spec.CPU = model.CPU
+	}
+	if model.CPULimit != "" {
+		beaconnode.Spec.CPULimit = model.CPULimit
+	}
+	if model.Memory != "" {
+		beaconnode.Spec.Memory = model.Memory
+	}
+	if model.MemoryLimit != "" {
+		beaconnode.Spec.MemoryLimit = model.MemoryLimit
 	}
 
 	beaconnode.Default()

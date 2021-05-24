@@ -16,6 +16,11 @@ type BeaconNode struct {
 	GRPC          *bool    `json:"grpc"`
 	GRPCHost      string   `json:"grpcHost"`
 	GRPCPort      uint     `json:"grpcPort"`
+	CPU           string   `json:"cpu"`
+	CPULimit      string   `json:"cpuLimit"`
+	Memory        string   `json:"memory"`
+	MemoryLimit   string   `json:"memoryLimit"`
+	Storage       string   `json:"storage"`
 }
 
 func FromEthereum2BeaconNode(beaconnode *ethereum2v1alpha1.BeaconNode) *BeaconNode {
@@ -33,5 +38,10 @@ func FromEthereum2BeaconNode(beaconnode *ethereum2v1alpha1.BeaconNode) *BeaconNo
 		GRPC:          &beaconnode.Spec.GRPC,
 		GRPCHost:      beaconnode.Spec.GRPCHost,
 		GRPCPort:      beaconnode.Spec.GRPCPort,
+		CPU:           beaconnode.Spec.CPU,
+		CPULimit:      beaconnode.Spec.CPULimit,
+		Memory:        beaconnode.Spec.Memory,
+		MemoryLimit:   beaconnode.Spec.MemoryLimit,
+		Storage:       beaconnode.Spec.Storage,
 	}
 }
