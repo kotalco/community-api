@@ -115,7 +115,7 @@ func (p *BeaconNodeMockHandler) Create(c *fiber.Ctx) error {
 
 	beaconnodesStore[model.Name] = beaconnode
 
-	return c.Status(http.StatusOK).JSON(fiber.Map{
+	return c.Status(http.StatusCreated).JSON(fiber.Map{
 		"beaconnode": models.FromEthereum2BeaconNode(beaconnode),
 	})
 }
