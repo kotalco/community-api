@@ -33,27 +33,31 @@ func main() {
 
 	ethereum2 := v1.Group("ethereum2")
 	beaconnodes := ethereum2.Group("beaconnodes")
+	validators := ethereum2.Group("validators")
 
 	// register handlers
 	app.Get("/", func(c *fiber.Ctx) error {
 		return c.SendString("Kotal API")
 	})
 
-	var nodeHandler, peerHandler, beaconHandler handlers.Handler
+	var nodeHandler, peerHandler, beaconHandler, validatorHandler handlers.Handler
 
 	if os.Getenv("MOCK") == "true" {
 		nodeHandler = ethereumHandlers.NewNodeMockHandler()
 		peerHandler = ipfsHandlers.NewPeerMockHandler()
 		beaconHandler = ethereum2Handlers.NewBeaconNodeMockHandler()
+		validatorHandler = ethereum2Handlers.NewValidatorMockHandler()
 	} else {
 		nodeHandler = ethereumHandlers.NewNodeHandler()
 		peerHandler = ipfsHandlers.NewPeerHandler()
 		beaconHandler = ethereum2Handlers.NewBeaconNodeHandler()
+		validatorHandler = ethereum2Handlers.NewValidatorHandler()
 	}
 
 	nodeHandler.Register(nodes)
 	peerHandler.Register(peers)
 	beaconHandler.Register(beaconnodes)
+	validatorHandler.Register(validators)
 
 	app.Listen(":3000")
 }
