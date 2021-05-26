@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/gofiber/fiber/v2"
@@ -22,7 +23,13 @@ func NewValidatorMockHandler() handlers.Handler {
 
 // Get gets a single Ethereum 2.0 mock validator client by name
 func (p *ValidatorMockHandler) Get(c *fiber.Ctx) error {
-	return c.SendString("Get a mock validator client")
+	name := c.Params("name")
+	validator := validatorsStore[name]
+	model := models.FromEthereum2Validator(validator)
+
+	return c.Status(http.StatusOK).JSON(fiber.Map{
+		"validator": model,
+	})
 }
 
 // List returns all Ethereum 2.0 mock validator clients
@@ -66,11 +73,23 @@ func (p *ValidatorMockHandler) Update(c *fiber.Ctx) error {
 	return c.SendString("Update a mock validator client")
 }
 
+// validateValidatorExist validate validator client by name exist
+func validateValidatorExist(c *fiber.Ctx) error {
+	name := c.Params("name")
+
+	if validatorsStore[name] != nil {
+		return c.Next()
+	}
+	return c.Status(http.StatusNotFound).JSON(map[string]string{
+		"error": fmt.Sprintf("validator by name %s doesn't exist", name),
+	})
+}
+
 // Register registers all handlers on the given router
 func (p *ValidatorMockHandler) Register(router fiber.Router) {
 	router.Post("/", p.Create)
 	router.Get("/", p.List)
-	router.Get("/:name", p.Get)
-	router.Put("/:name", p.Update)
-	router.Delete("/:name", p.Delete)
+	router.Get("/:name", validateValidatorExist, p.Get)
+	router.Put("/:name", validateValidatorExist, p.Update)
+	router.Delete("/:name", validateValidatorExist, p.Delete)
 }
