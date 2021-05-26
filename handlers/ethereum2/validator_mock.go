@@ -59,6 +59,7 @@ func (p *ValidatorMockHandler) Create(c *fiber.Ctx) error {
 		},
 		Spec: ethereum2v1alpha1.ValidatorSpec{
 			Network: model.Network,
+			Client:  ethereum2v1alpha1.Ethereum2Client(model.Client),
 		},
 	}
 
