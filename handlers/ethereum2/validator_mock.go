@@ -78,7 +78,12 @@ func (p *ValidatorMockHandler) Delete(c *fiber.Ctx) error {
 
 // Update updates Ethereum 2.0 mock validator client by name from spec
 func (p *ValidatorMockHandler) Update(c *fiber.Ctx) error {
-	return c.SendString("Update a mock validator client")
+	name := c.Params("name")
+	validator := validatorsStore[name]
+	validator.Default()
+	return c.Status(http.StatusOK).JSON(fiber.Map{
+		"validator": models.FromEthereum2Validator(validator),
+	})
 }
 
 // validateValidatorExist validate validator client by name exist
