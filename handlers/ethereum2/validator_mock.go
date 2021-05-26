@@ -71,7 +71,9 @@ func (p *ValidatorMockHandler) Create(c *fiber.Ctx) error {
 
 // Delete deletes Ethereum 2.0 mock validator client by name
 func (p *ValidatorMockHandler) Delete(c *fiber.Ctx) error {
-	return c.SendString("Delete a mock validator client")
+	name := c.Params("name")
+	delete(validatorsStore, name)
+	return c.SendStatus(http.StatusNoContent)
 }
 
 // Update updates Ethereum 2.0 mock validator client by name from spec
