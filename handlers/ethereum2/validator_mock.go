@@ -1,12 +1,19 @@
 package handlers
 
 import (
+	"net/http"
+
 	"github.com/gofiber/fiber/v2"
 	"github.com/kotalco/api/handlers"
+	models "github.com/kotalco/api/models/ethereum2"
+	ethereum2v1alpha1 "github.com/kotalco/kotal/apis/ethereum2/v1alpha1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 // ValidatorMockHandler is Ethereum 2.0 mock validator client handler
 type ValidatorMockHandler struct{}
+
+var validatorsStore = map[string]*ethereum2v1alpha1.Validator{}
 
 // NewValidatorMockHandler creates a new Ethereum 2.0 mock validator client handler
 func NewValidatorMockHandler() handlers.Handler {
@@ -25,7 +32,28 @@ func (p *ValidatorMockHandler) List(c *fiber.Ctx) error {
 
 // Create creates Ethereum 2.0 mock validator client from spec
 func (p *ValidatorMockHandler) Create(c *fiber.Ctx) error {
-	return c.SendString("Create a mock validator client")
+	model := new(models.Validator)
+
+	if err := c.BodyParser(model); err != nil {
+		return c.Status(http.StatusBadRequest).JSON(fiber.Map{
+			"error": "bad request",
+		})
+	}
+
+	validator := &ethereum2v1alpha1.Validator{
+		ObjectMeta: metav1.ObjectMeta{
+			Name: model.Name,
+		},
+	}
+
+	validator.Default()
+
+	validatorsStore[model.Name] = validator
+
+	return c.Status(http.StatusOK).JSON(fiber.Map{
+		"validator": models.FromEthereum2Validator(validator),
+	})
+
 }
 
 // Delete deletes Ethereum 2.0 mock validator client by name
