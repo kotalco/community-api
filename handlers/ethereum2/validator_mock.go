@@ -34,7 +34,13 @@ func (p *ValidatorMockHandler) Get(c *fiber.Ctx) error {
 
 // List returns all Ethereum 2.0 mock validator clients
 func (p *ValidatorMockHandler) List(c *fiber.Ctx) error {
-	return c.SendString("List all mock validator clients")
+	validators := []models.Validator{}
+	for _, validator := range validatorsStore {
+		validators = append(validators, *models.FromEthereum2Validator(validator))
+	}
+	return c.Status(http.StatusOK).JSON(fiber.Map{
+		"validators": validators,
+	})
 }
 
 // Create creates Ethereum 2.0 mock validator client from spec
