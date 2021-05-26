@@ -57,6 +57,9 @@ func (p *ValidatorMockHandler) Create(c *fiber.Ctx) error {
 		ObjectMeta: metav1.ObjectMeta{
 			Name: model.Name,
 		},
+		Spec: ethereum2v1alpha1.ValidatorSpec{
+			Network: model.Network,
+		},
 	}
 
 	validator.Default()
