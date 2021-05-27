@@ -58,10 +58,17 @@ func (p *ValidatorMockHandler) Create(c *fiber.Ctx) error {
 			Name: model.Name,
 		},
 		Spec: ethereum2v1alpha1.ValidatorSpec{
-			Network:  model.Network,
-			Client:   ethereum2v1alpha1.Ethereum2Client(model.Client),
-			Graffiti: model.Graffiti,
+			Network: model.Network,
+			Client:  ethereum2v1alpha1.Ethereum2Client(model.Client),
 		},
+	}
+
+	if model.Graffiti != "" {
+		validator.Spec.Graffiti = model.Graffiti
+	}
+
+	if len(model.BeaconEndpoints) != 0 {
+		validator.Spec.BeaconEndpoints = model.BeaconEndpoints
 	}
 
 	validator.Default()
@@ -96,6 +103,10 @@ func (p *ValidatorMockHandler) Update(c *fiber.Ctx) error {
 
 	if model.Graffiti != "" {
 		validator.Spec.Graffiti = model.Graffiti
+	}
+
+	if len(model.BeaconEndpoints) != 0 {
+		validator.Spec.BeaconEndpoints = model.BeaconEndpoints
 	}
 
 	validator.Default()
