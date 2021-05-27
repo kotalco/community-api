@@ -71,6 +71,22 @@ func (p *ValidatorMockHandler) Create(c *fiber.Ctx) error {
 		validator.Spec.BeaconEndpoints = model.BeaconEndpoints
 	}
 
+	if model.CPU != "" {
+		validator.Spec.CPU = model.CPU
+	}
+	if model.CPULimit != "" {
+		validator.Spec.CPULimit = model.CPULimit
+	}
+	if model.Memory != "" {
+		validator.Spec.Memory = model.Memory
+	}
+	if model.MemoryLimit != "" {
+		validator.Spec.MemoryLimit = model.MemoryLimit
+	}
+	if model.Storage != "" {
+		validator.Spec.Storage = model.Storage
+	}
+
 	validator.Default()
 
 	validatorsStore[model.Name] = validator
@@ -107,6 +123,22 @@ func (p *ValidatorMockHandler) Update(c *fiber.Ctx) error {
 
 	if len(model.BeaconEndpoints) != 0 {
 		validator.Spec.BeaconEndpoints = model.BeaconEndpoints
+	}
+
+	if model.CPU != "" {
+		validator.Spec.CPU = model.CPU
+	}
+	if model.CPULimit != "" {
+		validator.Spec.CPULimit = model.CPULimit
+	}
+	if model.Memory != "" {
+		validator.Spec.Memory = model.Memory
+	}
+	if model.MemoryLimit != "" {
+		validator.Spec.MemoryLimit = model.MemoryLimit
+	}
+	if model.Storage != "" {
+		validator.Spec.Storage = model.Storage
 	}
 
 	validator.Default()
