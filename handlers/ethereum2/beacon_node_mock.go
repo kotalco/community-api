@@ -110,6 +110,9 @@ func (p *BeaconNodeMockHandler) Create(c *fiber.Ctx) error {
 	if model.MemoryLimit != "" {
 		beaconnode.Spec.MemoryLimit = model.MemoryLimit
 	}
+	if model.Storage != "" {
+		beaconnode.Spec.Storage = model.Storage
+	}
 
 	beaconnode.Default()
 
@@ -197,6 +200,9 @@ func (p *BeaconNodeMockHandler) Update(c *fiber.Ctx) error {
 	}
 	if model.MemoryLimit != "" {
 		beaconnode.Spec.MemoryLimit = model.MemoryLimit
+	}
+	if model.Storage != "" {
+		beaconnode.Spec.Storage = model.Storage
 	}
 
 	beaconnode.Default()
