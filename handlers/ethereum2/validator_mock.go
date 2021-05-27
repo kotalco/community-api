@@ -58,8 +58,9 @@ func (p *ValidatorMockHandler) Create(c *fiber.Ctx) error {
 			Name: model.Name,
 		},
 		Spec: ethereum2v1alpha1.ValidatorSpec{
-			Network: model.Network,
-			Client:  ethereum2v1alpha1.Ethereum2Client(model.Client),
+			Network:  model.Network,
+			Client:   ethereum2v1alpha1.Ethereum2Client(model.Client),
+			Graffiti: model.Graffiti,
 		},
 	}
 
@@ -82,9 +83,23 @@ func (p *ValidatorMockHandler) Delete(c *fiber.Ctx) error {
 
 // Update updates Ethereum 2.0 mock validator client by name from spec
 func (p *ValidatorMockHandler) Update(c *fiber.Ctx) error {
+	model := new(models.Validator)
+
+	if err := c.BodyParser(model); err != nil {
+		return c.Status(http.StatusBadRequest).JSON(fiber.Map{
+			"error": "bad request",
+		})
+	}
+
 	name := c.Params("name")
 	validator := validatorsStore[name]
+
+	if model.Graffiti != "" {
+		validator.Spec.Graffiti = model.Graffiti
+	}
+
 	validator.Default()
+
 	return c.Status(http.StatusOK).JSON(fiber.Map{
 		"validator": models.FromEthereum2Validator(validator),
 	})
