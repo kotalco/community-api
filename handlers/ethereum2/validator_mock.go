@@ -53,13 +53,21 @@ func (p *ValidatorMockHandler) Create(c *fiber.Ctx) error {
 		})
 	}
 
+	keystores := []ethereum2v1alpha1.Keystore{}
+	for _, keystore := range model.Keystores {
+		keystores = append(keystores, ethereum2v1alpha1.Keystore{
+			SecretName: keystore.SecretName,
+		})
+	}
+
 	validator := &ethereum2v1alpha1.Validator{
 		ObjectMeta: metav1.ObjectMeta{
 			Name: model.Name,
 		},
 		Spec: ethereum2v1alpha1.ValidatorSpec{
-			Network: model.Network,
-			Client:  ethereum2v1alpha1.Ethereum2Client(model.Client),
+			Network:   model.Network,
+			Client:    ethereum2v1alpha1.Ethereum2Client(model.Client),
+			Keystores: keystores,
 		},
 	}
 
@@ -116,6 +124,16 @@ func (p *ValidatorMockHandler) Update(c *fiber.Ctx) error {
 
 	name := c.Params("name")
 	validator := validatorsStore[name]
+
+	if len(model.Keystores) != 0 {
+		keystores := []ethereum2v1alpha1.Keystore{}
+		for _, keystore := range model.Keystores {
+			keystores = append(keystores, ethereum2v1alpha1.Keystore{
+				SecretName: keystore.SecretName,
+			})
+		}
+		validator.Spec.Keystores = keystores
+	}
 
 	if model.Graffiti != "" {
 		validator.Spec.Graffiti = model.Graffiti
