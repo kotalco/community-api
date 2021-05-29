@@ -71,6 +71,10 @@ func (p *ValidatorMockHandler) Create(c *fiber.Ctx) error {
 		},
 	}
 
+	if model.WalletPasswordSecretName != "" {
+		validator.Spec.WalletPasswordSecret = model.WalletPasswordSecretName
+	}
+
 	if model.Graffiti != "" {
 		validator.Spec.Graffiti = model.Graffiti
 	}
@@ -124,6 +128,10 @@ func (p *ValidatorMockHandler) Update(c *fiber.Ctx) error {
 
 	name := c.Params("name")
 	validator := validatorsStore[name]
+
+	if model.WalletPasswordSecretName != "" {
+		validator.Spec.WalletPasswordSecret = model.WalletPasswordSecretName
+	}
 
 	if len(model.Keystores) != 0 {
 		keystores := []ethereum2v1alpha1.Keystore{}
