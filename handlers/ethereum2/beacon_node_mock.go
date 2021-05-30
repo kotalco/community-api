@@ -60,6 +60,10 @@ func (p *BeaconNodeMockHandler) Create(c *fiber.Ctx) error {
 		})
 	}
 
+	if model.Eth1Endpoints == nil {
+		model.Eth1Endpoints = []string{}
+	}
+
 	beaconnode := &ethereum2v1alpha1.BeaconNode{
 		ObjectMeta: metav1.ObjectMeta{
 			Name: model.Name,

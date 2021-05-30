@@ -81,6 +81,8 @@ func (p *ValidatorMockHandler) Create(c *fiber.Ctx) error {
 
 	if len(model.BeaconEndpoints) != 0 {
 		validator.Spec.BeaconEndpoints = model.BeaconEndpoints
+	} else {
+		validator.Spec.BeaconEndpoints = []string{}
 	}
 
 	if model.CPU != "" {
