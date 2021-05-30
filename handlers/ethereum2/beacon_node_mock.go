@@ -29,7 +29,7 @@ func (p *BeaconNodeMockHandler) Get(c *fiber.Ctx) error {
 	model := models.FromEthereum2BeaconNode(beaconnode)
 
 	return c.Status(http.StatusOK).JSON(fiber.Map{
-		"beaconnnode": model,
+		"beaconnode": model,
 	})
 }
 
