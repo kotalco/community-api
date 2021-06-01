@@ -35,7 +35,15 @@ func (s *SecretMockHandler) Get(c *fiber.Ctx) error {
 
 // List returns all k8s secret mocks
 func (s *SecretMockHandler) List(c *fiber.Ctx) error {
-	return c.SendString("List all mock k8s secrets")
+	secrets := []models.Secret{}
+
+	for _, secret := range secretsStore {
+		secrets = append(secrets, *models.FromCoreSecret(secret))
+	}
+
+	return c.Status(http.StatusOK).JSON(fiber.Map{
+		"secrets": secrets,
+	})
 }
 
 // Create creates k8s secret mock from spec
