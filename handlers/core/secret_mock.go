@@ -72,11 +72,23 @@ func (s *SecretMockHandler) Update(c *fiber.Ctx) error {
 	return c.SendStatus(http.StatusMethodNotAllowed)
 }
 
+// validateSecretExist validate secret by name exist
+func validateSecretExist(c *fiber.Ctx) error {
+	name := c.Params("name")
+
+	if secretsStore[name] != nil {
+		return c.Next()
+	}
+	return c.Status(http.StatusNotFound).JSON(map[string]string{
+		"error": fmt.Sprintf("secret by name %s doesn't exist", c.Params("name")),
+	})
+}
+
 // Register registers all handlers on the given router
 func (s *SecretMockHandler) Register(router fiber.Router) {
 	router.Post("/", s.Create)
 	router.Get("/", s.List)
-	router.Get("/:name", s.Get)
-	router.Put("/:name", s.Update)
-	router.Delete("/:name", s.Delete)
+	router.Get("/:name", validateSecretExist, s.Get)
+	router.Put("/:name", validateSecretExist, s.Update)
+	router.Delete("/:name", validateSecretExist, s.Delete)
 }
