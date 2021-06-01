@@ -34,6 +34,7 @@ func main() {
 
 	ipfs := v1.Group("ipfs")
 	peers := ipfs.Group("peers")
+	clusterpeers := ipfs.Group("clusterpeers")
 
 	ethereum2 := v1.Group("ethereum2")
 	beaconnodes := ethereum2.Group("beaconnodes")
@@ -47,18 +48,21 @@ func main() {
 	var secretHandler,
 		nodeHandler,
 		peerHandler,
+		clusterPeerHandler,
 		beaconHandler,
 		validatorHandler handlers.Handler
 
 	if os.Getenv("MOCK") == "true" {
 		nodeHandler = ethereumHandlers.NewNodeMockHandler()
 		peerHandler = ipfsHandlers.NewPeerMockHandler()
+		clusterPeerHandler = ipfsHandlers.NewClusterPeerMockHandler()
 		beaconHandler = ethereum2Handlers.NewBeaconNodeMockHandler()
 		validatorHandler = ethereum2Handlers.NewValidatorMockHandler()
 		secretHandler = coreHandlers.NewSecretMockHandler()
 	} else {
 		nodeHandler = ethereumHandlers.NewNodeHandler()
 		peerHandler = ipfsHandlers.NewPeerHandler()
+		clusterPeerHandler = ipfsHandlers.NewClusterPeerHandler()
 		beaconHandler = ethereum2Handlers.NewBeaconNodeHandler()
 		validatorHandler = ethereum2Handlers.NewValidatorHandler()
 		secretHandler = coreHandlers.NewSecretHandler()
@@ -66,6 +70,7 @@ func main() {
 
 	nodeHandler.Register(nodes)
 	peerHandler.Register(peers)
+	clusterPeerHandler.Register(clusterpeers)
 	beaconHandler.Register(beaconnodes)
 	validatorHandler.Register(validators)
 	secretHandler.Register(secrets)
