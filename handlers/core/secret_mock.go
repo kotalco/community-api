@@ -24,7 +24,13 @@ func NewSecretMockHandler() handlers.Handler {
 
 // Get gets a single k8s secret mock by name
 func (s *SecretMockHandler) Get(c *fiber.Ctx) error {
-	return c.SendString("Get a mock k8s secret")
+	name := c.Params("name")
+	secret := secretsStore[name]
+	model := models.FromCoreSecret(secret)
+
+	return c.Status(http.StatusOK).JSON(fiber.Map{
+		"secret": model,
+	})
 }
 
 // List returns all k8s secret mocks
