@@ -66,7 +66,11 @@ func (s *SecretMockHandler) Create(c *fiber.Ctx) error {
 	secret := &corev1.Secret{
 		ObjectMeta: metav1.ObjectMeta{
 			Name: model.Name,
+			Labels: map[string]string{
+				"kotal.io/key-type": model.Type,
+			},
 		},
+		StringData: model.Data,
 	}
 
 	secretsStore[model.Name] = secret
