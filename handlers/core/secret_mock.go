@@ -78,7 +78,9 @@ func (s *SecretMockHandler) Create(c *fiber.Ctx) error {
 
 // Delete deletes k8s secret mock by name
 func (s *SecretMockHandler) Delete(c *fiber.Ctx) error {
-	return c.SendString("Delete a mock k8s secret")
+	name := c.Params("name")
+	delete(secretsStore, name)
+	return c.SendStatus(http.StatusNoContent)
 }
 
 // Update updates k8s secret mock by name from spec
