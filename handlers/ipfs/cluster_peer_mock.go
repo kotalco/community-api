@@ -35,7 +35,14 @@ func (p *ClusterPeerMockHandler) Get(c *fiber.Ctx) error {
 
 // List returns all IPFS cluster peers
 func (p *ClusterPeerMockHandler) List(c *fiber.Ctx) error {
-	return c.SendString("List all mock cluster peers")
+	peers := []models.ClusterPeer{}
+	for _, peer := range clusterPeersStore {
+		peers = append(peers, *models.FromIPFSClusterPeer(peer))
+	}
+
+	return c.Status(http.StatusOK).JSON(fiber.Map{
+		"clusterpeers": peers,
+	})
 }
 
 // Create creates IPFS cluster peer from spec
