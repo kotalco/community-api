@@ -1,12 +1,20 @@
 package handlers
 
 import (
+	"fmt"
+	"net/http"
+
 	"github.com/gofiber/fiber/v2"
 	"github.com/kotalco/api/handlers"
+	models "github.com/kotalco/api/models/ipfs"
+	ipfsv1alpha1 "github.com/kotalco/kotal/apis/ipfs/v1alpha1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 // ClusterPeerMockHandler is IPFS peer handler
 type ClusterPeerMockHandler struct{}
+
+var clusterPeersStore = map[string]*ipfsv1alpha1.ClusterPeer{}
 
 // NewClusterPeerMockHandler creates a new IPFS cluster peer handler
 func NewClusterPeerMockHandler() handlers.Handler {
@@ -25,7 +33,33 @@ func (p *ClusterPeerMockHandler) List(c *fiber.Ctx) error {
 
 // Create creates IPFS cluster peer from spec
 func (p *ClusterPeerMockHandler) Create(c *fiber.Ctx) error {
-	return c.SendString("Create a mock cluster peer")
+	model := new(models.ClusterPeer)
+
+	if err := c.BodyParser(model); err != nil {
+		return c.Status(http.StatusBadRequest).JSON(fiber.Map{
+			"error": "bad request",
+		})
+	}
+
+	if clusterPeersStore[model.Name] != nil {
+		return c.Status(http.StatusUnprocessableEntity).JSON(fiber.Map{
+			"error": fmt.Sprintf("cluster peer by name %s already exist", model.Name),
+		})
+	}
+
+	peer := &ipfsv1alpha1.ClusterPeer{
+		ObjectMeta: metav1.ObjectMeta{
+			Name: model.Name,
+		},
+	}
+
+	peer.Default()
+
+	clusterPeersStore[model.Name] = peer
+
+	return c.Status(http.StatusCreated).JSON(fiber.Map{
+		"clusterpeer": models.FromIPFSClusterPeer(peer),
+	})
 }
 
 // Delete deletes IPFS cluster peer by name
