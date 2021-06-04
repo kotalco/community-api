@@ -67,6 +67,10 @@ func (p *ClusterPeerMockHandler) Create(c *fiber.Ctx) error {
 		},
 	}
 
+	if model.ID != "" {
+		peer.Spec.ID = model.ID
+	}
+
 	peer.Default()
 
 	clusterPeersStore[model.Name] = peer
