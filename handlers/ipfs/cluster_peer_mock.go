@@ -75,6 +75,10 @@ func (p *ClusterPeerMockHandler) Create(c *fiber.Ctx) error {
 		peer.Spec.PrivatekeySecretName = model.PrivatekeySecretName
 	}
 
+	if len(model.TrustedPeers) != 0 {
+		peer.Spec.TrustedPeers = model.TrustedPeers
+	}
+
 	peer.Default()
 
 	clusterPeersStore[model.Name] = peer
