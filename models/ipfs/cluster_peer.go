@@ -10,6 +10,7 @@ type ClusterPeer struct {
 	BootstrapPeers       []string `json:"bootstrapPeers"`
 	Consensus            string   `json:"consensus"`
 	ClusterSecretName    string   `json:"clusterSecretName"`
+	PeerEndpoint         string   `json:"peerEndpoint"`
 }
 
 func FromIPFSClusterPeer(peer *ipfsv1alpha1.ClusterPeer) *ClusterPeer {
@@ -21,5 +22,6 @@ func FromIPFSClusterPeer(peer *ipfsv1alpha1.ClusterPeer) *ClusterPeer {
 		BootstrapPeers:       peer.Spec.BootstrapPeers,
 		Consensus:            string(peer.Spec.Consensus),
 		ClusterSecretName:    peer.Spec.ClusterSecretName,
+		PeerEndpoint:         peer.Spec.PeerEndpoint,
 	}
 }
