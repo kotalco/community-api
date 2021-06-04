@@ -67,6 +67,10 @@ func (p *ClusterPeerMockHandler) Create(c *fiber.Ctx) error {
 		},
 	}
 
+	if model.Consensus != "" {
+		peer.Spec.Consensus = ipfsv1alpha1.ConsensusAlgorithm(model.Consensus)
+	}
+
 	if model.ID != "" {
 		peer.Spec.ID = model.ID
 	}
