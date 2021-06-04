@@ -23,7 +23,14 @@ func NewClusterPeerMockHandler() handlers.Handler {
 
 // Get gets a single IPFS cluster peer by name
 func (p *ClusterPeerMockHandler) Get(c *fiber.Ctx) error {
-	return c.SendString("Get a mock cluster peer")
+	name := c.Params("name")
+	peer := clusterPeersStore[name]
+	model := models.FromIPFSClusterPeer(peer)
+
+	return c.Status(http.StatusOK).JSON(fiber.Map{
+		"clusterpeer": model,
+	})
+
 }
 
 // List returns all IPFS cluster peers
