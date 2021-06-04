@@ -72,11 +72,23 @@ func (p *ClusterPeerMockHandler) Update(c *fiber.Ctx) error {
 	return c.SendString("Update a mock cluster peer")
 }
 
+// validateClusterPeerExist validate cluster peer by name exist
+func validateClusterPeerExist(c *fiber.Ctx) error {
+	name := c.Params("name")
+
+	if clusterPeersStore[name] != nil {
+		return c.Next()
+	}
+	return c.Status(http.StatusNotFound).JSON(map[string]string{
+		"error": fmt.Sprintf("cluster peer by name %s doesn't exist", c.Params("name")),
+	})
+}
+
 // Register registers all handlers on the given router
 func (p *ClusterPeerMockHandler) Register(router fiber.Router) {
 	router.Post("/", p.Create)
 	router.Get("/", p.List)
-	router.Get("/:name", p.Get)
-	router.Put("/:name", p.Update)
-	router.Delete("/:name", p.Delete)
+	router.Get("/:name", validateClusterPeerExist, p.Get)
+	router.Put("/:name", validateClusterPeerExist, p.Update)
+	router.Delete("/:name", validateClusterPeerExist, p.Delete)
 }
