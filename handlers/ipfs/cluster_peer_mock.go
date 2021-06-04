@@ -71,7 +71,9 @@ func (p *ClusterPeerMockHandler) Create(c *fiber.Ctx) error {
 
 // Delete deletes IPFS cluster peer by name
 func (p *ClusterPeerMockHandler) Delete(c *fiber.Ctx) error {
-	return c.SendString("Delete a mock cluster peer")
+	name := c.Params("name")
+	delete(clusterPeersStore, name)
+	return c.SendStatus(http.StatusNoContent)
 }
 
 // Update updates IPFS cluster peer by name from spec
