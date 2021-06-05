@@ -11,6 +11,11 @@ type ClusterPeer struct {
 	Consensus            string   `json:"consensus"`
 	ClusterSecretName    string   `json:"clusterSecretName"`
 	PeerEndpoint         string   `json:"peerEndpoint"`
+	CPU                  string   `json:"cpu"`
+	CPULimit             string   `json:"cpuLimit"`
+	Memory               string   `json:"memory"`
+	MemoryLimit          string   `json:"memoryLimit"`
+	Storage              string   `json:"storage"`
 }
 
 func FromIPFSClusterPeer(peer *ipfsv1alpha1.ClusterPeer) *ClusterPeer {
@@ -23,5 +28,10 @@ func FromIPFSClusterPeer(peer *ipfsv1alpha1.ClusterPeer) *ClusterPeer {
 		Consensus:            string(peer.Spec.Consensus),
 		ClusterSecretName:    peer.Spec.ClusterSecretName,
 		PeerEndpoint:         peer.Spec.PeerEndpoint,
+		CPU:                  peer.Spec.CPU,
+		CPULimit:             peer.Spec.CPULimit,
+		Memory:               peer.Spec.Memory,
+		MemoryLimit:          peer.Spec.MemoryLimit,
+		Storage:              peer.Spec.Storage,
 	}
 }

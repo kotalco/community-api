@@ -95,6 +95,22 @@ func (p *ClusterPeerMockHandler) Create(c *fiber.Ctx) error {
 		peer.Spec.ClusterSecretName = model.ClusterSecretName
 	}
 
+	if model.CPU != "" {
+		peer.Spec.CPU = model.CPU
+	}
+	if model.CPULimit != "" {
+		peer.Spec.CPULimit = model.CPULimit
+	}
+	if model.Memory != "" {
+		peer.Spec.Memory = model.Memory
+	}
+	if model.MemoryLimit != "" {
+		peer.Spec.MemoryLimit = model.MemoryLimit
+	}
+	if model.Storage != "" {
+		peer.Spec.Storage = model.Storage
+	}
+
 	peer.Default()
 
 	clusterPeersStore[model.Name] = peer
@@ -126,6 +142,22 @@ func (p *ClusterPeerMockHandler) Update(c *fiber.Ctx) error {
 
 	if model.PeerEndpoint != "" {
 		peer.Spec.PeerEndpoint = model.PeerEndpoint
+	}
+
+	if model.CPU != "" {
+		peer.Spec.CPU = model.CPU
+	}
+	if model.CPULimit != "" {
+		peer.Spec.CPULimit = model.CPULimit
+	}
+	if model.Memory != "" {
+		peer.Spec.Memory = model.Memory
+	}
+	if model.MemoryLimit != "" {
+		peer.Spec.MemoryLimit = model.MemoryLimit
+	}
+	if model.Storage != "" {
+		peer.Spec.Storage = model.Storage
 	}
 
 	peer.Default()
