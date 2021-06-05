@@ -113,7 +113,26 @@ func (p *ClusterPeerMockHandler) Delete(c *fiber.Ctx) error {
 
 // Update updates IPFS cluster peer by name from spec
 func (p *ClusterPeerMockHandler) Update(c *fiber.Ctx) error {
-	return c.SendString("Update a mock cluster peer")
+	name := c.Params("name")
+	model := new(models.ClusterPeer)
+
+	if err := c.BodyParser(model); err != nil {
+		return c.Status(http.StatusBadRequest).JSON(fiber.Map{
+			"error": "bad request",
+		})
+	}
+
+	peer := clusterPeersStore[name]
+
+	if model.PeerEndpoint != "" {
+		peer.Spec.PeerEndpoint = model.PeerEndpoint
+	}
+
+	peer.Default()
+
+	return c.Status(http.StatusOK).JSON(fiber.Map{
+		"clusterpeer": models.FromIPFSClusterPeer(peer),
+	})
 }
 
 // validateClusterPeerExist validate cluster peer by name exist
