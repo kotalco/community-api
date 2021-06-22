@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"fmt"
+	"log"
 	"net/http"
 
 	"github.com/gofiber/fiber/v2"
@@ -105,7 +106,63 @@ func (e *NodeHandler) Delete(c *fiber.Ctx) error {
 
 // Update updates a single node by name from new spec delta
 func (e *NodeHandler) Update(c *fiber.Ctx) error {
-	return c.SendString("Update a node")
+	model := new(models.Node)
+
+	if err := c.BodyParser(model); err != nil {
+		return c.Status(http.StatusBadRequest).JSON(fiber.Map{
+			"error": "bad request",
+		})
+	}
+
+	name := c.Params("name")
+	node := &ethereumv1alpha1.Node{}
+	key := types.NamespacedName{
+		Name:      name,
+		Namespace: "default",
+	}
+
+	k8s.Client().Get(c.Context(), key, node)
+
+	if model.RPC != nil {
+		rpc := *model.RPC
+		if rpc {
+			if len(model.RPCAPI) != 0 {
+				rpcAPI := []ethereumv1alpha1.API{}
+				for _, api := range model.RPCAPI {
+					rpcAPI = append(rpcAPI, ethereumv1alpha1.API(api))
+				}
+				node.Spec.RPCAPI = rpcAPI
+			}
+		}
+		node.Spec.RPC = rpc
+	}
+
+	if model.WS != nil {
+		ws := *model.WS
+		if ws {
+			if len(model.WSAPI) != 0 {
+				wsAPI := []ethereumv1alpha1.API{}
+				for _, api := range model.WSAPI {
+					wsAPI = append(wsAPI, ethereumv1alpha1.API(api))
+				}
+				node.Spec.WSAPI = wsAPI
+			}
+		}
+		node.Spec.WS = ws
+	}
+
+	if err := k8s.Client().Update(c.Context(), node); err != nil {
+		log.Println(err)
+		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
+			"error": fmt.Sprintf("can't update node by name %s", name),
+		})
+	}
+
+	updatedModel := models.FromEthereumNode(node)
+
+	return c.Status(http.StatusOK).JSON(fiber.Map{
+		"node": updatedModel,
+	})
 }
 
 // validateNodeExist validate node by name exist
