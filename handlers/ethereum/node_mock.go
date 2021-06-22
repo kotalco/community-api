@@ -54,7 +54,9 @@ func (e *NodeMockHandler) Create(c *fiber.Ctx) error {
 	model := new(models.Node)
 
 	if err := c.BodyParser(model); err != nil {
-		return err
+		return c.Status(http.StatusBadRequest).JSON(fiber.Map{
+			"error": "bad request",
+		})
 	}
 
 	// check if node exist with this name
@@ -130,7 +132,9 @@ func (e *NodeMockHandler) Update(c *fiber.Ctx) error {
 	node := nodesStore[name]
 
 	if err := c.BodyParser(model); err != nil {
-		return err
+		return c.Status(http.StatusBadRequest).JSON(fiber.Map{
+			"error": "bad request",
+		})
 	}
 
 	if model.Client != "" {
