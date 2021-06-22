@@ -146,10 +146,6 @@ func (p *BeaconNodeMockHandler) Update(c *fiber.Ctx) error {
 		})
 	}
 
-	if model.Client != "" {
-		beaconnode.Spec.Client = ethereum2v1alpha1.Ethereum2Client(model.Client)
-	}
-
 	if len(model.Eth1Endpoints) != 0 {
 		beaconnode.Spec.Eth1Endpoints = model.Eth1Endpoints
 	}

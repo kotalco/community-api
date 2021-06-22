@@ -137,10 +137,6 @@ func (e *NodeMockHandler) Update(c *fiber.Ctx) error {
 		})
 	}
 
-	if model.Client != "" {
-		node.Spec.Client = ethereumv1alpha1.EthereumClient(model.Client)
-	}
-
 	if model.RPC != nil {
 		rpc := *model.RPC
 		if rpc {
