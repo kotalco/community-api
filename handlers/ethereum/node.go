@@ -101,7 +101,16 @@ func (e *NodeHandler) Create(c *fiber.Ctx) error {
 
 // Delete deletes a single Ethereum node by name
 func (e *NodeHandler) Delete(c *fiber.Ctx) error {
-	return c.SendString("Delete a node")
+	node := c.Locals("node").(*ethereumv1alpha1.Node)
+
+	if err := k8s.Client().Delete(c.Context(), node); err != nil {
+		log.Println(err)
+		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
+			"error": fmt.Sprintf("can't delete node by name %s", c.Params("name")),
+		})
+	}
+
+	return c.SendStatus(http.StatusNoContent)
 }
 
 // Update updates a single node by name from new spec delta
@@ -186,6 +195,8 @@ func validateNodeExist(c *fiber.Ctx) error {
 			"error": fmt.Sprintf("can't get node by name %s", name),
 		})
 	}
+
+	c.Locals("node", node)
 
 	return c.Next()
 
