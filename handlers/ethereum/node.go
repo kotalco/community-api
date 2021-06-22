@@ -11,6 +11,7 @@ import (
 	ethereumv1alpha1 "github.com/kotalco/kotal/apis/ethereum/v1alpha1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/types"
 )
 
 // NodeHandler is Ethereum node handler
@@ -80,8 +81,6 @@ func (e *NodeHandler) Create(c *fiber.Ctx) error {
 		node.Spec.WS = ws
 	}
 
-	// TODO: default the node
-
 	if err := k8s.Client().Create(c.Context(), node); err != nil {
 		if errors.IsAlreadyExists(err) {
 			return c.Status(http.StatusUnprocessableEntity).JSON(fiber.Map{
@@ -109,11 +108,37 @@ func (e *NodeHandler) Update(c *fiber.Ctx) error {
 	return c.SendString("Update a node")
 }
 
+// validateNodeExist validate node by name exist
+func validateNodeExist(c *fiber.Ctx) error {
+	name := c.Params("name")
+	node := &ethereumv1alpha1.Node{}
+	key := types.NamespacedName{
+		Name:      name,
+		Namespace: "default",
+	}
+
+	if err := k8s.Client().Get(c.Context(), key, node); err != nil {
+
+		if errors.IsNotFound(err) {
+			return c.Status(http.StatusNotFound).JSON(map[string]string{
+				"error": fmt.Sprintf("node by name %s doesn't exist", name),
+			})
+		}
+
+		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
+			"error": fmt.Sprintf("can't get node by name %s", name),
+		})
+	}
+
+	return c.Next()
+
+}
+
 // Register registers all routes on the given router
 func (e *NodeHandler) Register(router fiber.Router) {
 	router.Post("/", e.Create)
 	router.Get("/", e.List)
-	router.Get("/:name", e.Get)
-	router.Put("/:name", e.Update)
-	router.Delete("/:name", e.Delete)
+	router.Get("/:name", validateNodeExist, e.Get)
+	router.Put("/:name", validateNodeExist, e.Update)
+	router.Delete("/:name", validateNodeExist, e.Delete)
 }
