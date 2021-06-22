@@ -174,8 +174,8 @@ func (e *NodeMockHandler) Update(c *fiber.Ctx) error {
 	})
 }
 
-// validateNodeExist validate node by name exist
-func validateNodeExist(c *fiber.Ctx) error {
+// validateNodeMockExist validate node by name exist
+func validateNodeMockExist(c *fiber.Ctx) error {
 	name := c.Params("name")
 
 	if nodesStore[name] != nil {
@@ -190,7 +190,7 @@ func validateNodeExist(c *fiber.Ctx) error {
 func (e *NodeMockHandler) Register(router fiber.Router) {
 	router.Post("/", e.Create)
 	router.Get("/", e.List)
-	router.Get("/:name", validateNodeExist, e.Get)
-	router.Put("/:name", validateNodeExist, e.Update)
-	router.Delete("/:name", validateNodeExist, e.Delete)
+	router.Get("/:name", validateNodeMockExist, e.Get)
+	router.Put("/:name", validateNodeMockExist, e.Update)
+	router.Delete("/:name", validateNodeMockExist, e.Delete)
 }
