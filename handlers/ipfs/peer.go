@@ -114,7 +114,56 @@ func (p *PeerHandler) Delete(c *fiber.Ctx) error {
 
 // Update updates IPFS peer by name from spec
 func (p *PeerHandler) Update(c *fiber.Ctx) error {
-	return c.SendString("Update a peer")
+	model := new(models.Peer)
+	if err := c.BodyParser(model); err != nil {
+		return c.Status(http.StatusBadRequest).JSON(fiber.Map{
+			"error": "bad request",
+		})
+	}
+
+	name := c.Params("name")
+	peer := c.Locals("peer").(*ipfsv1alpha1.Peer)
+
+	if model.APIPort != 0 {
+		peer.Spec.APIPort = model.APIPort
+	}
+
+	if model.APIHost != "" {
+		peer.Spec.APIHost = model.APIHost
+	}
+
+	if model.GatewayPort != 0 {
+		peer.Spec.GatewayPort = model.GatewayPort
+	}
+
+	if model.GatewayHost != "" {
+		peer.Spec.GatewayHost = model.GatewayHost
+	}
+
+	if model.Routing != "" {
+		peer.Spec.Routing = ipfsv1alpha1.RoutingMechanism(model.Routing)
+	}
+
+	if len(model.Profiles) != 0 {
+		profiles := []ipfsv1alpha1.Profile{}
+		for _, profile := range model.Profiles {
+			profiles = append(profiles, ipfsv1alpha1.Profile(profile))
+		}
+		peer.Spec.Profiles = profiles
+	}
+
+	if err := k8s.Client().Update(c.Context(), peer); err != nil {
+		log.Println(err)
+		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
+			"error": fmt.Sprintf("can't update peer by name %s", name),
+		})
+	}
+
+	updatedModel := models.FromIPFSPeer(peer)
+
+	return c.Status(http.StatusOK).JSON(fiber.Map{
+		"peer": updatedModel,
+	})
 }
 
 // validatePeerExist validates ipfs peer by name exist
