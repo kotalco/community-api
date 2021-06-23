@@ -100,7 +100,16 @@ func (p *PeerHandler) Create(c *fiber.Ctx) error {
 
 // Delete deletes IPFS peer by name
 func (p *PeerHandler) Delete(c *fiber.Ctx) error {
-	return c.SendString("Delete a peer")
+	peer := c.Locals("peer").(*ipfsv1alpha1.Peer)
+
+	if err := k8s.Client().Delete(c.Context(), peer); err != nil {
+		log.Println(err)
+		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
+			"error": fmt.Sprintf("can't delete peer by name %s", c.Params("name")),
+		})
+	}
+
+	return c.SendStatus(http.StatusNoContent)
 }
 
 // Update updates IPFS peer by name from spec
