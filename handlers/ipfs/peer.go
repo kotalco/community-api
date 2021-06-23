@@ -12,6 +12,7 @@ import (
 	ipfsv1alpha1 "github.com/kotalco/kotal/apis/ipfs/v1alpha1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/types"
 )
 
 // PeerHandler is IPFS peer handler
@@ -24,7 +25,11 @@ func NewPeerHandler() handlers.Handler {
 
 // Get gets a single IPFS peer by name
 func (p *PeerHandler) Get(c *fiber.Ctx) error {
-	return c.SendString("Get a peer")
+	peer := c.Locals("peer").(*ipfsv1alpha1.Peer)
+
+	return c.Status(http.StatusOK).JSON(fiber.Map{
+		"peer": models.FromIPFSPeer(peer),
+	})
 }
 
 // List returns all IPFS peers
