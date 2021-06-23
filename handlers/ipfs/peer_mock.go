@@ -51,7 +51,9 @@ func (p *PeerMockHandler) Create(c *fiber.Ctx) error {
 	model := new(models.Peer)
 
 	if err := c.BodyParser(model); err != nil {
-		return err
+		return c.Status(http.StatusBadRequest).JSON(fiber.Map{
+			"error": "bad request",
+		})
 	}
 
 	if peersStore[model.Name] != nil {
@@ -94,7 +96,9 @@ func (p *PeerMockHandler) Delete(c *fiber.Ctx) error {
 func (p *PeerMockHandler) Update(c *fiber.Ctx) error {
 	model := new(models.Peer)
 	if err := c.BodyParser(model); err != nil {
-		return err
+		return c.Status(http.StatusBadRequest).JSON(fiber.Map{
+			"error": "bad request",
+		})
 	}
 
 	name := c.Params("name")
