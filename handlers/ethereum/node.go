@@ -25,7 +25,11 @@ func NewNodeHandler() handlers.Handler {
 
 // Get gets a single node
 func (e *NodeHandler) Get(c *fiber.Ctx) error {
-	return c.SendString("Get a node")
+	node := c.Locals("node").(*ethereumv1alpha1.Node)
+
+	return c.Status(http.StatusOK).JSON(fiber.Map{
+		"node": models.FromEthereumNode(node),
+	})
 }
 
 // List lists all Ethereum nodes
