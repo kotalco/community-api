@@ -87,11 +87,38 @@ func (p *PeerHandler) Update(c *fiber.Ctx) error {
 	return c.SendString("Update a peer")
 }
 
+// validatePeerExist validates ipfs peer by name exist
+func validatePeerExist(c *fiber.Ctx) error {
+	name := c.Params("name")
+	peer := &ipfsv1alpha1.Peer{}
+	key := types.NamespacedName{
+		Name:      name,
+		Namespace: "default",
+	}
+
+	if err := k8s.Client().Get(c.Context(), key, peer); err != nil {
+
+		if errors.IsNotFound(err) {
+			return c.Status(http.StatusNotFound).JSON(map[string]string{
+				"error": fmt.Sprintf("peer by name %s doesn't exist", name),
+			})
+		}
+
+		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
+			"error": fmt.Sprintf("can't get peer by name %s", name),
+		})
+	}
+
+	c.Locals("peer", peer)
+
+	return c.Next()
+}
+
 // Register registers all handlers on the given router
 func (p *PeerHandler) Register(router fiber.Router) {
 	router.Post("/", p.Create)
 	router.Get("/", p.List)
-	router.Get("/:name", p.Get)
-	router.Put("/:name", p.Update)
-	router.Delete("/:name", p.Delete)
+	router.Get("/:name", validatePeerExist, p.Get)
+	router.Put("/:name", validatePeerExist, p.Update)
+	router.Delete("/:name", validatePeerExist, p.Delete)
 }

@@ -141,8 +141,8 @@ func (p *PeerMockHandler) Update(c *fiber.Ctx) error {
 	})
 }
 
-// validatePeerExist validates ipfs peer by name exist
-func validatePeerExist(c *fiber.Ctx) error {
+// validatePeerMockExist validates ipfs peer by name exist
+func validatePeerMockExist(c *fiber.Ctx) error {
 	name := c.Params("name")
 
 	if peersStore[name] != nil {
@@ -158,7 +158,7 @@ func validatePeerExist(c *fiber.Ctx) error {
 func (p *PeerMockHandler) Register(router fiber.Router) {
 	router.Post("/", p.Create)
 	router.Get("/", p.List)
-	router.Get("/:name", validatePeerExist, p.Get)
-	router.Put("/:name", validatePeerExist, p.Update)
-	router.Delete("/:name", validatePeerExist, p.Delete)
+	router.Get("/:name", validatePeerMockExist, p.Get)
+	router.Put("/:name", validatePeerMockExist, p.Update)
+	router.Delete("/:name", validatePeerMockExist, p.Delete)
 }
