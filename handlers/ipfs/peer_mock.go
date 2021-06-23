@@ -65,23 +65,12 @@ func (p *PeerMockHandler) Create(c *fiber.Ctx) error {
 		initProfiles = append(initProfiles, ipfsv1alpha1.Profile(profile))
 	}
 
-	profiles := []ipfsv1alpha1.Profile{}
-	for _, profile := range model.Profiles {
-		profiles = append(profiles, ipfsv1alpha1.Profile(profile))
-	}
-
 	peer := &ipfsv1alpha1.Peer{
 		ObjectMeta: metav1.ObjectMeta{
 			Name: model.Name,
 		},
 		Spec: ipfsv1alpha1.PeerSpec{
 			InitProfiles: initProfiles,
-			Profiles:     profiles,
-			APIPort:      model.APIPort,
-			APIHost:      model.APIHost,
-			GatewayPort:  model.GatewayPort,
-			GatewayHost:  model.GatewayHost,
-			Routing:      ipfsv1alpha1.RoutingMechanism(model.Routing),
 		},
 	}
 
