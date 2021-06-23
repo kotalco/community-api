@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"os"
 
 	"github.com/gofiber/fiber/v2"
@@ -75,5 +76,10 @@ func main() {
 	validatorHandler.Register(validators)
 	secretHandler.Register(secrets)
 
-	app.Listen(":3000")
+	port := os.Getenv("KOTAL_API_SERVER_PORT")
+	if port == "" {
+		port = "3000"
+	}
+
+	app.Listen(fmt.Sprintf(":%s", port))
 }
