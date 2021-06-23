@@ -34,7 +34,23 @@ func (e *NodeHandler) Get(c *fiber.Ctx) error {
 
 // List lists all Ethereum nodes
 func (e *NodeHandler) List(c *fiber.Ctx) error {
-	return c.SendString("List all nodes")
+	nodes := &ethereumv1alpha1.NodeList{}
+	if err := k8s.Client().List(c.Context(), nodes); err != nil {
+		log.Println(err)
+		c.Status(http.StatusInternalServerError).JSON(fiber.Map{
+			"error": "failed to get all nodes",
+		})
+	}
+
+	nodeModels := []models.Node{}
+	for _, node := range nodes.Items {
+		nodeModels = append(nodeModels, *models.FromEthereumNode(&node))
+	}
+
+	return c.Status(http.StatusOK).JSON(fiber.Map{
+		"nodes": nodeModels,
+	})
+
 }
 
 // Create creates a single Ethereum node from spec
