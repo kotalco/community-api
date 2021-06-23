@@ -34,7 +34,23 @@ func (p *PeerHandler) Get(c *fiber.Ctx) error {
 
 // List returns all IPFS peers
 func (p *PeerHandler) List(c *fiber.Ctx) error {
-	return c.SendString("List all peers")
+	peers := &ipfsv1alpha1.PeerList{}
+	if err := k8s.Client().List(c.Context(), peers); err != nil {
+		log.Println(err)
+		c.Status(http.StatusInternalServerError).JSON(fiber.Map{
+			"error": "failed to get all peers",
+		})
+	}
+
+	peerModels := []models.Peer{}
+	for _, peer := range peers.Items {
+		peerModels = append(peerModels, *models.FromIPFSPeer(&peer))
+	}
+
+	return c.Status(http.StatusOK).JSON(fiber.Map{
+		"peers": peerModels,
+	})
+
 }
 
 // Create creates IPFS peer from spec
