@@ -81,5 +81,7 @@ func main() {
 		port = "3000"
 	}
 
-	app.Listen(fmt.Sprintf(":%s", port))
+	if err := app.Listen(fmt.Sprintf(":%s", port)); err != nil {
+		panic(err)
+	}
 }
