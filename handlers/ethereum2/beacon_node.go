@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"fmt"
+	"log"
 	"net/http"
 
 	"github.com/gofiber/fiber/v2"
@@ -81,7 +82,16 @@ func (p *BeaconNodeHandler) Create(c *fiber.Ctx) error {
 
 // Delete deletes ethereum 2.0 beacon node by name
 func (p *BeaconNodeHandler) Delete(c *fiber.Ctx) error {
-	return c.SendString("Delete a beacon node")
+	node := c.Locals("node").(*ethereum2v1alpha1.BeaconNode)
+
+	if err := k8s.Client().Delete(c.Context(), node); err != nil {
+		log.Println(err)
+		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
+			"error": fmt.Sprintf("can't delete beacon node by name %s", c.Params("name")),
+		})
+	}
+
+	return c.SendStatus(http.StatusNoContent)
 }
 
 // Update updates ethereum 2.0 beacon node by name from spec
