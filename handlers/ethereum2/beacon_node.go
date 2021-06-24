@@ -66,6 +66,8 @@ func (p *BeaconNodeHandler) Create(c *fiber.Ctx) error {
 		model.Eth1Endpoints = []string{}
 	}
 
+	client := ethereum2v1alpha1.Ethereum2Client(model.Client)
+
 	beaconnode := &ethereum2v1alpha1.BeaconNode{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      model.Name,
@@ -73,12 +75,14 @@ func (p *BeaconNodeHandler) Create(c *fiber.Ctx) error {
 		},
 		Spec: ethereum2v1alpha1.BeaconNodeSpec{
 			Join:          model.Network,
-			Client:        ethereum2v1alpha1.Ethereum2Client(model.Client),
+			Client:        client,
 			Eth1Endpoints: model.Eth1Endpoints,
+			RPC:           client == ethereum2v1alpha1.PrysmClient,
 		},
 	}
 
 	if err := k8s.Client().Create(c.Context(), beaconnode); err != nil {
+		log.Println(err)
 		if errors.IsAlreadyExists(err) {
 			return c.Status(http.StatusUnprocessableEntity).JSON(fiber.Map{
 				"error": fmt.Sprintf("beacon node by name %s already exist", model.Name),

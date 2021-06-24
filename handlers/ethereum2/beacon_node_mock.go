@@ -64,14 +64,17 @@ func (p *BeaconNodeMockHandler) Create(c *fiber.Ctx) error {
 		model.Eth1Endpoints = []string{}
 	}
 
+	client := ethereum2v1alpha1.Ethereum2Client(model.Client)
+
 	beaconnode := &ethereum2v1alpha1.BeaconNode{
 		ObjectMeta: metav1.ObjectMeta{
 			Name: model.Name,
 		},
 		Spec: ethereum2v1alpha1.BeaconNodeSpec{
 			Join:          model.Network,
-			Client:        ethereum2v1alpha1.Ethereum2Client(model.Client),
+			Client:        client,
 			Eth1Endpoints: model.Eth1Endpoints,
+			RPC:           client == ethereum2v1alpha1.PrysmClient,
 		},
 	}
 
