@@ -24,7 +24,11 @@ func NewBeaconNodeHandler() handlers.Handler {
 
 // Get gets a single ethereum 2.0 beacon node by name
 func (p *BeaconNodeHandler) Get(c *fiber.Ctx) error {
-	return c.SendString("Get a beacon node")
+	node := c.Locals("node").(*ethereum2v1alpha1.BeaconNode)
+
+	return c.Status(http.StatusOK).JSON(fiber.Map{
+		"beaconnode": models.FromEthereum2BeaconNode(node),
+	})
 }
 
 // List returns all ethereum 2.0 beacon nodes
