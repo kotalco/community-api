@@ -75,49 +75,6 @@ func (p *BeaconNodeMockHandler) Create(c *fiber.Ctx) error {
 		},
 	}
 
-	if model.REST != nil {
-		rest := *model.REST
-		if rest {
-			beaconnode.Spec.RESTHost = model.RESTHost
-			beaconnode.Spec.RESTPort = model.RESTPort
-		}
-		beaconnode.Spec.REST = rest
-	}
-
-	if model.RPC != nil {
-		rpc := *model.RPC
-		if rpc {
-			beaconnode.Spec.RPCHost = model.RPCHost
-			beaconnode.Spec.RPCPort = model.RPCPort
-		}
-		beaconnode.Spec.RPC = rpc
-	}
-
-	if model.GRPC != nil {
-		grpc := *model.GRPC
-		if grpc {
-			beaconnode.Spec.GRPCHost = model.GRPCHost
-			beaconnode.Spec.GRPCPort = model.GRPCPort
-		}
-		beaconnode.Spec.GRPC = grpc
-	}
-
-	if model.CPU != "" {
-		beaconnode.Spec.CPU = model.CPU
-	}
-	if model.CPULimit != "" {
-		beaconnode.Spec.CPULimit = model.CPULimit
-	}
-	if model.Memory != "" {
-		beaconnode.Spec.Memory = model.Memory
-	}
-	if model.MemoryLimit != "" {
-		beaconnode.Spec.MemoryLimit = model.MemoryLimit
-	}
-	if model.Storage != "" {
-		beaconnode.Spec.Storage = model.Storage
-	}
-
 	beaconnode.Default()
 
 	beaconnodesStore[model.Name] = beaconnode
