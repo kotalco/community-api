@@ -111,7 +111,85 @@ func (p *BeaconNodeHandler) Delete(c *fiber.Ctx) error {
 
 // Update updates ethereum 2.0 beacon node by name from spec
 func (p *BeaconNodeHandler) Update(c *fiber.Ctx) error {
-	return c.SendString("Update a beacon node")
+	model := new(models.BeaconNode)
+
+	if err := c.BodyParser(model); err != nil {
+		return c.Status(http.StatusBadRequest).JSON(fiber.Map{
+			"error": "bad request",
+		})
+	}
+
+	beaconnode := c.Locals("node").(*ethereum2v1alpha1.BeaconNode)
+
+	if len(model.Eth1Endpoints) != 0 {
+		beaconnode.Spec.Eth1Endpoints = model.Eth1Endpoints
+	}
+
+	if model.REST != nil {
+		rest := *model.REST
+		if rest {
+			if model.RESTHost != "" {
+				beaconnode.Spec.RESTHost = model.RESTHost
+			}
+			if model.RESTPort != 0 {
+				beaconnode.Spec.RESTPort = model.RESTPort
+			}
+		}
+		beaconnode.Spec.REST = rest
+	}
+
+	if model.RPC != nil {
+		rpc := *model.RPC
+		if rpc {
+			if model.RPCHost != "" {
+				beaconnode.Spec.RPCHost = model.RPCHost
+			}
+			if model.RPCPort != 0 {
+				beaconnode.Spec.RPCPort = model.RPCPort
+			}
+		}
+		beaconnode.Spec.RPC = rpc
+	}
+
+	if model.GRPC != nil {
+		grpc := *model.GRPC
+		if grpc {
+			if model.GRPCHost != "" {
+				beaconnode.Spec.GRPCHost = model.GRPCHost
+			}
+			if model.GRPCPort != 0 {
+				beaconnode.Spec.GRPCPort = model.GRPCPort
+			}
+		}
+		beaconnode.Spec.GRPC = grpc
+	}
+
+	if model.CPU != "" {
+		beaconnode.Spec.CPU = model.CPU
+	}
+	if model.CPULimit != "" {
+		beaconnode.Spec.CPULimit = model.CPULimit
+	}
+	if model.Memory != "" {
+		beaconnode.Spec.Memory = model.Memory
+	}
+	if model.MemoryLimit != "" {
+		beaconnode.Spec.MemoryLimit = model.MemoryLimit
+	}
+	if model.Storage != "" {
+		beaconnode.Spec.Storage = model.Storage
+	}
+
+	if err := k8s.Client().Update(c.Context(), beaconnode); err != nil {
+		log.Println(err)
+		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
+			"error": fmt.Sprintf("can't update beacon node by name %s", c.Params("name")),
+		})
+	}
+
+	return c.Status(http.StatusOK).JSON(fiber.Map{
+		"beaconnode": models.FromEthereum2BeaconNode(beaconnode),
+	})
 }
 
 // validateBeaconNodeExist validate node by name exist
