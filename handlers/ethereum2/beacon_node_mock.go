@@ -212,8 +212,8 @@ func (p *BeaconNodeMockHandler) Update(c *fiber.Ctx) error {
 	})
 }
 
-// validateBeaconNodeExist validate beacon node by name exist
-func validateBeaconNodeExist(c *fiber.Ctx) error {
+// validateBeaconNodeMockExist validate beacon node by name exist
+func validateBeaconNodeMockExist(c *fiber.Ctx) error {
 	name := c.Params("name")
 
 	if beaconnodesStore[name] != nil {
@@ -228,7 +228,7 @@ func validateBeaconNodeExist(c *fiber.Ctx) error {
 func (p *BeaconNodeMockHandler) Register(router fiber.Router) {
 	router.Post("/", p.Create)
 	router.Get("/", p.List)
-	router.Get("/:name", validateBeaconNodeExist, p.Get)
-	router.Put("/:name", validateBeaconNodeExist, p.Update)
-	router.Delete("/:name", validateBeaconNodeExist, p.Delete)
+	router.Get("/:name", validateBeaconNodeMockExist, p.Get)
+	router.Put("/:name", validateBeaconNodeMockExist, p.Update)
+	router.Delete("/:name", validateBeaconNodeMockExist, p.Delete)
 }
