@@ -34,7 +34,22 @@ func (p *BeaconNodeHandler) Get(c *fiber.Ctx) error {
 
 // List returns all ethereum 2.0 beacon nodes
 func (p *BeaconNodeHandler) List(c *fiber.Ctx) error {
-	return c.SendString("List all beacon nodes")
+	nodes := &ethereum2v1alpha1.BeaconNodeList{}
+	if err := k8s.Client().List(c.Context(), nodes); err != nil {
+		log.Println(err)
+		c.Status(http.StatusInternalServerError).JSON(fiber.Map{
+			"error": "failed to get all beacon nodes",
+		})
+	}
+
+	nodeModels := []models.BeaconNode{}
+	for _, node := range nodes.Items {
+		nodeModels = append(nodeModels, *models.FromEthereum2BeaconNode(&node))
+	}
+
+	return c.Status(http.StatusOK).JSON(fiber.Map{
+		"beaconnodes": nodeModels,
+	})
 }
 
 // Create creates ethereum 2.0 beacon node from spec
