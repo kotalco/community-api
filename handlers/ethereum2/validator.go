@@ -92,7 +92,16 @@ func (p *ValidatorHandler) Create(c *fiber.Ctx) error {
 
 // Delete deletes Ethereum 2.0 validator client by name
 func (p *ValidatorHandler) Delete(c *fiber.Ctx) error {
-	return c.SendString("Delete a validator client")
+	validator := c.Locals("validator").(*ethereum2v1alpha1.Validator)
+
+	if err := k8s.Client().Delete(c.Context(), validator); err != nil {
+		log.Println(err)
+		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
+			"error": fmt.Sprintf("can't delete validator by name %s", c.Params("name")),
+		})
+	}
+
+	return c.SendStatus(http.StatusNoContent)
 }
 
 // Update updates Ethereum 2.0 validator client by name from spec
