@@ -12,6 +12,7 @@ import (
 	ethereum2v1alpha1 "github.com/kotalco/kotal/apis/ethereum2/v1alpha1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/types"
 )
 
 // ValidatorHandler is Ethereum 2.0 validator client handler
@@ -99,11 +100,39 @@ func (p *ValidatorHandler) Update(c *fiber.Ctx) error {
 	return c.SendString("Update a validator client")
 }
 
+// validateValidatorExist validate node by name exist
+func validateValidatorExist(c *fiber.Ctx) error {
+	name := c.Params("name")
+	validator := &ethereum2v1alpha1.Validator{}
+	key := types.NamespacedName{
+		Name:      name,
+		Namespace: "default",
+	}
+
+	if err := k8s.Client().Get(c.Context(), key, validator); err != nil {
+
+		if errors.IsNotFound(err) {
+			return c.Status(http.StatusNotFound).JSON(map[string]string{
+				"error": fmt.Sprintf("validator by name %s doesn't exist", name),
+			})
+		}
+
+		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
+			"error": fmt.Sprintf("can't get validator by name %s", name),
+		})
+	}
+
+	c.Locals("validator", validator)
+
+	return c.Next()
+
+}
+
 // Register registers all handlers on the given router
 func (p *ValidatorHandler) Register(router fiber.Router) {
 	router.Post("/", p.Create)
 	router.Get("/", p.List)
-	router.Get("/:name", p.Get)
-	router.Put("/:name", p.Update)
-	router.Delete("/:name", p.Delete)
+	router.Get("/:name", validateValidatorExist, p.Get)
+	router.Put("/:name", validateValidatorExist, p.Update)
+	router.Delete("/:name", validateValidatorExist, p.Delete)
 }

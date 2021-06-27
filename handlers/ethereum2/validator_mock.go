@@ -156,8 +156,8 @@ func (p *ValidatorMockHandler) Update(c *fiber.Ctx) error {
 	})
 }
 
-// validateValidatorExist validate validator client by name exist
-func validateValidatorExist(c *fiber.Ctx) error {
+// validateValidatorMockExist validate validator client by name exist
+func validateValidatorMockExist(c *fiber.Ctx) error {
 	name := c.Params("name")
 
 	if validatorsStore[name] != nil {
@@ -172,7 +172,7 @@ func validateValidatorExist(c *fiber.Ctx) error {
 func (p *ValidatorMockHandler) Register(router fiber.Router) {
 	router.Post("/", p.Create)
 	router.Get("/", p.List)
-	router.Get("/:name", validateValidatorExist, p.Get)
-	router.Put("/:name", validateValidatorExist, p.Update)
-	router.Delete("/:name", validateValidatorExist, p.Delete)
+	router.Get("/:name", validateValidatorMockExist, p.Get)
+	router.Put("/:name", validateValidatorMockExist, p.Update)
+	router.Delete("/:name", validateValidatorMockExist, p.Delete)
 }
