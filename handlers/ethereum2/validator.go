@@ -110,7 +110,65 @@ func (p *ValidatorHandler) Delete(c *fiber.Ctx) error {
 
 // Update updates Ethereum 2.0 validator client by name from spec
 func (p *ValidatorHandler) Update(c *fiber.Ctx) error {
-	return c.SendString("Update a validator client")
+	model := new(models.Validator)
+
+	if err := c.BodyParser(model); err != nil {
+		return c.Status(http.StatusBadRequest).JSON(fiber.Map{
+			"error": "bad request",
+		})
+	}
+
+	name := c.Params("name")
+	validator := c.Locals("validator").(*ethereum2v1alpha1.Validator)
+
+	if model.WalletPasswordSecretName != "" {
+		validator.Spec.WalletPasswordSecret = model.WalletPasswordSecretName
+	}
+
+	if len(model.Keystores) != 0 {
+		keystores := []ethereum2v1alpha1.Keystore{}
+		for _, keystore := range model.Keystores {
+			keystores = append(keystores, ethereum2v1alpha1.Keystore{
+				SecretName: keystore.SecretName,
+			})
+		}
+		validator.Spec.Keystores = keystores
+	}
+
+	if model.Graffiti != "" {
+		validator.Spec.Graffiti = model.Graffiti
+	}
+
+	if len(model.BeaconEndpoints) != 0 {
+		validator.Spec.BeaconEndpoints = model.BeaconEndpoints
+	}
+
+	if model.CPU != "" {
+		validator.Spec.CPU = model.CPU
+	}
+	if model.CPULimit != "" {
+		validator.Spec.CPULimit = model.CPULimit
+	}
+	if model.Memory != "" {
+		validator.Spec.Memory = model.Memory
+	}
+	if model.MemoryLimit != "" {
+		validator.Spec.MemoryLimit = model.MemoryLimit
+	}
+	if model.Storage != "" {
+		validator.Spec.Storage = model.Storage
+	}
+
+	if err := k8s.Client().Update(c.Context(), validator); err != nil {
+		log.Println(err)
+		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
+			"error": fmt.Sprintf("can't update validator by name %s", name),
+		})
+	}
+
+	return c.Status(http.StatusOK).JSON(fiber.Map{
+		"validator": models.FromEthereum2Validator(validator),
+	})
 }
 
 // validateValidatorExist validate node by name exist
