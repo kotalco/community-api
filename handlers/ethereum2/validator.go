@@ -34,7 +34,23 @@ func (p *ValidatorHandler) Get(c *fiber.Ctx) error {
 
 // List returns all Ethereum 2.0 validator clients
 func (p *ValidatorHandler) List(c *fiber.Ctx) error {
-	return c.SendString("List all validator clients")
+	validators := &ethereum2v1alpha1.ValidatorList{}
+	validatorModels := []models.Validator{}
+
+	if err := k8s.Client().List(c.Context(), validators); err != nil {
+		log.Println(err)
+		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
+			"error": "failed to get all validators",
+		})
+	}
+
+	for _, validator := range validators.Items {
+		validatorModels = append(validatorModels, *models.FromEthereum2Validator(&validator))
+	}
+
+	return c.Status(http.StatusOK).JSON(fiber.Map{
+		"validators": validatorModels,
+	})
 }
 
 // Create creates Ethereum 2.0 validator client from spec
