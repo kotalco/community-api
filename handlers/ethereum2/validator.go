@@ -25,7 +25,11 @@ func NewValidatorHandler() handlers.Handler {
 
 // Get gets a single Ethereum 2.0 validator client by name
 func (p *ValidatorHandler) Get(c *fiber.Ctx) error {
-	return c.SendString("Get a validator client")
+	validator := c.Locals("validator").(*ethereum2v1alpha1.Validator)
+
+	return c.Status(http.StatusOK).JSON(fiber.Map{
+		"validator": models.FromEthereum2Validator(validator),
+	})
 }
 
 // List returns all Ethereum 2.0 validator clients
