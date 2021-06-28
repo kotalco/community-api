@@ -67,7 +67,8 @@ func (s *SecretMockHandler) Create(c *fiber.Ctx) error {
 		ObjectMeta: metav1.ObjectMeta{
 			Name: model.Name,
 			Labels: map[string]string{
-				"kotal.io/key-type": model.Type,
+				"kotal.io/key-type":            model.Type,
+				"app.kubernetes.io/created-by": "kotal-api",
 			},
 		},
 		StringData: model.Data,
