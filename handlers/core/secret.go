@@ -45,7 +45,11 @@ func (s *SecretHandler) List(c *fiber.Ctx) error {
 	}
 
 	secretModels := []models.Secret{}
+	secretType := c.Query("type")
 	for _, secret := range secrets.Items {
+		if secretType != "" && secret.Labels["kotal.io/key-type"] != secretType {
+			continue
+		}
 		secretModels = append(secretModels, *models.FromCoreSecret(&secret))
 	}
 
