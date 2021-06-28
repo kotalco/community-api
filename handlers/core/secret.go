@@ -75,7 +75,16 @@ func (s *SecretHandler) Create(c *fiber.Ctx) error {
 
 // Delete deletes k8s secret by name
 func (s *SecretHandler) Delete(c *fiber.Ctx) error {
-	return c.SendString("Delete a secret")
+	secret := c.Locals("secret").(*corev1.Secret)
+
+	if err := k8s.Client().Delete(c.Context(), secret); err != nil {
+		log.Println(err)
+		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
+			"error": fmt.Sprintf("can't delete secret by name %s", c.Params("name")),
+		})
+	}
+
+	return c.SendStatus(http.StatusNoContent)
 }
 
 // Update updates k8s secret by name from spec
