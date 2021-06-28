@@ -47,6 +47,7 @@ func (s *SecretHandler) Create(c *fiber.Ctx) error {
 		})
 	}
 
+	t := true
 	secret := &corev1.Secret{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      model.Name,
@@ -57,6 +58,7 @@ func (s *SecretHandler) Create(c *fiber.Ctx) error {
 			},
 		},
 		StringData: model.Data,
+		Immutable:  &t,
 	}
 
 	if err := k8s.Client().Create(c.Context(), secret); err != nil {
