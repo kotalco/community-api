@@ -36,8 +36,12 @@ func (s *SecretMockHandler) Get(c *fiber.Ctx) error {
 // List returns all k8s secret mocks
 func (s *SecretMockHandler) List(c *fiber.Ctx) error {
 	secrets := []models.Secret{}
+	secretType := c.Query("type")
 
 	for _, secret := range secretsStore {
+		if secretType != "" && secret.Labels["kotal.io/key-type"] != secretType {
+			continue
+		}
 		secrets = append(secrets, *models.FromCoreSecret(secret))
 	}
 
