@@ -13,6 +13,7 @@ import (
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 // SecretHandler is k8s secret handler
@@ -34,7 +35,24 @@ func (s *SecretHandler) Get(c *fiber.Ctx) error {
 
 // List returns all k8s secrets
 func (s *SecretHandler) List(c *fiber.Ctx) error {
-	return c.SendString("List all secrets")
+	secrets := &corev1.SecretList{}
+	if err := k8s.Client().List(c.Context(), secrets, client.HasLabels{"app.kubernetes.io/created-by"}); err != nil {
+		log.Println(err)
+
+		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
+			"error": "failed to get all secrets",
+		})
+	}
+
+	secretModels := []models.Secret{}
+	for _, secret := range secrets.Items {
+		secretModels = append(secretModels, *models.FromCoreSecret(&secret))
+	}
+
+	return c.Status(http.StatusOK).JSON(fiber.Map{
+		"secrets": secretModels,
+	})
+
 }
 
 // Create creates k8s secret from spec
