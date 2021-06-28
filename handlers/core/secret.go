@@ -12,6 +12,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/types"
 )
 
 // SecretHandler is k8s secret handler
@@ -82,11 +83,39 @@ func (s *SecretHandler) Update(c *fiber.Ctx) error {
 	return c.SendStatus(http.StatusMethodNotAllowed)
 }
 
+// validateSecretExist validate secret by name exist
+func validateSecretExist(c *fiber.Ctx) error {
+	name := c.Params("name")
+	secret := &corev1.Secret{}
+	key := types.NamespacedName{
+		Name:      name,
+		Namespace: "default",
+	}
+
+	if err := k8s.Client().Get(c.Context(), key, secret); err != nil {
+		log.Println(err)
+		if errors.IsNotFound(err) {
+			return c.Status(http.StatusNotFound).JSON(map[string]string{
+				"error": fmt.Sprintf("secret by name %s doesn't exist", name),
+			})
+		}
+
+		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
+			"error": fmt.Sprintf("can't get secret by name %s", name),
+		})
+	}
+
+	c.Locals("secret", secret)
+
+	return c.Next()
+
+}
+
 // Register registers all handlers on the given router
 func (s *SecretHandler) Register(router fiber.Router) {
 	router.Post("/", s.Create)
 	router.Get("/", s.List)
-	router.Get("/:name", s.Get)
-	router.Put("/:name", s.Update)
-	router.Delete("/:name", s.Delete)
+	router.Get("/:name", validateSecretExist, s.Get)
+	router.Put("/:name", validateSecretExist, s.Update)
+	router.Delete("/:name", validateSecretExist, s.Delete)
 }

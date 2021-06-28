@@ -93,8 +93,8 @@ func (s *SecretMockHandler) Update(c *fiber.Ctx) error {
 	return c.SendStatus(http.StatusMethodNotAllowed)
 }
 
-// validateSecretExist validate secret by name exist
-func validateSecretExist(c *fiber.Ctx) error {
+// validateSecretMockExist validate secret by name exist
+func validateSecretMockExist(c *fiber.Ctx) error {
 	name := c.Params("name")
 
 	if secretsStore[name] != nil {
@@ -109,7 +109,7 @@ func validateSecretExist(c *fiber.Ctx) error {
 func (s *SecretMockHandler) Register(router fiber.Router) {
 	router.Post("/", s.Create)
 	router.Get("/", s.List)
-	router.Get("/:name", validateSecretExist, s.Get)
-	router.Put("/:name", validateSecretExist, s.Update)
-	router.Delete("/:name", validateSecretExist, s.Delete)
+	router.Get("/:name", validateSecretMockExist, s.Get)
+	router.Put("/:name", validateSecretMockExist, s.Update)
+	router.Delete("/:name", validateSecretMockExist, s.Delete)
 }
