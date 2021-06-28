@@ -25,7 +25,11 @@ func NewSecretHandler() handlers.Handler {
 
 // Get gets a single k8s secret by name
 func (s *SecretHandler) Get(c *fiber.Ctx) error {
-	return c.SendString("Get a secret")
+	secret := c.Locals("secret").(*corev1.Secret)
+
+	return c.Status(http.StatusOK).JSON(fiber.Map{
+		"secret": models.FromCoreSecret(secret),
+	})
 }
 
 // List returns all k8s secrets
