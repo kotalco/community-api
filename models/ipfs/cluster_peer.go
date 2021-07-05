@@ -1,8 +1,13 @@
 package models
 
-import ipfsv1alpha1 "github.com/kotalco/kotal/apis/ipfs/v1alpha1"
+import (
+	"github.com/kotalco/api/models"
+	"github.com/kotalco/api/shared"
+	ipfsv1alpha1 "github.com/kotalco/kotal/apis/ipfs/v1alpha1"
+)
 
 type ClusterPeer struct {
+	models.Time
 	Name                 string   `json:"name"`
 	ID                   string   `json:"id"`
 	PrivatekeySecretName string   `json:"privatekeySecretName"`
@@ -20,7 +25,10 @@ type ClusterPeer struct {
 
 func FromIPFSClusterPeer(peer *ipfsv1alpha1.ClusterPeer) *ClusterPeer {
 	return &ClusterPeer{
-		Name:                 peer.Name,
+		Name: peer.Name,
+		Time: models.Time{
+			CreatedAt: peer.CreationTimestamp.UTC().Format(shared.JavascriptISOString),
+		},
 		ID:                   peer.Spec.ID,
 		PrivatekeySecretName: peer.Spec.PrivatekeySecretName,
 		TrustedPeers:         peer.Spec.TrustedPeers,

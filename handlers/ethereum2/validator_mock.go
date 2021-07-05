@@ -62,7 +62,8 @@ func (p *ValidatorMockHandler) Create(c *fiber.Ctx) error {
 
 	validator := &ethereum2v1alpha1.Validator{
 		ObjectMeta: metav1.ObjectMeta{
-			Name: model.Name,
+			Name:              model.Name,
+			CreationTimestamp: metav1.Now(),
 		},
 		Spec: ethereum2v1alpha1.ValidatorSpec{
 			Network:   model.Network,

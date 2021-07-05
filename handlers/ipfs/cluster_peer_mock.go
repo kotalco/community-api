@@ -63,7 +63,8 @@ func (p *ClusterPeerMockHandler) Create(c *fiber.Ctx) error {
 
 	peer := &ipfsv1alpha1.ClusterPeer{
 		ObjectMeta: metav1.ObjectMeta{
-			Name: model.Name,
+			Name:              model.Name,
+			CreationTimestamp: metav1.Now(),
 		},
 	}
 

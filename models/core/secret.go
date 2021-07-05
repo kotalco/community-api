@@ -1,9 +1,14 @@
 package models
 
-import corev1 "k8s.io/api/core/v1"
+import (
+	"github.com/kotalco/api/models"
+	"github.com/kotalco/api/shared"
+	corev1 "k8s.io/api/core/v1"
+)
 
 // Secret is Kubernetes secret
 type Secret struct {
+	models.Time
 	Name string            `json:"name"`
 	Type string            `json:"type"`
 	Data map[string]string `json:"data,omitempty"`
@@ -12,6 +17,9 @@ type Secret struct {
 func FromCoreSecret(secret *corev1.Secret) *Secret {
 	return &Secret{
 		Name: secret.Name,
+		Time: models.Time{
+			CreatedAt: secret.CreationTimestamp.UTC().Format(shared.JavascriptISOString),
+		},
 		Type: secret.Labels["kotal.io/key-type"],
 	}
 }

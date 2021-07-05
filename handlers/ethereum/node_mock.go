@@ -68,7 +68,8 @@ func (e *NodeMockHandler) Create(c *fiber.Ctx) error {
 
 	node := &ethereumv1alpha1.Node{
 		ObjectMeta: metav1.ObjectMeta{
-			Name: model.Name,
+			Name:              model.Name,
+			CreationTimestamp: metav1.Now(),
 		},
 		Spec: ethereumv1alpha1.NodeSpec{
 			NetworkConfig: ethereumv1alpha1.NetworkConfig{

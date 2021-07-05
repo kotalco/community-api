@@ -1,9 +1,14 @@
 package models
 
-import ethereumv1alpha1 "github.com/kotalco/kotal/apis/ethereum/v1alpha1"
+import (
+	"github.com/kotalco/api/models"
+	"github.com/kotalco/api/shared"
+	ethereumv1alpha1 "github.com/kotalco/kotal/apis/ethereum/v1alpha1"
+)
 
 // Node is Ethereum node
 type Node struct {
+	models.Time
 	Name    string   `json:"name"`
 	Network string   `json:"network"`
 	Client  string   `json:"client"`
@@ -15,7 +20,10 @@ type Node struct {
 
 func FromEthereumNode(n *ethereumv1alpha1.Node) *Node {
 	model := &Node{
-		Name:    n.Name,
+		Name: n.Name,
+		Time: models.Time{
+			CreatedAt: n.CreationTimestamp.UTC().Format(shared.JavascriptISOString),
+		},
 		Network: n.Spec.Join,
 		Client:  string(n.Spec.Client),
 		RPC:     &n.Spec.RPC,

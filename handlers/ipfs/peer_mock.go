@@ -69,7 +69,8 @@ func (p *PeerMockHandler) Create(c *fiber.Ctx) error {
 
 	peer := &ipfsv1alpha1.Peer{
 		ObjectMeta: metav1.ObjectMeta{
-			Name: model.Name,
+			Name:              model.Name,
+			CreationTimestamp: metav1.Now(),
 		},
 		Spec: ipfsv1alpha1.PeerSpec{
 			InitProfiles: initProfiles,

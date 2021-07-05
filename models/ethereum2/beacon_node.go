@@ -1,8 +1,13 @@
 package models
 
-import ethereum2v1alpha1 "github.com/kotalco/kotal/apis/ethereum2/v1alpha1"
+import (
+	"github.com/kotalco/api/models"
+	"github.com/kotalco/api/shared"
+	ethereum2v1alpha1 "github.com/kotalco/kotal/apis/ethereum2/v1alpha1"
+)
 
 type BeaconNode struct {
+	models.Time
 	Name          string   `json:"name"`
 	Network       string   `json:"network"`
 	Client        string   `json:"client"`
@@ -25,7 +30,10 @@ type BeaconNode struct {
 
 func FromEthereum2BeaconNode(beaconnode *ethereum2v1alpha1.BeaconNode) *BeaconNode {
 	return &BeaconNode{
-		Name:          beaconnode.Name,
+		Name: beaconnode.Name,
+		Time: models.Time{
+			CreatedAt: beaconnode.CreationTimestamp.UTC().Format(shared.JavascriptISOString),
+		},
 		Network:       beaconnode.Spec.Join,
 		Client:        string(beaconnode.Spec.Client),
 		Eth1Endpoints: beaconnode.Spec.Eth1Endpoints,

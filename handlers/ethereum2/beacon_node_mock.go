@@ -68,7 +68,8 @@ func (p *BeaconNodeMockHandler) Create(c *fiber.Ctx) error {
 
 	beaconnode := &ethereum2v1alpha1.BeaconNode{
 		ObjectMeta: metav1.ObjectMeta{
-			Name: model.Name,
+			Name:              model.Name,
+			CreationTimestamp: metav1.Now(),
 		},
 		Spec: ethereum2v1alpha1.BeaconNodeSpec{
 			Join:          model.Network,

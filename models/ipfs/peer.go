@@ -1,10 +1,15 @@
 package models
 
-import ipfsv1alpha1 "github.com/kotalco/kotal/apis/ipfs/v1alpha1"
+import (
+	"github.com/kotalco/api/models"
+	"github.com/kotalco/api/shared"
+	ipfsv1alpha1 "github.com/kotalco/kotal/apis/ipfs/v1alpha1"
+)
 
 // Peer is IPFS peer
 // TODO: update with SwarmKeySecret and Resources
 type Peer struct {
+	models.Time
 	Name         string   `json:"name"`
 	InitProfiles []string `json:"initProfiles"`
 	APIPort      uint     `json:"apiPort"`
@@ -30,7 +35,10 @@ func FromIPFSPeer(peer *ipfsv1alpha1.Peer) *Peer {
 	}
 
 	return &Peer{
-		Name:         peer.Name,
+		Name: peer.Name,
+		Time: models.Time{
+			CreatedAt: peer.CreationTimestamp.UTC().Format(shared.JavascriptISOString),
+		},
 		APIPort:      peer.Spec.APIPort,
 		APIHost:      peer.Spec.APIHost,
 		GatewayPort:  peer.Spec.GatewayPort,
