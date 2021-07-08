@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/kotalco/api/handlers"
@@ -102,7 +103,12 @@ func (e *NodeHandler) Create(c *fiber.Ctx) error {
 		node.Spec.WS = ws
 	}
 
+	if os.Getenv("MOCK") == "true" {
+		node.Default()
+	}
+
 	if err := k8s.Client().Create(c.Context(), node); err != nil {
+		log.Println(err)
 		if errors.IsAlreadyExists(err) {
 			return c.Status(http.StatusUnprocessableEntity).JSON(fiber.Map{
 				"error": fmt.Sprintf("node by name %s already exist", model.Name),
@@ -115,7 +121,7 @@ func (e *NodeHandler) Create(c *fiber.Ctx) error {
 	}
 
 	return c.Status(http.StatusCreated).JSON(map[string]interface{}{
-		"node": model,
+		"node": models.FromEthereumNode(node),
 	})
 }
 
@@ -178,6 +184,10 @@ func (e *NodeHandler) Update(c *fiber.Ctx) error {
 			}
 		}
 		node.Spec.WS = ws
+	}
+
+	if os.Getenv("MOCK") == "true" {
+		node.Default()
 	}
 
 	if err := k8s.Client().Update(c.Context(), node); err != nil {

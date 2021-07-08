@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/kotalco/api/handlers"
@@ -79,6 +80,10 @@ func (p *BeaconNodeHandler) Create(c *fiber.Ctx) error {
 			Eth1Endpoints: model.Eth1Endpoints,
 			RPC:           client == ethereum2v1alpha1.PrysmClient,
 		},
+	}
+
+	if os.Getenv("MOCK") == "true" {
+		beaconnode.Default()
 	}
 
 	if err := k8s.Client().Create(c.Context(), beaconnode); err != nil {
@@ -182,6 +187,10 @@ func (p *BeaconNodeHandler) Update(c *fiber.Ctx) error {
 	}
 	if model.Storage != "" {
 		beaconnode.Spec.Storage = model.Storage
+	}
+
+	if os.Getenv("MOCK") == "true" {
+		beaconnode.Default()
 	}
 
 	if err := k8s.Client().Update(c.Context(), beaconnode); err != nil {

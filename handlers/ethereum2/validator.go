@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/kotalco/api/handlers"
@@ -92,6 +93,10 @@ func (p *ValidatorHandler) Create(c *fiber.Ctx) error {
 		validator.Spec.BeaconEndpoints = []string{}
 	}
 
+	if os.Getenv("MOCK") == "true" {
+		validator.Default()
+	}
+
 	if err := k8s.Client().Create(c.Context(), validator); err != nil {
 		log.Println(err)
 		if errors.IsAlreadyExists(err) {
@@ -173,6 +178,10 @@ func (p *ValidatorHandler) Update(c *fiber.Ctx) error {
 	}
 	if model.Storage != "" {
 		validator.Spec.Storage = model.Storage
+	}
+
+	if os.Getenv("MOCK") == "true" {
+		validator.Default()
 	}
 
 	if err := k8s.Client().Update(c.Context(), validator); err != nil {

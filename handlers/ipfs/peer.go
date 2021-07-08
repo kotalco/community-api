@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/kotalco/api/handlers"
@@ -78,6 +79,10 @@ func (p *PeerHandler) Create(c *fiber.Ctx) error {
 		},
 	}
 
+	if os.Getenv("MOCK") == "true" {
+		peer.Default()
+	}
+
 	if err := k8s.Client().Create(c.Context(), peer); err != nil {
 		log.Println(err)
 
@@ -150,6 +155,10 @@ func (p *PeerHandler) Update(c *fiber.Ctx) error {
 			profiles = append(profiles, ipfsv1alpha1.Profile(profile))
 		}
 		peer.Spec.Profiles = profiles
+	}
+
+	if os.Getenv("MOCK") == "true" {
+		peer.Default()
 	}
 
 	if err := k8s.Client().Update(c.Context(), peer); err != nil {

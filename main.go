@@ -8,7 +8,6 @@ import (
 	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/gofiber/fiber/v2/middleware/logger"
 	"github.com/gofiber/fiber/v2/middleware/recover"
-	"github.com/kotalco/api/handlers"
 	coreHandlers "github.com/kotalco/api/handlers/core"
 	ethereumHandlers "github.com/kotalco/api/handlers/ethereum"
 	ethereum2Handlers "github.com/kotalco/api/handlers/ethereum2"
@@ -46,28 +45,12 @@ func main() {
 		return c.SendString("Kotal API")
 	})
 
-	var secretHandler,
-		nodeHandler,
-		peerHandler,
-		clusterPeerHandler,
-		beaconHandler,
-		validatorHandler handlers.Handler
-
-	if os.Getenv("MOCK") == "true" {
-		nodeHandler = ethereumHandlers.NewNodeMockHandler()
-		peerHandler = ipfsHandlers.NewPeerMockHandler()
-		clusterPeerHandler = ipfsHandlers.NewClusterPeerMockHandler()
-		beaconHandler = ethereum2Handlers.NewBeaconNodeMockHandler()
-		validatorHandler = ethereum2Handlers.NewValidatorMockHandler()
-		secretHandler = coreHandlers.NewSecretMockHandler()
-	} else {
-		nodeHandler = ethereumHandlers.NewNodeHandler()
-		peerHandler = ipfsHandlers.NewPeerHandler()
-		clusterPeerHandler = ipfsHandlers.NewClusterPeerHandler()
-		beaconHandler = ethereum2Handlers.NewBeaconNodeHandler()
-		validatorHandler = ethereum2Handlers.NewValidatorHandler()
-		secretHandler = coreHandlers.NewSecretHandler()
-	}
+	nodeHandler := ethereumHandlers.NewNodeHandler()
+	peerHandler := ipfsHandlers.NewPeerHandler()
+	clusterPeerHandler := ipfsHandlers.NewClusterPeerHandler()
+	beaconHandler := ethereum2Handlers.NewBeaconNodeHandler()
+	validatorHandler := ethereum2Handlers.NewValidatorHandler()
+	secretHandler := coreHandlers.NewSecretHandler()
 
 	nodeHandler.Register(nodes)
 	peerHandler.Register(peers)
