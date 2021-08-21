@@ -118,6 +118,10 @@ func (e *NodeHandler) Create(c *fiber.Ctx) error {
 		node.Spec.WS = ws
 	}
 
+	if model.GraphQL != nil {
+		node.Spec.GraphQL = *model.GraphQL
+	}
+
 	if os.Getenv("MOCK") == "true" {
 		node.Default()
 	}
@@ -199,6 +203,10 @@ func (e *NodeHandler) Update(c *fiber.Ctx) error {
 			}
 		}
 		node.Spec.WS = ws
+	}
+
+	if model.GraphQL != nil {
+		node.Spec.GraphQL = *model.GraphQL
 	}
 
 	if os.Getenv("MOCK") == "true" {

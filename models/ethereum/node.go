@@ -16,6 +16,7 @@ type Node struct {
 	RPCAPI  []string `json:"rpcAPI"`
 	WS      *bool    `json:"ws"`
 	WSAPI   []string `json:"wsAPI"`
+	GraphQL *bool    `json:"graphql"`
 }
 
 func FromEthereumNode(n *ethereumv1alpha1.Node) *Node {
@@ -28,6 +29,7 @@ func FromEthereumNode(n *ethereumv1alpha1.Node) *Node {
 		Client:  string(n.Spec.Client),
 		RPC:     &n.Spec.RPC,
 		WS:      &n.Spec.WS,
+		GraphQL: &n.Spec.GraphQL,
 	}
 
 	var rpcAPI []string
