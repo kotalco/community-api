@@ -5,11 +5,14 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"sort"
+	"strconv"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/kotalco/api/handlers"
 	"github.com/kotalco/api/k8s"
 	models "github.com/kotalco/api/models/ipfs"
+	"github.com/kotalco/api/shared"
 	ipfsv1alpha1 "github.com/kotalco/kotal/apis/ipfs/v1alpha1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -25,7 +28,7 @@ func NewClusterPeerHandler() handlers.Handler {
 }
 
 // Get gets a single IPFS cluster peer by name
-func (p *ClusterPeerHandler) Get(c *fiber.Ctx) error {
+func (cp *ClusterPeerHandler) Get(c *fiber.Ctx) error {
 	peer := c.Locals("peer").(*ipfsv1alpha1.ClusterPeer)
 	model := models.FromIPFSClusterPeer(peer)
 
@@ -36,7 +39,7 @@ func (p *ClusterPeerHandler) Get(c *fiber.Ctx) error {
 }
 
 // List returns all IPFS cluster peers
-func (p *ClusterPeerHandler) List(c *fiber.Ctx) error {
+func (cp *ClusterPeerHandler) List(c *fiber.Ctx) error {
 	peers := &ipfsv1alpha1.ClusterPeerList{}
 	if err := k8s.Client().List(c.Context(), peers); err != nil {
 		log.Println(err)
@@ -46,7 +49,19 @@ func (p *ClusterPeerHandler) List(c *fiber.Ctx) error {
 	}
 
 	peerModels := []models.ClusterPeer{}
-	for _, peer := range peers.Items {
+
+	page := c.Query("page")
+	p, err := strconv.Atoi(page)
+	if err != nil {
+		p = 1
+	}
+
+	start, end := shared.Page(uint(len(peers.Items)), uint(p))
+	sort.Slice(peers.Items[:], func(i, j int) bool {
+		return peers.Items[i].CreationTimestamp.Before(&peers.Items[j].CreationTimestamp)
+	})
+
+	for _, peer := range peers.Items[start:end] {
 		peerModels = append(peerModels, *models.FromIPFSClusterPeer(&peer))
 	}
 
@@ -56,7 +71,7 @@ func (p *ClusterPeerHandler) List(c *fiber.Ctx) error {
 }
 
 // Create creates IPFS cluster peer from spec
-func (p *ClusterPeerHandler) Create(c *fiber.Ctx) error {
+func (cp *ClusterPeerHandler) Create(c *fiber.Ctx) error {
 	model := new(models.ClusterPeer)
 
 	if err := c.BodyParser(model); err != nil {
@@ -140,7 +155,7 @@ func (p *ClusterPeerHandler) Create(c *fiber.Ctx) error {
 }
 
 // Delete deletes IPFS cluster peer by name
-func (p *ClusterPeerHandler) Delete(c *fiber.Ctx) error {
+func (cp *ClusterPeerHandler) Delete(c *fiber.Ctx) error {
 	peer := c.Locals("peer").(*ipfsv1alpha1.ClusterPeer)
 
 	if err := k8s.Client().Delete(c.Context(), peer); err != nil {
@@ -154,7 +169,7 @@ func (p *ClusterPeerHandler) Delete(c *fiber.Ctx) error {
 }
 
 // Update updates IPFS cluster peer by name from spec
-func (p *ClusterPeerHandler) Update(c *fiber.Ctx) error {
+func (cp *ClusterPeerHandler) Update(c *fiber.Ctx) error {
 	name := c.Params("name")
 	model := new(models.ClusterPeer)
 
@@ -230,10 +245,10 @@ func validateClusterPeerExist(c *fiber.Ctx) error {
 }
 
 // Register registers all handlers on the given router
-func (p *ClusterPeerHandler) Register(router fiber.Router) {
-	router.Post("/", p.Create)
-	router.Get("/", p.List)
-	router.Get("/:name", validateClusterPeerExist, p.Get)
-	router.Put("/:name", validateClusterPeerExist, p.Update)
-	router.Delete("/:name", validateClusterPeerExist, p.Delete)
+func (cp *ClusterPeerHandler) Register(router fiber.Router) {
+	router.Post("/", cp.Create)
+	router.Get("/", cp.List)
+	router.Get("/:name", validateClusterPeerExist, cp.Get)
+	router.Put("/:name", validateClusterPeerExist, cp.Update)
+	router.Delete("/:name", validateClusterPeerExist, cp.Delete)
 }

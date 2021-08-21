@@ -4,11 +4,14 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"sort"
+	"strconv"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/kotalco/api/handlers"
 	"github.com/kotalco/api/k8s"
 	models "github.com/kotalco/api/models/core"
+	"github.com/kotalco/api/shared"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -46,7 +49,18 @@ func (s *SecretHandler) List(c *fiber.Ctx) error {
 
 	secretModels := []models.Secret{}
 	secretType := c.Query("type")
-	for _, secret := range secrets.Items {
+	page := c.Query("page")
+	p, err := strconv.Atoi(page)
+	if err != nil {
+		p = 1
+	}
+
+	start, end := shared.Page(uint(len(secrets.Items)), uint(p))
+	sort.Slice(secrets.Items[:], func(i, j int) bool {
+		return secrets.Items[i].CreationTimestamp.Before(&secrets.Items[j].CreationTimestamp)
+	})
+
+	for _, secret := range secrets.Items[start:end] {
 		if secretType != "" && secret.Labels["kotal.io/key-type"] != secretType {
 			continue
 		}

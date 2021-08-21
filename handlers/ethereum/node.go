@@ -5,11 +5,14 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"sort"
+	"strconv"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/kotalco/api/handlers"
 	"github.com/kotalco/api/k8s"
 	models "github.com/kotalco/api/models/ethereum"
+	"github.com/kotalco/api/shared"
 	ethereumv1alpha1 "github.com/kotalco/kotal/apis/ethereum/v1alpha1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -44,7 +47,19 @@ func (e *NodeHandler) List(c *fiber.Ctx) error {
 	}
 
 	nodeModels := []models.Node{}
-	for _, node := range nodes.Items {
+
+	page := c.Query("page")
+	p, err := strconv.Atoi(page)
+	if err != nil {
+		p = 1
+	}
+
+	start, end := shared.Page(uint(len(nodes.Items)), uint(p))
+	sort.Slice(nodes.Items[:], func(i, j int) bool {
+		return nodes.Items[i].CreationTimestamp.Before(&nodes.Items[j].CreationTimestamp)
+	})
+
+	for _, node := range nodes.Items[start:end] {
 		nodeModels = append(nodeModels, *models.FromEthereumNode(&node))
 	}
 

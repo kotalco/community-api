@@ -5,11 +5,14 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"sort"
+	"strconv"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/kotalco/api/handlers"
 	"github.com/kotalco/api/k8s"
 	models "github.com/kotalco/api/models/ipfs"
+	"github.com/kotalco/api/shared"
 	ipfsv1alpha1 "github.com/kotalco/kotal/apis/ipfs/v1alpha1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -25,7 +28,7 @@ func NewPeerHandler() handlers.Handler {
 }
 
 // Get gets a single IPFS peer by name
-func (p *PeerHandler) Get(c *fiber.Ctx) error {
+func (pr *PeerHandler) Get(c *fiber.Ctx) error {
 	peer := c.Locals("peer").(*ipfsv1alpha1.Peer)
 
 	return c.Status(http.StatusOK).JSON(fiber.Map{
@@ -34,7 +37,7 @@ func (p *PeerHandler) Get(c *fiber.Ctx) error {
 }
 
 // List returns all IPFS peers
-func (p *PeerHandler) List(c *fiber.Ctx) error {
+func (pr *PeerHandler) List(c *fiber.Ctx) error {
 	peers := &ipfsv1alpha1.PeerList{}
 	if err := k8s.Client().List(c.Context(), peers); err != nil {
 		log.Println(err)
@@ -44,7 +47,19 @@ func (p *PeerHandler) List(c *fiber.Ctx) error {
 	}
 
 	peerModels := []models.Peer{}
-	for _, peer := range peers.Items {
+
+	page := c.Query("page")
+	p, err := strconv.Atoi(page)
+	if err != nil {
+		p = 1
+	}
+
+	start, end := shared.Page(uint(len(peers.Items)), uint(p))
+	sort.Slice(peers.Items[:], func(i, j int) bool {
+		return peers.Items[i].CreationTimestamp.Before(&peers.Items[j].CreationTimestamp)
+	})
+
+	for _, peer := range peers.Items[start:end] {
 		peerModels = append(peerModels, *models.FromIPFSPeer(&peer))
 	}
 
@@ -55,7 +70,7 @@ func (p *PeerHandler) List(c *fiber.Ctx) error {
 }
 
 // Create creates IPFS peer from spec
-func (p *PeerHandler) Create(c *fiber.Ctx) error {
+func (pr *PeerHandler) Create(c *fiber.Ctx) error {
 	model := new(models.Peer)
 
 	if err := c.BodyParser(model); err != nil {
@@ -104,7 +119,7 @@ func (p *PeerHandler) Create(c *fiber.Ctx) error {
 }
 
 // Delete deletes IPFS peer by name
-func (p *PeerHandler) Delete(c *fiber.Ctx) error {
+func (pr *PeerHandler) Delete(c *fiber.Ctx) error {
 	peer := c.Locals("peer").(*ipfsv1alpha1.Peer)
 
 	if err := k8s.Client().Delete(c.Context(), peer); err != nil {
@@ -118,7 +133,7 @@ func (p *PeerHandler) Delete(c *fiber.Ctx) error {
 }
 
 // Update updates IPFS peer by name from spec
-func (p *PeerHandler) Update(c *fiber.Ctx) error {
+func (pr *PeerHandler) Update(c *fiber.Ctx) error {
 	model := new(models.Peer)
 	if err := c.BodyParser(model); err != nil {
 		return c.Status(http.StatusBadRequest).JSON(fiber.Map{
@@ -203,10 +218,10 @@ func validatePeerExist(c *fiber.Ctx) error {
 }
 
 // Register registers all handlers on the given router
-func (p *PeerHandler) Register(router fiber.Router) {
-	router.Post("/", p.Create)
-	router.Get("/", p.List)
-	router.Get("/:name", validatePeerExist, p.Get)
-	router.Put("/:name", validatePeerExist, p.Update)
-	router.Delete("/:name", validatePeerExist, p.Delete)
+func (pr *PeerHandler) Register(router fiber.Router) {
+	router.Post("/", pr.Create)
+	router.Get("/", pr.List)
+	router.Get("/:name", validatePeerExist, pr.Get)
+	router.Put("/:name", validatePeerExist, pr.Update)
+	router.Delete("/:name", validatePeerExist, pr.Delete)
 }

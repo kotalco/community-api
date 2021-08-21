@@ -5,11 +5,14 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"sort"
+	"strconv"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/kotalco/api/handlers"
 	"github.com/kotalco/api/k8s"
 	models "github.com/kotalco/api/models/ethereum2"
+	"github.com/kotalco/api/shared"
 	ethereum2v1alpha1 "github.com/kotalco/kotal/apis/ethereum2/v1alpha1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -25,7 +28,7 @@ func NewValidatorHandler() handlers.Handler {
 }
 
 // Get gets a single Ethereum 2.0 validator client by name
-func (p *ValidatorHandler) Get(c *fiber.Ctx) error {
+func (v *ValidatorHandler) Get(c *fiber.Ctx) error {
 	validator := c.Locals("validator").(*ethereum2v1alpha1.Validator)
 
 	return c.Status(http.StatusOK).JSON(fiber.Map{
@@ -34,7 +37,7 @@ func (p *ValidatorHandler) Get(c *fiber.Ctx) error {
 }
 
 // List returns all Ethereum 2.0 validator clients
-func (p *ValidatorHandler) List(c *fiber.Ctx) error {
+func (v *ValidatorHandler) List(c *fiber.Ctx) error {
 	validators := &ethereum2v1alpha1.ValidatorList{}
 	validatorModels := []models.Validator{}
 
@@ -45,7 +48,18 @@ func (p *ValidatorHandler) List(c *fiber.Ctx) error {
 		})
 	}
 
-	for _, validator := range validators.Items {
+	page := c.Query("page")
+	p, err := strconv.Atoi(page)
+	if err != nil {
+		p = 1
+	}
+
+	start, end := shared.Page(uint(len(validators.Items)), uint(p))
+	sort.Slice(validators.Items[:], func(i, j int) bool {
+		return validators.Items[i].CreationTimestamp.Before(&validators.Items[j].CreationTimestamp)
+	})
+
+	for _, validator := range validators.Items[start:end] {
 		validatorModels = append(validatorModels, *models.FromEthereum2Validator(&validator))
 	}
 
@@ -55,7 +69,7 @@ func (p *ValidatorHandler) List(c *fiber.Ctx) error {
 }
 
 // Create creates Ethereum 2.0 validator client from spec
-func (p *ValidatorHandler) Create(c *fiber.Ctx) error {
+func (v *ValidatorHandler) Create(c *fiber.Ctx) error {
 	model := new(models.Validator)
 
 	if err := c.BodyParser(model); err != nil {
@@ -116,7 +130,7 @@ func (p *ValidatorHandler) Create(c *fiber.Ctx) error {
 }
 
 // Delete deletes Ethereum 2.0 validator client by name
-func (p *ValidatorHandler) Delete(c *fiber.Ctx) error {
+func (v *ValidatorHandler) Delete(c *fiber.Ctx) error {
 	validator := c.Locals("validator").(*ethereum2v1alpha1.Validator)
 
 	if err := k8s.Client().Delete(c.Context(), validator); err != nil {
@@ -130,7 +144,7 @@ func (p *ValidatorHandler) Delete(c *fiber.Ctx) error {
 }
 
 // Update updates Ethereum 2.0 validator client by name from spec
-func (p *ValidatorHandler) Update(c *fiber.Ctx) error {
+func (v *ValidatorHandler) Update(c *fiber.Ctx) error {
 	model := new(models.Validator)
 
 	if err := c.BodyParser(model); err != nil {
@@ -225,10 +239,10 @@ func validateValidatorExist(c *fiber.Ctx) error {
 }
 
 // Register registers all handlers on the given router
-func (p *ValidatorHandler) Register(router fiber.Router) {
-	router.Post("/", p.Create)
-	router.Get("/", p.List)
-	router.Get("/:name", validateValidatorExist, p.Get)
-	router.Put("/:name", validateValidatorExist, p.Update)
-	router.Delete("/:name", validateValidatorExist, p.Delete)
+func (v *ValidatorHandler) Register(router fiber.Router) {
+	router.Post("/", v.Create)
+	router.Get("/", v.List)
+	router.Get("/:name", validateValidatorExist, v.Get)
+	router.Put("/:name", validateValidatorExist, v.Update)
+	router.Delete("/:name", validateValidatorExist, v.Delete)
 }

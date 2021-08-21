@@ -5,11 +5,14 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"sort"
+	"strconv"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/kotalco/api/handlers"
 	"github.com/kotalco/api/k8s"
 	models "github.com/kotalco/api/models/ethereum2"
+	"github.com/kotalco/api/shared"
 	ethereum2v1alpha1 "github.com/kotalco/kotal/apis/ethereum2/v1alpha1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -25,7 +28,7 @@ func NewBeaconNodeHandler() handlers.Handler {
 }
 
 // Get gets a single ethereum 2.0 beacon node by name
-func (p *BeaconNodeHandler) Get(c *fiber.Ctx) error {
+func (b *BeaconNodeHandler) Get(c *fiber.Ctx) error {
 	node := c.Locals("node").(*ethereum2v1alpha1.BeaconNode)
 
 	return c.Status(http.StatusOK).JSON(fiber.Map{
@@ -34,7 +37,7 @@ func (p *BeaconNodeHandler) Get(c *fiber.Ctx) error {
 }
 
 // List returns all ethereum 2.0 beacon nodes
-func (p *BeaconNodeHandler) List(c *fiber.Ctx) error {
+func (b *BeaconNodeHandler) List(c *fiber.Ctx) error {
 	nodes := &ethereum2v1alpha1.BeaconNodeList{}
 	if err := k8s.Client().List(c.Context(), nodes); err != nil {
 		log.Println(err)
@@ -44,7 +47,19 @@ func (p *BeaconNodeHandler) List(c *fiber.Ctx) error {
 	}
 
 	nodeModels := []models.BeaconNode{}
-	for _, node := range nodes.Items {
+
+	page := c.Query("page")
+	p, err := strconv.Atoi(page)
+	if err != nil {
+		p = 1
+	}
+
+	start, end := shared.Page(uint(len(nodes.Items)), uint(p))
+	sort.Slice(nodes.Items[:], func(i, j int) bool {
+		return nodes.Items[i].CreationTimestamp.Before(&nodes.Items[j].CreationTimestamp)
+	})
+
+	for _, node := range nodes.Items[start:end] {
 		nodeModels = append(nodeModels, *models.FromEthereum2BeaconNode(&node))
 	}
 
@@ -54,7 +69,7 @@ func (p *BeaconNodeHandler) List(c *fiber.Ctx) error {
 }
 
 // Create creates ethereum 2.0 beacon node from spec
-func (p *BeaconNodeHandler) Create(c *fiber.Ctx) error {
+func (b *BeaconNodeHandler) Create(c *fiber.Ctx) error {
 	model := new(models.BeaconNode)
 
 	if err := c.BodyParser(model); err != nil {
@@ -105,7 +120,7 @@ func (p *BeaconNodeHandler) Create(c *fiber.Ctx) error {
 }
 
 // Delete deletes ethereum 2.0 beacon node by name
-func (p *BeaconNodeHandler) Delete(c *fiber.Ctx) error {
+func (b *BeaconNodeHandler) Delete(c *fiber.Ctx) error {
 	node := c.Locals("node").(*ethereum2v1alpha1.BeaconNode)
 
 	if err := k8s.Client().Delete(c.Context(), node); err != nil {
@@ -119,7 +134,7 @@ func (p *BeaconNodeHandler) Delete(c *fiber.Ctx) error {
 }
 
 // Update updates ethereum 2.0 beacon node by name from spec
-func (p *BeaconNodeHandler) Update(c *fiber.Ctx) error {
+func (b *BeaconNodeHandler) Update(c *fiber.Ctx) error {
 	model := new(models.BeaconNode)
 
 	if err := c.BodyParser(model); err != nil {
@@ -234,10 +249,10 @@ func validateBeaconNodeExist(c *fiber.Ctx) error {
 }
 
 // Register registers all handlers on the given router
-func (p *BeaconNodeHandler) Register(router fiber.Router) {
-	router.Post("/", p.Create)
-	router.Get("/", p.List)
-	router.Get("/:name", validateBeaconNodeExist, p.Get)
-	router.Put("/:name", validateBeaconNodeExist, p.Update)
-	router.Delete("/:name", validateBeaconNodeExist, p.Delete)
+func (b *BeaconNodeHandler) Register(router fiber.Router) {
+	router.Post("/", b.Create)
+	router.Get("/", b.List)
+	router.Get("/:name", validateBeaconNodeExist, b.Get)
+	router.Put("/:name", validateBeaconNodeExist, b.Update)
+	router.Delete("/:name", validateBeaconNodeExist, b.Delete)
 }
