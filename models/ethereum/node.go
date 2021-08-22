@@ -12,6 +12,7 @@ type Node struct {
 	Name        string   `json:"name"`
 	Network     string   `json:"network"`
 	Client      string   `json:"client"`
+	SyncMode    string   `json:"syncMode"`
 	RPC         *bool    `json:"rpc"`
 	RPCPort     uint     `json:"rpcPort"`
 	RPCAPI      []string `json:"rpcAPI"`
@@ -28,11 +29,12 @@ func FromEthereumNode(n *ethereumv1alpha1.Node) *Node {
 		Time: models.Time{
 			CreatedAt: n.CreationTimestamp.UTC().Format(shared.JavascriptISOString),
 		},
-		Network: n.Spec.Join,
-		Client:  string(n.Spec.Client),
-		RPC:     &n.Spec.RPC,
-		WS:      &n.Spec.WS,
-		GraphQL: &n.Spec.GraphQL,
+		Network:  n.Spec.Join,
+		Client:   string(n.Spec.Client),
+		SyncMode: string(n.Spec.SyncMode),
+		RPC:      &n.Spec.RPC,
+		WS:       &n.Spec.WS,
+		GraphQL:  &n.Spec.GraphQL,
 	}
 
 	var rpcAPI []string
