@@ -139,56 +139,47 @@ func (e *NodeHandler) Update(c *fiber.Ctx) error {
 	}
 
 	name := c.Params("name")
-	node := &ethereumv1alpha1.Node{}
-	key := types.NamespacedName{
-		Name:      name,
-		Namespace: "default",
-	}
-
-	k8s.Client().Get(c.Context(), key, node)
+	node := c.Locals("node").(*ethereumv1alpha1.Node)
 
 	if model.RPC != nil {
-		rpc := *model.RPC
-		if rpc {
-			if len(model.RPCAPI) != 0 {
-				rpcAPI := []ethereumv1alpha1.API{}
-				for _, api := range model.RPCAPI {
-					rpcAPI = append(rpcAPI, ethereumv1alpha1.API(api))
-				}
-				node.Spec.RPCAPI = rpcAPI
+		node.Spec.RPC = *model.RPC
+	}
+	if node.Spec.RPC {
+		if len(model.RPCAPI) != 0 {
+			rpcAPI := []ethereumv1alpha1.API{}
+			for _, api := range model.RPCAPI {
+				rpcAPI = append(rpcAPI, ethereumv1alpha1.API(api))
 			}
-			if model.RPCPort != 0 {
-				node.Spec.RPCPort = model.RPCPort
-			}
+			node.Spec.RPCAPI = rpcAPI
 		}
-		node.Spec.RPC = rpc
+		if model.RPCPort != 0 {
+			node.Spec.RPCPort = model.RPCPort
+		}
 	}
 
 	if model.WS != nil {
-		ws := *model.WS
-		if ws {
-			if len(model.WSAPI) != 0 {
-				wsAPI := []ethereumv1alpha1.API{}
-				for _, api := range model.WSAPI {
-					wsAPI = append(wsAPI, ethereumv1alpha1.API(api))
-				}
-				node.Spec.WSAPI = wsAPI
+		node.Spec.WS = *model.WS
+	}
+	if node.Spec.WS {
+		if len(model.WSAPI) != 0 {
+			wsAPI := []ethereumv1alpha1.API{}
+			for _, api := range model.WSAPI {
+				wsAPI = append(wsAPI, ethereumv1alpha1.API(api))
 			}
-			if model.WSPort != 0 {
-				node.Spec.WSPort = model.WSPort
-			}
+			node.Spec.WSAPI = wsAPI
 		}
-		node.Spec.WS = ws
+		if model.WSPort != 0 {
+			node.Spec.WSPort = model.WSPort
+		}
 	}
 
 	if model.GraphQL != nil {
-		graphQL := *model.GraphQL
-		if graphQL {
-			if model.GraphQLPort != 0 {
-				node.Spec.GraphQLPort = model.GraphQLPort
-			}
+		node.Spec.GraphQL = *model.GraphQL
+	}
+	if node.Spec.GraphQL {
+		if model.GraphQLPort != 0 {
+			node.Spec.GraphQLPort = model.GraphQLPort
 		}
-		node.Spec.GraphQL = graphQL
 	}
 
 	if os.Getenv("MOCK") == "true" {
