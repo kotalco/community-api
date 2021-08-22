@@ -13,6 +13,7 @@ type Node struct {
 	Network     string   `json:"network"`
 	Client      string   `json:"client"`
 	SyncMode    string   `json:"syncMode"`
+	P2PPort     uint     `json:"p2pPort"`
 	RPC         *bool    `json:"rpc"`
 	RPCPort     uint     `json:"rpcPort"`
 	RPCAPI      []string `json:"rpcAPI"`
@@ -32,6 +33,7 @@ func FromEthereumNode(n *ethereumv1alpha1.Node) *Node {
 		Network:  n.Spec.Join,
 		Client:   string(n.Spec.Client),
 		SyncMode: string(n.Spec.SyncMode),
+		P2PPort:  n.Spec.P2PPort,
 		RPC:      &n.Spec.RPC,
 		WS:       &n.Spec.WS,
 		GraphQL:  &n.Spec.GraphQL,

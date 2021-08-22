@@ -144,6 +144,9 @@ func (e *NodeHandler) Update(c *fiber.Ctx) error {
 	if model.SyncMode != "" {
 		node.Spec.SyncMode = ethereumv1alpha1.SynchronizationMode(model.SyncMode)
 	}
+	if model.P2PPort != 0 {
+		node.Spec.P2PPort = model.P2PPort
+	}
 	if model.RPC != nil {
 		node.Spec.RPC = *model.RPC
 	}
