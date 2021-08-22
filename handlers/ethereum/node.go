@@ -92,36 +92,6 @@ func (e *NodeHandler) Create(c *fiber.Ctx) error {
 		},
 	}
 
-	var rpcAPI []ethereumv1alpha1.API
-	if model.RPC != nil {
-		rpc := *model.RPC
-		if rpc {
-			rpcAPI = []ethereumv1alpha1.API{}
-			for _, api := range model.RPCAPI {
-				rpcAPI = append(rpcAPI, ethereumv1alpha1.API(api))
-			}
-			node.Spec.RPCAPI = rpcAPI
-		}
-		node.Spec.RPC = rpc
-	}
-
-	var wsAPI []ethereumv1alpha1.API
-	if model.WS != nil {
-		ws := *model.WS
-		if ws {
-			wsAPI = []ethereumv1alpha1.API{}
-			for _, api := range model.WSAPI {
-				wsAPI = append(wsAPI, ethereumv1alpha1.API(api))
-			}
-			node.Spec.WSAPI = wsAPI
-		}
-		node.Spec.WS = ws
-	}
-
-	if model.GraphQL != nil {
-		node.Spec.GraphQL = *model.GraphQL
-	}
-
 	if os.Getenv("MOCK") == "true" {
 		node.Default()
 	}
@@ -187,6 +157,9 @@ func (e *NodeHandler) Update(c *fiber.Ctx) error {
 				}
 				node.Spec.RPCAPI = rpcAPI
 			}
+			if model.RPCPort != 0 {
+				node.Spec.RPCPort = model.RPCPort
+			}
 		}
 		node.Spec.RPC = rpc
 	}
@@ -201,12 +174,21 @@ func (e *NodeHandler) Update(c *fiber.Ctx) error {
 				}
 				node.Spec.WSAPI = wsAPI
 			}
+			if model.WSPort != 0 {
+				node.Spec.WSPort = model.WSPort
+			}
 		}
 		node.Spec.WS = ws
 	}
 
 	if model.GraphQL != nil {
-		node.Spec.GraphQL = *model.GraphQL
+		graphQL := *model.GraphQL
+		if graphQL {
+			if model.GraphQLPort != 0 {
+				node.Spec.GraphQLPort = model.GraphQLPort
+			}
+		}
+		node.Spec.GraphQL = graphQL
 	}
 
 	if os.Getenv("MOCK") == "true" {

@@ -9,14 +9,17 @@ import (
 // Node is Ethereum node
 type Node struct {
 	models.Time
-	Name    string   `json:"name"`
-	Network string   `json:"network"`
-	Client  string   `json:"client"`
-	RPC     *bool    `json:"rpc"`
-	RPCAPI  []string `json:"rpcAPI"`
-	WS      *bool    `json:"ws"`
-	WSAPI   []string `json:"wsAPI"`
-	GraphQL *bool    `json:"graphql"`
+	Name        string   `json:"name"`
+	Network     string   `json:"network"`
+	Client      string   `json:"client"`
+	RPC         *bool    `json:"rpc"`
+	RPCPort     uint     `json:"rpcPort"`
+	RPCAPI      []string `json:"rpcAPI"`
+	WS          *bool    `json:"ws"`
+	WSPort      uint     `json:"wsPort"`
+	WSAPI       []string `json:"wsAPI"`
+	GraphQL     *bool    `json:"graphql"`
+	GraphQLPort uint     `json:"graphqlPort"`
 }
 
 func FromEthereumNode(n *ethereumv1alpha1.Node) *Node {
@@ -38,6 +41,8 @@ func FromEthereumNode(n *ethereumv1alpha1.Node) *Node {
 		for _, api := range n.Spec.RPCAPI {
 			rpcAPI = append(rpcAPI, string(api))
 		}
+		model.RPCPort = n.Spec.RPCPort
+		model.RPCAPI = rpcAPI
 	}
 
 	var wsAPI []string
@@ -46,10 +51,13 @@ func FromEthereumNode(n *ethereumv1alpha1.Node) *Node {
 		for _, api := range n.Spec.WSAPI {
 			wsAPI = append(wsAPI, string(api))
 		}
+		model.WSPort = n.Spec.WSPort
+		model.WSAPI = wsAPI
 	}
 
-	model.RPCAPI = rpcAPI
-	model.WSAPI = wsAPI
+	if n.Spec.GraphQL {
+		model.GraphQLPort = n.Spec.GraphQLPort
+	}
 
 	return model
 
