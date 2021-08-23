@@ -24,6 +24,11 @@ type Node struct {
 	GraphQLPort uint     `json:"graphqlPort"`
 	Hosts       []string `json:"hosts"`
 	CORSDomains []string `json:"corsDomains"`
+	CPU         string   `json:"cpu"`
+	CPULimit    string   `json:"cpuLimit"`
+	Memory      string   `json:"memory"`
+	MemoryLimit string   `json:"memoryLimit"`
+	Storage     string   `json:"storage"`
 }
 
 func FromEthereumNode(n *ethereumv1alpha1.Node) *Node {
@@ -32,13 +37,18 @@ func FromEthereumNode(n *ethereumv1alpha1.Node) *Node {
 		Time: models.Time{
 			CreatedAt: n.CreationTimestamp.UTC().Format(shared.JavascriptISOString),
 		},
-		Network:  n.Spec.Join,
-		Client:   string(n.Spec.Client),
-		SyncMode: string(n.Spec.SyncMode),
-		P2PPort:  n.Spec.P2PPort,
-		RPC:      &n.Spec.RPC,
-		WS:       &n.Spec.WS,
-		GraphQL:  &n.Spec.GraphQL,
+		Network:     n.Spec.Join,
+		Client:      string(n.Spec.Client),
+		SyncMode:    string(n.Spec.SyncMode),
+		P2PPort:     n.Spec.P2PPort,
+		RPC:         &n.Spec.RPC,
+		WS:          &n.Spec.WS,
+		GraphQL:     &n.Spec.GraphQL,
+		CPU:         n.Spec.CPU,
+		CPULimit:    n.Spec.CPULimit,
+		Memory:      n.Spec.Memory,
+		MemoryLimit: n.Spec.MemoryLimit,
+		Storage:     n.Spec.Storage,
 	}
 
 	var rpcAPI []string
