@@ -188,6 +188,14 @@ func (e *NodeHandler) Update(c *fiber.Ctx) error {
 		}
 	}
 
+	if len(model.Hosts) != 0 {
+		node.Spec.Hosts = model.Hosts
+	}
+
+	if len(model.CORSDomains) != 0 {
+		node.Spec.CORSDomains = model.CORSDomains
+	}
+
 	if os.Getenv("MOCK") == "true" {
 		node.Default()
 	}

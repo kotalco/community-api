@@ -22,6 +22,8 @@ type Node struct {
 	WSAPI       []string `json:"wsAPI"`
 	GraphQL     *bool    `json:"graphql"`
 	GraphQLPort uint     `json:"graphqlPort"`
+	Hosts       []string `json:"hosts"`
+	CORSDomains []string `json:"corsDomains"`
 }
 
 func FromEthereumNode(n *ethereumv1alpha1.Node) *Node {
@@ -61,6 +63,14 @@ func FromEthereumNode(n *ethereumv1alpha1.Node) *Node {
 
 	if n.Spec.GraphQL {
 		model.GraphQLPort = n.Spec.GraphQLPort
+	}
+
+	if len(n.Spec.Hosts) != 0 {
+		model.Hosts = n.Spec.Hosts
+	}
+
+	if len(n.Spec.CORSDomains) != 0 {
+		model.CORSDomains = n.Spec.CORSDomains
 	}
 
 	return model
