@@ -16,6 +16,8 @@ type Node struct {
 	P2PPort     uint     `json:"p2pPort"`
 	StaticNodes []string `json:"staticNodes"`
 	Bootnodes   []string `json:"bootnodes"`
+	Miner       *bool    `json:"miner"`
+	Coinbase    string   `json:"coinbase"`
 	RPC         *bool    `json:"rpc"`
 	RPCPort     uint     `json:"rpcPort"`
 	RPCAPI      []string `json:"rpcAPI"`
@@ -43,6 +45,8 @@ func FromEthereumNode(n *ethereumv1alpha1.Node) *Node {
 		Client:      string(n.Spec.Client),
 		SyncMode:    string(n.Spec.SyncMode),
 		P2PPort:     n.Spec.P2PPort,
+		Miner:       &n.Spec.Miner,
+		Coinbase:    string(n.Spec.Coinbase),
 		RPC:         &n.Spec.RPC,
 		WS:          &n.Spec.WS,
 		GraphQL:     &n.Spec.GraphQL,
