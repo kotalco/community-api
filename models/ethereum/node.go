@@ -14,6 +14,8 @@ type Node struct {
 	Client      string   `json:"client"`
 	SyncMode    string   `json:"syncMode"`
 	P2PPort     uint     `json:"p2pPort"`
+	StaticNodes []string `json:"staticNodes"`
+	Bootnodes   []string `json:"bootnodes"`
 	RPC         *bool    `json:"rpc"`
 	RPCPort     uint     `json:"rpcPort"`
 	RPCAPI      []string `json:"rpcAPI"`
@@ -82,6 +84,18 @@ func FromEthereumNode(n *ethereumv1alpha1.Node) *Node {
 	if len(n.Spec.CORSDomains) != 0 {
 		model.CORSDomains = n.Spec.CORSDomains
 	}
+
+	staticNodes := []string{}
+	for _, enode := range n.Spec.StaticNodes {
+		staticNodes = append(staticNodes, string(enode))
+	}
+	model.StaticNodes = staticNodes
+
+	bootnodes := []string{}
+	for _, bootnode := range n.Spec.Bootnodes {
+		bootnodes = append(bootnodes, string(bootnode))
+	}
+	model.Bootnodes = bootnodes
 
 	return model
 

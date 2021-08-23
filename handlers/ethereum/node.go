@@ -196,6 +196,18 @@ func (e *NodeHandler) Update(c *fiber.Ctx) error {
 		node.Spec.CORSDomains = model.CORSDomains
 	}
 
+	var bootnodes, staticNodes []ethereumv1alpha1.Enode
+
+	for _, bootnode := range model.Bootnodes {
+		bootnodes = append(bootnodes, ethereumv1alpha1.Enode(bootnode))
+	}
+	node.Spec.Bootnodes = bootnodes
+
+	for _, staticNode := range model.StaticNodes {
+		staticNodes = append(staticNodes, ethereumv1alpha1.Enode(staticNode))
+	}
+	node.Spec.StaticNodes = staticNodes
+
 	if model.CPU != "" {
 		node.Spec.CPU = model.CPU
 	}
