@@ -141,6 +141,10 @@ func (e *NodeHandler) Update(c *fiber.Ctx) error {
 	name := c.Params("name")
 	node := c.Locals("node").(*ethereumv1alpha1.Node)
 
+	if model.Logging != "" {
+		node.Spec.Logging = ethereumv1alpha1.VerbosityLevel(model.Logging)
+	}
+
 	if model.SyncMode != "" {
 		node.Spec.SyncMode = ethereumv1alpha1.SynchronizationMode(model.SyncMode)
 	}

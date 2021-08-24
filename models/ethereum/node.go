@@ -12,6 +12,7 @@ type Node struct {
 	Name        string   `json:"name"`
 	Network     string   `json:"network"`
 	Client      string   `json:"client"`
+	Logging     string   `json:"logging"`
 	SyncMode    string   `json:"syncMode"`
 	P2PPort     uint     `json:"p2pPort"`
 	StaticNodes []string `json:"staticNodes"`
@@ -43,6 +44,7 @@ func FromEthereumNode(n *ethereumv1alpha1.Node) *Node {
 		},
 		Network:     n.Spec.Join,
 		Client:      string(n.Spec.Client),
+		Logging:     string(n.Spec.Logging),
 		SyncMode:    string(n.Spec.SyncMode),
 		P2PPort:     n.Spec.P2PPort,
 		Miner:       &n.Spec.Miner,
