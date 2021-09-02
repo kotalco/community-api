@@ -4,7 +4,7 @@ go 1.16
 
 require (
 	github.com/gofiber/fiber/v2 v2.14.0
-	github.com/kotalco/kotal v0.0.0-20210520184950-9eaaa73c3fae
+	github.com/kotalco/kotal v0.0.0-20210817190935-979d6e70b8e5
 	k8s.io/api v0.21.2
 	k8s.io/apimachinery v0.21.2
 	k8s.io/client-go v0.21.2

@@ -90,7 +90,7 @@ func (b *BeaconNodeHandler) Create(c *fiber.Ctx) error {
 			Namespace: "default",
 		},
 		Spec: ethereum2v1alpha1.BeaconNodeSpec{
-			Join:          model.Network,
+			Network:       model.Network,
 			Client:        client,
 			Eth1Endpoints: model.Eth1Endpoints,
 			RPC:           client == ethereum2v1alpha1.PrysmClient,

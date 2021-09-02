@@ -44,7 +44,7 @@ func NewClient() client.Client {
 		log.Println("creating k8s client using test environment ...")
 		testEnv := envtest.Environment{
 			CRDDirectoryPaths: []string{
-				filepath.Join(build.Default.GOPATH, "pkg", "mod", "github.com", "kotalco", "kotal@v0.0.0-20210520184950-9eaaa73c3fae", "config", "crd", "bases"),
+				filepath.Join(build.Default.GOPATH, "pkg", "mod", "github.com", "kotalco", "kotal@v0.0.0-20210817190935-979d6e70b8e5", "config", "crd", "bases"),
 			},
 			ErrorIfCRDPathMissing: true,
 		}

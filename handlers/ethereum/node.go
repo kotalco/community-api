@@ -85,10 +85,8 @@ func (e *NodeHandler) Create(c *fiber.Ctx) error {
 			Namespace: "default",
 		},
 		Spec: ethereumv1alpha1.NodeSpec{
-			NetworkConfig: ethereumv1alpha1.NetworkConfig{
-				Join: model.Network,
-			},
-			Client: ethereumv1alpha1.EthereumClient(model.Client),
+			Network: model.Network,
+			Client:  ethereumv1alpha1.EthereumClient(model.Client),
 		},
 	}
 

@@ -42,7 +42,7 @@ func FromEthereumNode(n *ethereumv1alpha1.Node) *Node {
 		Time: models.Time{
 			CreatedAt: n.CreationTimestamp.UTC().Format(shared.JavascriptISOString),
 		},
-		Network:     n.Spec.Join,
+		Network:     n.Spec.Network,
 		Client:      string(n.Spec.Client),
 		Logging:     string(n.Spec.Logging),
 		SyncMode:    string(n.Spec.SyncMode),

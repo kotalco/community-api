@@ -34,7 +34,7 @@ func FromEthereum2BeaconNode(beaconnode *ethereum2v1alpha1.BeaconNode) *BeaconNo
 		Time: models.Time{
 			CreatedAt: beaconnode.CreationTimestamp.UTC().Format(shared.JavascriptISOString),
 		},
-		Network:       beaconnode.Spec.Join,
+		Network:       beaconnode.Spec.Network,
 		Client:        string(beaconnode.Spec.Client),
 		Eth1Endpoints: beaconnode.Spec.Eth1Endpoints,
 		REST:          &beaconnode.Spec.REST,
