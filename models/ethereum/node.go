@@ -9,31 +9,32 @@ import (
 // Node is Ethereum node
 type Node struct {
 	models.Time
-	Name        string   `json:"name"`
-	Network     string   `json:"network"`
-	Client      string   `json:"client"`
-	Logging     string   `json:"logging"`
-	SyncMode    string   `json:"syncMode"`
-	P2PPort     uint     `json:"p2pPort"`
-	StaticNodes []string `json:"staticNodes"`
-	Bootnodes   []string `json:"bootnodes"`
-	Miner       *bool    `json:"miner"`
-	Coinbase    string   `json:"coinbase"`
-	RPC         *bool    `json:"rpc"`
-	RPCPort     uint     `json:"rpcPort"`
-	RPCAPI      []string `json:"rpcAPI"`
-	WS          *bool    `json:"ws"`
-	WSPort      uint     `json:"wsPort"`
-	WSAPI       []string `json:"wsAPI"`
-	GraphQL     *bool    `json:"graphql"`
-	GraphQLPort uint     `json:"graphqlPort"`
-	Hosts       []string `json:"hosts"`
-	CORSDomains []string `json:"corsDomains"`
-	CPU         string   `json:"cpu"`
-	CPULimit    string   `json:"cpuLimit"`
-	Memory      string   `json:"memory"`
-	MemoryLimit string   `json:"memoryLimit"`
-	Storage     string   `json:"storage"`
+	Name                     string   `json:"name"`
+	Network                  string   `json:"network"`
+	Client                   string   `json:"client"`
+	Logging                  string   `json:"logging"`
+	NodePrivateKeySecretName string   `json:"nodePrivateKeySecretName,omitempty"`
+	SyncMode                 string   `json:"syncMode"`
+	P2PPort                  uint     `json:"p2pPort"`
+	StaticNodes              []string `json:"staticNodes"`
+	Bootnodes                []string `json:"bootnodes"`
+	Miner                    *bool    `json:"miner"`
+	Coinbase                 string   `json:"coinbase"`
+	RPC                      *bool    `json:"rpc"`
+	RPCPort                  uint     `json:"rpcPort"`
+	RPCAPI                   []string `json:"rpcAPI"`
+	WS                       *bool    `json:"ws"`
+	WSPort                   uint     `json:"wsPort"`
+	WSAPI                    []string `json:"wsAPI"`
+	GraphQL                  *bool    `json:"graphql"`
+	GraphQLPort              uint     `json:"graphqlPort"`
+	Hosts                    []string `json:"hosts"`
+	CORSDomains              []string `json:"corsDomains"`
+	CPU                      string   `json:"cpu"`
+	CPULimit                 string   `json:"cpuLimit"`
+	Memory                   string   `json:"memory"`
+	MemoryLimit              string   `json:"memoryLimit"`
+	Storage                  string   `json:"storage"`
 }
 
 func FromEthereumNode(n *ethereumv1alpha1.Node) *Node {
@@ -42,21 +43,22 @@ func FromEthereumNode(n *ethereumv1alpha1.Node) *Node {
 		Time: models.Time{
 			CreatedAt: n.CreationTimestamp.UTC().Format(shared.JavascriptISOString),
 		},
-		Network:     n.Spec.Network,
-		Client:      string(n.Spec.Client),
-		Logging:     string(n.Spec.Logging),
-		SyncMode:    string(n.Spec.SyncMode),
-		P2PPort:     n.Spec.P2PPort,
-		Miner:       &n.Spec.Miner,
-		Coinbase:    string(n.Spec.Coinbase),
-		RPC:         &n.Spec.RPC,
-		WS:          &n.Spec.WS,
-		GraphQL:     &n.Spec.GraphQL,
-		CPU:         n.Spec.CPU,
-		CPULimit:    n.Spec.CPULimit,
-		Memory:      n.Spec.Memory,
-		MemoryLimit: n.Spec.MemoryLimit,
-		Storage:     n.Spec.Storage,
+		Network:                  n.Spec.Network,
+		Client:                   string(n.Spec.Client),
+		Logging:                  string(n.Spec.Logging),
+		NodePrivateKeySecretName: n.Spec.NodePrivatekeySecretName,
+		SyncMode:                 string(n.Spec.SyncMode),
+		P2PPort:                  n.Spec.P2PPort,
+		Miner:                    &n.Spec.Miner,
+		Coinbase:                 string(n.Spec.Coinbase),
+		RPC:                      &n.Spec.RPC,
+		WS:                       &n.Spec.WS,
+		GraphQL:                  &n.Spec.GraphQL,
+		CPU:                      n.Spec.CPU,
+		CPULimit:                 n.Spec.CPULimit,
+		Memory:                   n.Spec.Memory,
+		MemoryLimit:              n.Spec.MemoryLimit,
+		Storage:                  n.Spec.Storage,
 	}
 
 	var rpcAPI []string

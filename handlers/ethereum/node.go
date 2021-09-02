@@ -85,8 +85,9 @@ func (e *NodeHandler) Create(c *fiber.Ctx) error {
 			Namespace: "default",
 		},
 		Spec: ethereumv1alpha1.NodeSpec{
-			Network: model.Network,
-			Client:  ethereumv1alpha1.EthereumClient(model.Client),
+			Network:                  model.Network,
+			Client:                   ethereumv1alpha1.EthereumClient(model.Client),
+			NodePrivatekeySecretName: model.NodePrivateKeySecretName,
 		},
 	}
 
@@ -141,6 +142,10 @@ func (e *NodeHandler) Update(c *fiber.Ctx) error {
 
 	if model.Logging != "" {
 		node.Spec.Logging = ethereumv1alpha1.VerbosityLevel(model.Logging)
+	}
+
+	if model.NodePrivateKeySecretName != "" {
+		node.Spec.NodePrivatekeySecretName = model.NodePrivateKeySecretName
 	}
 
 	if model.SyncMode != "" {
