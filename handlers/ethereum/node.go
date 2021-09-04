@@ -162,6 +162,12 @@ func (e *NodeHandler) Update(c *fiber.Ctx) error {
 		if model.Coinbase != "" {
 			node.Spec.Coinbase = ethereumv1alpha1.EthereumAddress(model.Coinbase)
 		}
+		if model.Import != nil {
+			node.Spec.Import = &ethereumv1alpha1.ImportedAccount{
+				PrivateKeySecretName: model.Import.PrivateKeySecretName,
+				PasswordSecretName:   model.Import.PasswordSecretName,
+			}
+		}
 	}
 
 	if model.RPC != nil {
