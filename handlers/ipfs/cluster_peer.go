@@ -17,6 +17,7 @@ import (
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 // ClusterPeerHandler is IPFS peer handler
@@ -220,7 +221,7 @@ func (cp *ClusterPeerHandler) Update(c *fiber.Ctx) error {
 // Count returns total number of cluster peers
 func (pr *ClusterPeerHandler) Count(c *fiber.Ctx) error {
 	peers := &ipfsv1alpha1.ClusterPeerList{}
-	if err := k8s.Client().List(c.Context(), peers); err != nil {
+	if err := k8s.Client().List(c.Context(), peers, client.InNamespace("default")); err != nil {
 		log.Println(err)
 		return c.SendStatus(http.StatusInternalServerError)
 	}

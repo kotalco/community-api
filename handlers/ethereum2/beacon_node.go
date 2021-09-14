@@ -17,6 +17,7 @@ import (
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 // BeaconNodeHandler is ethereum 2.0 beacon node handler
@@ -223,7 +224,7 @@ func (b *BeaconNodeHandler) Update(c *fiber.Ctx) error {
 // Count returns total number of beacon nodes
 func (b *BeaconNodeHandler) Count(c *fiber.Ctx) error {
 	beaconnodes := &ethereum2v1alpha1.BeaconNodeList{}
-	if err := k8s.Client().List(c.Context(), beaconnodes); err != nil {
+	if err := k8s.Client().List(c.Context(), beaconnodes, client.InNamespace("default")); err != nil {
 		log.Println(err)
 		return c.SendStatus(http.StatusInternalServerError)
 	}

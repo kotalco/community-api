@@ -17,6 +17,7 @@ import (
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 // NodeHandler is Ethereum node handler
@@ -268,7 +269,7 @@ func (e *NodeHandler) Update(c *fiber.Ctx) error {
 // Count returns total number of nodes
 func (e *NodeHandler) Count(c *fiber.Ctx) error {
 	nodes := &ethereumv1alpha1.NodeList{}
-	if err := k8s.Client().List(c.Context(), nodes); err != nil {
+	if err := k8s.Client().List(c.Context(), nodes, client.InNamespace("default")); err != nil {
 		log.Println(err)
 		return c.SendStatus(http.StatusInternalServerError)
 	}

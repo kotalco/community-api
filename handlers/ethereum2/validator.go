@@ -17,6 +17,7 @@ import (
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 // ValidatorHandler is Ethereum 2.0 validator client handler
@@ -213,7 +214,7 @@ func (v *ValidatorHandler) Update(c *fiber.Ctx) error {
 // Count returns total number of validators
 func (pr *ValidatorHandler) Count(c *fiber.Ctx) error {
 	validators := &ethereum2v1alpha1.ValidatorList{}
-	if err := k8s.Client().List(c.Context(), validators); err != nil {
+	if err := k8s.Client().List(c.Context(), validators, client.InNamespace("default")); err != nil {
 		log.Println(err)
 		return c.SendStatus(http.StatusInternalServerError)
 	}
