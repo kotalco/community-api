@@ -220,6 +220,19 @@ func (b *BeaconNodeHandler) Update(c *fiber.Ctx) error {
 	})
 }
 
+// Count returns total number of beacon nodes
+func (b *BeaconNodeHandler) Count(c *fiber.Ctx) error {
+	beaconnodes := &ethereum2v1alpha1.BeaconNodeList{}
+	if err := k8s.Client().List(c.Context(), beaconnodes); err != nil {
+		log.Println(err)
+		return c.SendStatus(http.StatusInternalServerError)
+	}
+
+	c.Set("X-Total-Count", fmt.Sprintf("%d", len(beaconnodes.Items)))
+
+	return c.SendStatus(http.StatusOK)
+}
+
 // validateBeaconNodeExist validate node by name exist
 func validateBeaconNodeExist(c *fiber.Ctx) error {
 	name := c.Params("name")
@@ -251,6 +264,7 @@ func validateBeaconNodeExist(c *fiber.Ctx) error {
 // Register registers all handlers on the given router
 func (b *BeaconNodeHandler) Register(router fiber.Router) {
 	router.Post("/", b.Create)
+	router.Head("/", b.Count)
 	router.Get("/", b.List)
 	router.Get("/:name", validateBeaconNodeExist, b.Get)
 	router.Put("/:name", validateBeaconNodeExist, b.Update)
