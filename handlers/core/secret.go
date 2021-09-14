@@ -136,6 +136,19 @@ func (s *SecretHandler) Update(c *fiber.Ctx) error {
 	return c.SendStatus(http.StatusMethodNotAllowed)
 }
 
+// Count returns total number of secrets
+func (s *SecretHandler) Count(c *fiber.Ctx) error {
+	secrets := &corev1.SecretList{}
+	if err := k8s.Client().List(c.Context(), secrets); err != nil {
+		log.Println(err)
+		return c.SendStatus(http.StatusInternalServerError)
+	}
+
+	c.Set("X-Total-Count", fmt.Sprintf("%d", len(secrets.Items)))
+
+	return c.SendStatus(http.StatusOK)
+}
+
 // validateSecretExist validate secret by name exist
 func validateSecretExist(c *fiber.Ctx) error {
 	name := c.Params("name")
@@ -167,6 +180,7 @@ func validateSecretExist(c *fiber.Ctx) error {
 // Register registers all handlers on the given router
 func (s *SecretHandler) Register(router fiber.Router) {
 	router.Post("/", s.Create)
+	router.Head("/", s.Count)
 	router.Get("/", s.List)
 	router.Get("/:name", validateSecretExist, s.Get)
 	router.Put("/:name", validateSecretExist, s.Update)
