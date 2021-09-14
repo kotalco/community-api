@@ -265,6 +265,19 @@ func (e *NodeHandler) Update(c *fiber.Ctx) error {
 	})
 }
 
+// Count returns total number of nodes
+func (e *NodeHandler) Count(c *fiber.Ctx) error {
+	nodes := &ethereumv1alpha1.NodeList{}
+	if err := k8s.Client().List(c.Context(), nodes); err != nil {
+		log.Println(err)
+		return c.SendStatus(http.StatusInternalServerError)
+	}
+
+	c.Set("X-Total-Count", fmt.Sprintf("%d", len(nodes.Items)))
+
+	return c.SendStatus(http.StatusOK)
+}
+
 // validateNodeExist validate node by name exist
 func validateNodeExist(c *fiber.Ctx) error {
 	name := c.Params("name")
@@ -296,6 +309,7 @@ func validateNodeExist(c *fiber.Ctx) error {
 // Register registers all routes on the given router
 func (e *NodeHandler) Register(router fiber.Router) {
 	router.Post("/", e.Create)
+	router.Head("/", e.Count)
 	router.Get("/", e.List)
 	router.Get("/:name", validateNodeExist, e.Get)
 	router.Put("/:name", validateNodeExist, e.Update)
