@@ -211,7 +211,7 @@ func (pr *PeerHandler) Count(c *fiber.Ctx) error {
 	peers := &ipfsv1alpha1.PeerList{}
 	if err := k8s.Client().List(c.Context(), peers); err != nil {
 		log.Println(err)
-		c.SendStatus(http.StatusInternalServerError)
+		return c.SendStatus(http.StatusInternalServerError)
 	}
 
 	c.Set("X-Total-Count", fmt.Sprintf("%d", len(peers.Items)))

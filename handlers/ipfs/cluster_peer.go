@@ -217,6 +217,19 @@ func (cp *ClusterPeerHandler) Update(c *fiber.Ctx) error {
 	})
 }
 
+// Count returns total number of cluster peers
+func (pr *ClusterPeerHandler) Count(c *fiber.Ctx) error {
+	peers := &ipfsv1alpha1.ClusterPeerList{}
+	if err := k8s.Client().List(c.Context(), peers); err != nil {
+		log.Println(err)
+		return c.SendStatus(http.StatusInternalServerError)
+	}
+
+	c.Set("X-Total-Count", fmt.Sprintf("%d", len(peers.Items)))
+
+	return c.SendStatus(http.StatusOK)
+}
+
 // validateClusterPeerExist validate cluster peer by name exist
 func validateClusterPeerExist(c *fiber.Ctx) error {
 	name := c.Params("name")
@@ -247,6 +260,7 @@ func validateClusterPeerExist(c *fiber.Ctx) error {
 // Register registers all handlers on the given router
 func (cp *ClusterPeerHandler) Register(router fiber.Router) {
 	router.Post("/", cp.Create)
+	router.Head("/", cp.Count)
 	router.Get("/", cp.List)
 	router.Get("/:name", validateClusterPeerExist, cp.Get)
 	router.Put("/:name", validateClusterPeerExist, cp.Update)
