@@ -18,6 +18,11 @@ type Peer struct {
 	GatewayHost  string   `json:"gatewayHost"`
 	Routing      string   `json:"routing"`
 	Profiles     []string `json:"profiles"`
+	CPU          string   `json:"cpu"`
+	CPULimit     string   `json:"cpuLimit"`
+	Memory       string   `json:"memory"`
+	MemoryLimit  string   `json:"memoryLimit"`
+	Storage      string   `json:"storage"`
 }
 
 // FromIPFSPeer creates peer model from IPFS peer
@@ -46,5 +51,10 @@ func FromIPFSPeer(peer *ipfsv1alpha1.Peer) *Peer {
 		Routing:      string(peer.Spec.Routing),
 		Profiles:     profiles,
 		InitProfiles: initProfiles,
+		CPU:          peer.Spec.CPU,
+		CPULimit:     peer.Spec.CPULimit,
+		Memory:       peer.Spec.Memory,
+		MemoryLimit:  peer.Spec.MemoryLimit,
+		Storage:      peer.Spec.Storage,
 	}
 }
