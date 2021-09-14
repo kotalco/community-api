@@ -139,7 +139,7 @@ func (s *SecretHandler) Update(c *fiber.Ctx) error {
 // Count returns total number of secrets
 func (s *SecretHandler) Count(c *fiber.Ctx) error {
 	secrets := &corev1.SecretList{}
-	if err := k8s.Client().List(c.Context(), secrets, client.InNamespace("default")); err != nil {
+	if err := k8s.Client().List(c.Context(), secrets, client.InNamespace("default"), client.HasLabels{"kotal.io/key-type"}); err != nil {
 		log.Println(err)
 		return c.SendStatus(http.StatusInternalServerError)
 	}
