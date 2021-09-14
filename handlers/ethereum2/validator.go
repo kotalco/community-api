@@ -210,6 +210,19 @@ func (v *ValidatorHandler) Update(c *fiber.Ctx) error {
 	})
 }
 
+// Count returns total number of validators
+func (pr *ValidatorHandler) Count(c *fiber.Ctx) error {
+	validators := &ethereum2v1alpha1.ValidatorList{}
+	if err := k8s.Client().List(c.Context(), validators); err != nil {
+		log.Println(err)
+		return c.SendStatus(http.StatusInternalServerError)
+	}
+
+	c.Set("X-Total-Count", fmt.Sprintf("%d", len(validators.Items)))
+
+	return c.SendStatus(http.StatusOK)
+}
+
 // validateValidatorExist validate node by name exist
 func validateValidatorExist(c *fiber.Ctx) error {
 	name := c.Params("name")
@@ -241,6 +254,7 @@ func validateValidatorExist(c *fiber.Ctx) error {
 // Register registers all handlers on the given router
 func (v *ValidatorHandler) Register(router fiber.Router) {
 	router.Post("/", v.Create)
+	router.Head("/", v.Count)
 	router.Get("/", v.List)
 	router.Get("/:name", validateValidatorExist, v.Get)
 	router.Put("/:name", validateValidatorExist, v.Update)
