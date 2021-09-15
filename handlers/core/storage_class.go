@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"fmt"
+	"log"
 	"net/http"
 
 	"github.com/gofiber/fiber/v2"
@@ -11,6 +12,7 @@ import (
 	storagev1 "k8s.io/api/storage/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/types"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 // StorageClassHandler is k8s storage class handler
@@ -50,7 +52,24 @@ func (s *StorageClassHandler) Get(c *fiber.Ctx) error {
 
 // List returns all k8s storage classes
 func (s *StorageClassHandler) List(c *fiber.Ctx) error {
-	return c.SendString("list all storage classes")
+	storageClasses := &storagev1.StorageClassList{}
+
+	if err := k8s.Client().List(c.Context(), storageClasses, client.InNamespace("default")); err != nil {
+		log.Println(err)
+		c.Status(http.StatusInternalServerError).JSON(fiber.Map{
+			"error": "failed to get all nodes",
+		})
+	}
+
+	storageClassModels := []models.StorageClass{}
+
+	for _, storageClass := range storageClasses.Items {
+		storageClassModels = append(storageClassModels, *models.FromCoreStorageClass(&storageClass))
+	}
+
+	return c.Status(http.StatusOK).JSON(fiber.Map{
+		"storageClasses": storageClassModels,
+	})
 }
 
 // Create creates k8s storage class from spec
