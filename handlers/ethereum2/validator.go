@@ -42,7 +42,7 @@ func (v *ValidatorHandler) List(c *fiber.Ctx) error {
 	validators := &ethereum2v1alpha1.ValidatorList{}
 	validatorModels := []models.Validator{}
 
-	if err := k8s.Client().List(c.Context(), validators); err != nil {
+	if err := k8s.Client().List(c.Context(), validators, client.InNamespace("default")); err != nil {
 		log.Println(err)
 		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
 			"error": "failed to get all validators",

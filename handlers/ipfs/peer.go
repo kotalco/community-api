@@ -40,7 +40,7 @@ func (pr *PeerHandler) Get(c *fiber.Ctx) error {
 // List returns all IPFS peers
 func (pr *PeerHandler) List(c *fiber.Ctx) error {
 	peers := &ipfsv1alpha1.PeerList{}
-	if err := k8s.Client().List(c.Context(), peers); err != nil {
+	if err := k8s.Client().List(c.Context(), peers, client.InNamespace("default")); err != nil {
 		log.Println(err)
 		c.Status(http.StatusInternalServerError).JSON(fiber.Map{
 			"error": "failed to get all peers",

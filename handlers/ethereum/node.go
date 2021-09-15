@@ -40,7 +40,7 @@ func (e *NodeHandler) Get(c *fiber.Ctx) error {
 // List lists all Ethereum nodes
 func (e *NodeHandler) List(c *fiber.Ctx) error {
 	nodes := &ethereumv1alpha1.NodeList{}
-	if err := k8s.Client().List(c.Context(), nodes); err != nil {
+	if err := k8s.Client().List(c.Context(), nodes, client.InNamespace("default")); err != nil {
 		log.Println(err)
 		c.Status(http.StatusInternalServerError).JSON(fiber.Map{
 			"error": "failed to get all nodes",

@@ -39,7 +39,7 @@ func (s *SecretHandler) Get(c *fiber.Ctx) error {
 // List returns all k8s secrets
 func (s *SecretHandler) List(c *fiber.Ctx) error {
 	secrets := &corev1.SecretList{}
-	if err := k8s.Client().List(c.Context(), secrets, client.HasLabels{"app.kubernetes.io/created-by"}); err != nil {
+	if err := k8s.Client().List(c.Context(), secrets, client.InNamespace("default"), client.HasLabels{"app.kubernetes.io/created-by"}); err != nil {
 		log.Println(err)
 
 		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
