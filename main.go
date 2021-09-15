@@ -28,6 +28,7 @@ func main() {
 
 	core := v1.Group("core")
 	secrets := core.Group("secrets")
+	storageClasses := core.Group("storageclasses")
 
 	ethereum := v1.Group("ethereum")
 	nodes := ethereum.Group("nodes")
@@ -51,6 +52,7 @@ func main() {
 	beaconHandler := ethereum2Handlers.NewBeaconNodeHandler()
 	validatorHandler := ethereum2Handlers.NewValidatorHandler()
 	secretHandler := coreHandlers.NewSecretHandler()
+	storageClassHandler := coreHandlers.NewStorageClassHandler()
 
 	nodeHandler.Register(nodes)
 	peerHandler.Register(peers)
@@ -58,6 +60,7 @@ func main() {
 	beaconHandler.Register(beaconnodes)
 	validatorHandler.Register(validators)
 	secretHandler.Register(secrets)
+	storageClassHandler.Register(storageClasses)
 
 	port := os.Getenv("KOTAL_API_SERVER_PORT")
 	if port == "" {
