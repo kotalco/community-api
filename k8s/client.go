@@ -22,12 +22,13 @@ import (
 
 var ControllerRuntimeClient client.Client
 var KubernetesClientset *kubernetes.Clientset
-var once sync.Once
+var clientOnce sync.Once
+var clientsetOnce sync.Once
 
 // Client create k8s client once
 func Client() client.Client {
 	var err error
-	once.Do(func() {
+	clientOnce.Do(func() {
 		ControllerRuntimeClient, err = NewRuntimeClient()
 		if err != nil {
 			// TODO: Don't panic
@@ -40,7 +41,7 @@ func Client() client.Client {
 // Clientset create k8s client once
 func Clientset() *kubernetes.Clientset {
 	var err error
-	once.Do(func() {
+	clientsetOnce.Do(func() {
 		KubernetesClientset, err = NewClientset()
 		if err != nil {
 			// TODO: Don't panic
