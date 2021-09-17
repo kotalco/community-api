@@ -11,6 +11,7 @@ import (
 	ethereum2v1alpha1 "github.com/kotalco/kotal/apis/ethereum2/v1alpha1"
 	ipfsv1alpha1 "github.com/kotalco/kotal/apis/ipfs/v1alpha1"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/client-go/kubernetes"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
@@ -19,27 +20,41 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/envtest"
 )
 
-var k8sClient client.Client
+var ControllerRuntimeClient client.Client
+var KubernetesClientset *kubernetes.Clientset
 var once sync.Once
 
 // Client create k8s client once
 func Client() client.Client {
+	var err error
 	once.Do(func() {
-		k8sClient = NewClient()
+		ControllerRuntimeClient, err = NewRuntimeClient()
+		if err != nil {
+			// TODO: Don't panic
+			panic(err)
+		}
 	})
-
-	return k8sClient
+	return ControllerRuntimeClient
 }
 
-// NewClient creates new k8s client
-func NewClient() client.Client {
-
-	var config *rest.Config
+// Clientset create k8s client once
+func Clientset() *kubernetes.Clientset {
 	var err error
+	once.Do(func() {
+		KubernetesClientset, err = NewClientset()
+		if err != nil {
+			// TODO: Don't panic
+			panic(err)
+		}
+	})
+	return KubernetesClientset
+}
+
+// Config returns REST config based on the environment
+func Config() (*rest.Config, error) {
 
 	// if we're in k8s cluster, create in cluster config using service account
 	// otherwise, create out of cluster config using kubeconfig at $HOME/.kube/config
-	// TODO: don't panic
 	if os.Getenv("MOCK") == "true" {
 		log.Println("creating k8s client using test environment ...")
 		testEnv := envtest.Environment{
@@ -48,23 +63,24 @@ func NewClient() client.Client {
 			},
 			ErrorIfCRDPathMissing: true,
 		}
-		config, err = testEnv.Start()
-		if err != nil {
-			panic(err.Error())
-		}
+		return testEnv.Start()
 	} else if os.Getenv("KUBERNETES_SERVICE_HOST") != "" {
 		log.Println("creating k8s client using in-cluster config ...")
-		config, err = rest.InClusterConfig()
-		if err != nil {
-			panic(err.Error())
-		}
+		return rest.InClusterConfig()
 	} else {
 		log.Println("creating k8s client using out-of-cluster config ...")
 		kubeconfig := filepath.Join(homedir.HomeDir(), ".kube", "config")
-		config, err = clientcmd.BuildConfigFromFlags("", kubeconfig)
-		if err != nil {
-			panic(err.Error())
-		}
+		return clientcmd.BuildConfigFromFlags("", kubeconfig)
+	}
+
+}
+
+// NewRuntimeClient creates new controller-runtime k8s client
+func NewRuntimeClient() (client.Client, error) {
+
+	config, err := Config()
+	if err != nil {
+		return nil, err
 	}
 
 	scheme := runtime.NewScheme()
@@ -75,11 +91,16 @@ func NewClient() client.Client {
 
 	opts := client.Options{Scheme: scheme}
 
-	c, err := client.New(config, opts)
+	return client.New(config, opts)
+}
+
+// NewClientset returns client-go clientset
+func NewClientset() (*kubernetes.Clientset, error) {
+	config, err := Config()
 	if err != nil {
-		// TODO: don't panic
-		panic(err.Error())
+		return nil, err
 	}
 
-	return c
+	return kubernetes.NewForConfig(config)
+
 }
