@@ -16,6 +16,7 @@ import (
 	models "github.com/kotalco/api/models/ipfs"
 	"github.com/kotalco/api/shared"
 	ipfsv1alpha1 "github.com/kotalco/kotal/apis/ipfs/v1alpha1"
+	sharedAPIs "github.com/kotalco/kotal/apis/shared"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
@@ -88,6 +89,11 @@ func (cp *ClusterPeerHandler) Create(c *fiber.Ctx) error {
 			Name:              model.Name,
 			Namespace:         "default",
 			CreationTimestamp: metav1.Now(),
+		},
+		Spec: ipfsv1alpha1.ClusterPeerSpec{
+			Resources: sharedAPIs.Resources{
+				StorageClass: model.StorageClass,
+			},
 		},
 	}
 

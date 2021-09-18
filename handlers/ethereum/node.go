@@ -16,6 +16,7 @@ import (
 	models "github.com/kotalco/api/models/ethereum"
 	"github.com/kotalco/api/shared"
 	ethereumv1alpha1 "github.com/kotalco/kotal/apis/ethereum/v1alpha1"
+	sharedAPIs "github.com/kotalco/kotal/apis/shared"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
@@ -91,6 +92,9 @@ func (e *NodeHandler) Create(c *fiber.Ctx) error {
 			Network:                  model.Network,
 			Client:                   ethereumv1alpha1.EthereumClient(model.Client),
 			NodePrivatekeySecretName: model.NodePrivateKeySecretName,
+			Resources: sharedAPIs.Resources{
+				StorageClass: model.StorageClass,
+			},
 		},
 	}
 

@@ -16,6 +16,7 @@ import (
 	models "github.com/kotalco/api/models/ipfs"
 	"github.com/kotalco/api/shared"
 	ipfsv1alpha1 "github.com/kotalco/kotal/apis/ipfs/v1alpha1"
+	sharedAPIs "github.com/kotalco/kotal/apis/shared"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
@@ -94,6 +95,9 @@ func (pr *PeerHandler) Create(c *fiber.Ctx) error {
 		},
 		Spec: ipfsv1alpha1.PeerSpec{
 			InitProfiles: initProfiles,
+			Resources: sharedAPIs.Resources{
+				StorageClass: model.StorageClass,
+			},
 		},
 	}
 

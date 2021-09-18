@@ -16,6 +16,7 @@ import (
 	models "github.com/kotalco/api/models/ethereum2"
 	"github.com/kotalco/api/shared"
 	ethereum2v1alpha1 "github.com/kotalco/kotal/apis/ethereum2/v1alpha1"
+	sharedAPIs "github.com/kotalco/kotal/apis/shared"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
@@ -97,6 +98,9 @@ func (b *BeaconNodeHandler) Create(c *fiber.Ctx) error {
 			Client:        client,
 			Eth1Endpoints: model.Eth1Endpoints,
 			RPC:           client == ethereum2v1alpha1.PrysmClient,
+			Resources: sharedAPIs.Resources{
+				StorageClass: model.StorageClass,
+			},
 		},
 	}
 
