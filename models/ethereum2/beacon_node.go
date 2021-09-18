@@ -26,6 +26,7 @@ type BeaconNode struct {
 	Memory        string   `json:"memory"`
 	MemoryLimit   string   `json:"memoryLimit"`
 	Storage       string   `json:"storage"`
+	StorageClass  *string  `json:"storageClass"`
 }
 
 func FromEthereum2BeaconNode(beaconnode *ethereum2v1alpha1.BeaconNode) *BeaconNode {
@@ -51,5 +52,6 @@ func FromEthereum2BeaconNode(beaconnode *ethereum2v1alpha1.BeaconNode) *BeaconNo
 		Memory:        beaconnode.Spec.Memory,
 		MemoryLimit:   beaconnode.Spec.MemoryLimit,
 		Storage:       beaconnode.Spec.Storage,
+		StorageClass:  beaconnode.Spec.StorageClass,
 	}
 }

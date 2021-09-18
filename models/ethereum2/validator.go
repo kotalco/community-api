@@ -20,6 +20,7 @@ type Validator struct {
 	Memory                   string     `json:"memory"`
 	MemoryLimit              string     `json:"memoryLimit"`
 	Storage                  string     `json:"storage"`
+	StorageClass             *string    `json:"storageClass"`
 }
 
 type Keystore struct {
@@ -49,6 +50,7 @@ func FromEthereum2Validator(validator *ethereum2v1alpha1.Validator) *Validator {
 		Memory:                   validator.Spec.Memory,
 		MemoryLimit:              validator.Spec.MemoryLimit,
 		Storage:                  validator.Spec.Storage,
+		StorageClass:             validator.Spec.StorageClass,
 		WalletPasswordSecretName: validator.Spec.WalletPasswordSecret,
 	}
 }

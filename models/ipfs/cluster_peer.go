@@ -21,6 +21,7 @@ type ClusterPeer struct {
 	Memory               string   `json:"memory"`
 	MemoryLimit          string   `json:"memoryLimit"`
 	Storage              string   `json:"storage"`
+	StorageClass         *string  `json:"storageClass"`
 }
 
 func FromIPFSClusterPeer(peer *ipfsv1alpha1.ClusterPeer) *ClusterPeer {
@@ -41,5 +42,6 @@ func FromIPFSClusterPeer(peer *ipfsv1alpha1.ClusterPeer) *ClusterPeer {
 		Memory:               peer.Spec.Memory,
 		MemoryLimit:          peer.Spec.MemoryLimit,
 		Storage:              peer.Spec.Storage,
+		StorageClass:         peer.Spec.StorageClass,
 	}
 }

@@ -23,6 +23,7 @@ type Peer struct {
 	Memory       string   `json:"memory"`
 	MemoryLimit  string   `json:"memoryLimit"`
 	Storage      string   `json:"storage"`
+	StorageClass *string  `json:"storageClass"`
 }
 
 // FromIPFSPeer creates peer model from IPFS peer
@@ -56,5 +57,6 @@ func FromIPFSPeer(peer *ipfsv1alpha1.Peer) *Peer {
 		Memory:       peer.Spec.Memory,
 		MemoryLimit:  peer.Spec.MemoryLimit,
 		Storage:      peer.Spec.Storage,
+		StorageClass: peer.Spec.StorageClass,
 	}
 }

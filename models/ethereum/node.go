@@ -42,6 +42,7 @@ type Node struct {
 	Memory                   string           `json:"memory"`
 	MemoryLimit              string           `json:"memoryLimit"`
 	Storage                  string           `json:"storage"`
+	StorageClass             *string          `json:"storageClass"`
 }
 
 func FromEthereumNode(n *ethereumv1alpha1.Node) *Node {
@@ -66,6 +67,7 @@ func FromEthereumNode(n *ethereumv1alpha1.Node) *Node {
 		Memory:                   n.Spec.Memory,
 		MemoryLimit:              n.Spec.MemoryLimit,
 		Storage:                  n.Spec.Storage,
+		StorageClass:             n.Spec.StorageClass,
 	}
 
 	if n.Spec.Miner && n.Spec.Import != nil {
