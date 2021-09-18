@@ -9,7 +9,9 @@ import (
 	"strconv"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/websocket/v2"
 	"github.com/kotalco/api/handlers"
+	sharedHandlers "github.com/kotalco/api/handlers/shared"
 	"github.com/kotalco/api/k8s"
 	models "github.com/kotalco/api/models/ipfs"
 	"github.com/kotalco/api/shared"
@@ -264,6 +266,7 @@ func (cp *ClusterPeerHandler) Register(router fiber.Router) {
 	router.Head("/", cp.Count)
 	router.Get("/", cp.List)
 	router.Get("/:name", validateClusterPeerExist, cp.Get)
+	router.Get("/:name/logs", websocket.New(sharedHandlers.Logger))
 	router.Put("/:name", validateClusterPeerExist, cp.Update)
 	router.Delete("/:name", validateClusterPeerExist, cp.Delete)
 }

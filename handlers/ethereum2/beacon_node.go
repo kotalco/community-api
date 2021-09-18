@@ -9,7 +9,9 @@ import (
 	"strconv"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/websocket/v2"
 	"github.com/kotalco/api/handlers"
+	sharedHandlers "github.com/kotalco/api/handlers/shared"
 	"github.com/kotalco/api/k8s"
 	models "github.com/kotalco/api/models/ethereum2"
 	"github.com/kotalco/api/shared"
@@ -268,6 +270,7 @@ func (b *BeaconNodeHandler) Register(router fiber.Router) {
 	router.Head("/", b.Count)
 	router.Get("/", b.List)
 	router.Get("/:name", validateBeaconNodeExist, b.Get)
+	router.Get("/:name/logs", websocket.New(sharedHandlers.Logger))
 	router.Put("/:name", validateBeaconNodeExist, b.Update)
 	router.Delete("/:name", validateBeaconNodeExist, b.Delete)
 }

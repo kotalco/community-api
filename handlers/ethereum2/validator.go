@@ -9,7 +9,9 @@ import (
 	"strconv"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/websocket/v2"
 	"github.com/kotalco/api/handlers"
+	sharedHandlers "github.com/kotalco/api/handlers/shared"
 	"github.com/kotalco/api/k8s"
 	models "github.com/kotalco/api/models/ethereum2"
 	"github.com/kotalco/api/shared"
@@ -258,6 +260,7 @@ func (v *ValidatorHandler) Register(router fiber.Router) {
 	router.Head("/", v.Count)
 	router.Get("/", v.List)
 	router.Get("/:name", validateValidatorExist, v.Get)
+	router.Get("/:name/logs", websocket.New(sharedHandlers.Logger))
 	router.Put("/:name", validateValidatorExist, v.Update)
 	router.Delete("/:name", validateValidatorExist, v.Delete)
 }
