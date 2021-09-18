@@ -3,6 +3,8 @@ package shared
 import (
 	"context"
 	"fmt"
+	"os"
+	"time"
 
 	"github.com/gofiber/websocket/v2"
 	"github.com/kotalco/api/k8s"
@@ -12,6 +14,14 @@ import (
 // Logger returns a websocket that emits logs from pod
 func Logger(c *websocket.Conn) {
 	defer c.Close()
+
+	if os.Getenv("MOCK") == "true" {
+		for {
+			msg := fmt.Sprintf("%s \n", time.Now().Local())
+			c.WriteMessage(websocket.TextMessage, []byte(msg))
+			time.Sleep(time.Second)
+		}
+	}
 
 	podLogOptions := corev1.PodLogOptions{
 		Follow: true,
