@@ -235,6 +235,7 @@ func (b *BeaconNodeHandler) Count(c *fiber.Ctx) error {
 		return c.SendStatus(http.StatusInternalServerError)
 	}
 
+	c.Set("Access-Control-Expose-Headers", "X-Total-Count")
 	c.Set("X-Total-Count", fmt.Sprintf("%d", len(beaconnodes.Items)))
 
 	return c.SendStatus(http.StatusOK)
