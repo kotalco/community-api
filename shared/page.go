@@ -6,11 +6,11 @@ const PerPage = 10
 // given a length and page index
 // it returns 0,0 [] if length or page is 0
 func Page(length, page uint) (start, end uint) {
-	if length == 0 || page == 0 {
+	if length == 0 {
 		return
 	}
 
-	start = (page - 1) * PerPage
+	start = page * PerPage
 	if start > length {
 		start = length
 	}
