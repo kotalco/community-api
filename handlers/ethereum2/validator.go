@@ -52,15 +52,11 @@ func (v *ValidatorHandler) List(c *fiber.Ctx) error {
 		})
 	}
 
-	page := c.Query("page")
-	p, err := strconv.Atoi(page)
-	if err != nil {
-		p = 1
-	}
+	page, _ := strconv.Atoi(c.Query("page"))
 
-	start, end := shared.Page(uint(len(validators.Items)), uint(p))
+	start, end := shared.Page(uint(len(validators.Items)), uint(page))
 	sort.Slice(validators.Items[:], func(i, j int) bool {
-		return validators.Items[i].CreationTimestamp.Before(&validators.Items[j].CreationTimestamp)
+		return validators.Items[j].CreationTimestamp.Before(&validators.Items[i].CreationTimestamp)
 	})
 
 	for _, validator := range validators.Items[start:end] {

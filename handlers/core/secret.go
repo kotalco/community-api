@@ -49,15 +49,12 @@ func (s *SecretHandler) List(c *fiber.Ctx) error {
 
 	secretModels := []models.Secret{}
 	secretType := c.Query("type")
-	page := c.Query("page")
-	p, err := strconv.Atoi(page)
-	if err != nil {
-		p = 1
-	}
+	// default page to 0
+	page, _ := strconv.Atoi(c.Query("page"))
 
-	start, end := shared.Page(uint(len(secrets.Items)), uint(p))
+	start, end := shared.Page(uint(len(secrets.Items)), uint(page))
 	sort.Slice(secrets.Items[:], func(i, j int) bool {
-		return secrets.Items[i].CreationTimestamp.Before(&secrets.Items[j].CreationTimestamp)
+		return secrets.Items[j].CreationTimestamp.Before(&secrets.Items[i].CreationTimestamp)
 	})
 
 	for _, secret := range secrets.Items[start:end] {

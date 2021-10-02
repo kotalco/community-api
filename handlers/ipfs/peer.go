@@ -52,15 +52,11 @@ func (pr *PeerHandler) List(c *fiber.Ctx) error {
 
 	peerModels := []models.Peer{}
 
-	page := c.Query("page")
-	p, err := strconv.Atoi(page)
-	if err != nil {
-		p = 1
-	}
+	page, _ := strconv.Atoi(c.Query("page"))
 
-	start, end := shared.Page(uint(len(peers.Items)), uint(p))
+	start, end := shared.Page(uint(len(peers.Items)), uint(page))
 	sort.Slice(peers.Items[:], func(i, j int) bool {
-		return peers.Items[i].CreationTimestamp.Before(&peers.Items[j].CreationTimestamp)
+		return peers.Items[j].CreationTimestamp.Before(&peers.Items[i].CreationTimestamp)
 	})
 
 	for _, peer := range peers.Items[start:end] {

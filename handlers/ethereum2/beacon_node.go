@@ -52,15 +52,11 @@ func (b *BeaconNodeHandler) List(c *fiber.Ctx) error {
 
 	nodeModels := []models.BeaconNode{}
 
-	page := c.Query("page")
-	p, err := strconv.Atoi(page)
-	if err != nil {
-		p = 1
-	}
+	page, _ := strconv.Atoi(c.Query("page"))
 
-	start, end := shared.Page(uint(len(nodes.Items)), uint(p))
+	start, end := shared.Page(uint(len(nodes.Items)), uint(page))
 	sort.Slice(nodes.Items[:], func(i, j int) bool {
-		return nodes.Items[i].CreationTimestamp.Before(&nodes.Items[j].CreationTimestamp)
+		return nodes.Items[j].CreationTimestamp.Before(&nodes.Items[i].CreationTimestamp)
 	})
 
 	for _, node := range nodes.Items[start:end] {
