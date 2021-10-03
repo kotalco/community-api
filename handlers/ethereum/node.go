@@ -317,6 +317,7 @@ func (e *NodeHandler) Register(router fiber.Router) {
 	router.Get("/", e.List)
 	router.Get("/:name", validateNodeExist, e.Get)
 	router.Get("/:name/logs", websocket.New(sharedHandlers.Logger))
+	router.Get("/:name/status", websocket.New(sharedHandlers.Status))
 	router.Put("/:name", validateNodeExist, e.Update)
 	router.Delete("/:name", validateNodeExist, e.Delete)
 }

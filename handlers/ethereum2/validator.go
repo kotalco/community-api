@@ -262,6 +262,7 @@ func (v *ValidatorHandler) Register(router fiber.Router) {
 	router.Get("/", v.List)
 	router.Get("/:name", validateValidatorExist, v.Get)
 	router.Get("/:name/logs", websocket.New(sharedHandlers.Logger))
+	router.Get("/:name/status", websocket.New(sharedHandlers.Status))
 	router.Put("/:name", validateValidatorExist, v.Update)
 	router.Delete("/:name", validateValidatorExist, v.Delete)
 }

@@ -257,6 +257,7 @@ func (pr *PeerHandler) Register(router fiber.Router) {
 	router.Get("/", pr.List)
 	router.Get("/:name", validatePeerExist, pr.Get)
 	router.Get("/:name/logs", websocket.New(sharedHandlers.Logger))
+	router.Get("/:name/status", websocket.New(sharedHandlers.Status))
 	router.Put("/:name", validatePeerExist, pr.Update)
 	router.Delete("/:name", validatePeerExist, pr.Delete)
 }

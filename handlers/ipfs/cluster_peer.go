@@ -270,6 +270,7 @@ func (cp *ClusterPeerHandler) Register(router fiber.Router) {
 	router.Get("/", cp.List)
 	router.Get("/:name", validateClusterPeerExist, cp.Get)
 	router.Get("/:name/logs", websocket.New(sharedHandlers.Logger))
+	router.Get("/:name/status", websocket.New(sharedHandlers.Status))
 	router.Put("/:name", validateClusterPeerExist, cp.Update)
 	router.Delete("/:name", validateClusterPeerExist, cp.Delete)
 }

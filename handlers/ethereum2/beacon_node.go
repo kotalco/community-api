@@ -272,6 +272,7 @@ func (b *BeaconNodeHandler) Register(router fiber.Router) {
 	router.Get("/", b.List)
 	router.Get("/:name", validateBeaconNodeExist, b.Get)
 	router.Get("/:name/logs", websocket.New(sharedHandlers.Logger))
+	router.Get("/:name/status", websocket.New(sharedHandlers.Status))
 	router.Put("/:name", validateBeaconNodeExist, b.Update)
 	router.Delete("/:name", validateBeaconNodeExist, b.Delete)
 }
