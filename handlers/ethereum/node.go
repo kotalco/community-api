@@ -1,12 +1,16 @@
 package handlers
 
 import (
+	"context"
 	"fmt"
 	"log"
+	"math/big"
 	"net/http"
 	"os"
 	"sort"
 	"strconv"
+	"strings"
+	"time"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/websocket/v2"
@@ -17,6 +21,7 @@ import (
 	"github.com/kotalco/api/shared"
 	ethereumv1alpha1 "github.com/kotalco/kotal/apis/ethereum/v1alpha1"
 	sharedAPIs "github.com/kotalco/kotal/apis/shared"
+	"github.com/ybbus/jsonrpc/v2"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
@@ -282,6 +287,67 @@ func (e *NodeHandler) Count(c *fiber.Ctx) error {
 	return c.SendStatus(http.StatusOK)
 }
 
+func (e *NodeHandler) Stats(c *websocket.Conn) {
+	defer c.Close()
+
+	name := c.Params("name")
+	node := &ethereumv1alpha1.Node{}
+	key := types.NamespacedName{
+		Namespace: "default",
+		Name:      name,
+	}
+
+	for {
+
+		err := k8s.Client().Get(context.Background(), key, node)
+		if errors.IsNotFound(err) {
+			c.WriteJSON(fiber.Map{
+				"error": fmt.Sprintf("node by name %s doesn't exist", name),
+			})
+			return
+		}
+
+		if !node.Spec.RPC {
+			c.WriteJSON(fiber.Map{
+				"error": "rpc is not enabled",
+			})
+			return
+		}
+
+		client := jsonrpc.NewClient(fmt.Sprintf("http://%s:%d", node.Name, node.Spec.RPCPort))
+
+		type SyncStatus struct {
+			CurrentBlock string `json:"currentBlock"`
+			HighestBlock string `json:"highestBlock"`
+		}
+
+		// sync status
+		syncStatus := SyncStatus{}
+		client.CallFor(&syncStatus, "eth_syncing")
+
+		current := new(big.Int)
+		current.SetString(strings.Replace(syncStatus.CurrentBlock, "0x", "", 1), 16)
+
+		highest := new(big.Int)
+		highest.SetString(strings.Replace(syncStatus.HighestBlock, "0x", "", 1), 16)
+
+		// peer count
+		var peerCount string
+		client.CallFor(&peerCount, "net_peerCount")
+
+		count := new(big.Int)
+		count.SetString(strings.Replace(peerCount, "0x", "", 1), 16)
+
+		c.WriteJSON(fiber.Map{
+			"currentBlock": current.String(),
+			"highestBlock": highest.String(),
+			"peerCount":    count,
+		})
+
+		time.Sleep(time.Second)
+	}
+}
+
 // validateNodeExist validate node by name exist
 func validateNodeExist(c *fiber.Ctx) error {
 	name := c.Params("name")
@@ -318,6 +384,7 @@ func (e *NodeHandler) Register(router fiber.Router) {
 	router.Get("/:name", validateNodeExist, e.Get)
 	router.Get("/:name/logs", websocket.New(sharedHandlers.Logger))
 	router.Get("/:name/status", websocket.New(sharedHandlers.Status))
+	router.Get("/:name/stats", websocket.New(e.Stats))
 	router.Put("/:name", validateNodeExist, e.Update)
 	router.Delete("/:name", validateNodeExist, e.Delete)
 }
