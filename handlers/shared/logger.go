@@ -16,7 +16,12 @@ func Logger(c *websocket.Conn) {
 	defer c.Close()
 
 	if os.Getenv("MOCK") == "true" {
+		var i int
 		for {
+			i++
+			if i == 10 {
+				return
+			}
 			msg := fmt.Sprintf("%s \n", time.Now().Local())
 			c.WriteMessage(websocket.TextMessage, []byte(msg))
 			time.Sleep(time.Second)
