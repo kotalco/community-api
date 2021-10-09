@@ -50,6 +50,9 @@ func (pr *PeerHandler) List(c *fiber.Ctx) error {
 		})
 	}
 
+	c.Set("Access-Control-Expose-Headers", "X-Total-Count")
+	c.Set("X-Total-Count", fmt.Sprintf("%d", len(peers.Items)))
+
 	peerModels := []models.Peer{}
 
 	page, _ := strconv.Atoi(c.Query("page"))

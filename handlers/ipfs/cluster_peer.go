@@ -52,6 +52,9 @@ func (cp *ClusterPeerHandler) List(c *fiber.Ctx) error {
 		})
 	}
 
+	c.Set("Access-Control-Expose-Headers", "X-Total-Count")
+	c.Set("X-Total-Count", fmt.Sprintf("%d", len(peers.Items)))
+
 	peerModels := []models.ClusterPeer{}
 
 	page, _ := strconv.Atoi(c.Query("page"))

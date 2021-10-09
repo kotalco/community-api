@@ -47,6 +47,9 @@ func (s *SecretHandler) List(c *fiber.Ctx) error {
 		})
 	}
 
+	c.Set("Access-Control-Expose-Headers", "X-Total-Count")
+	c.Set("X-Total-Count", fmt.Sprintf("%d", len(secrets.Items)))
+
 	secretModels := []models.Secret{}
 	secretType := c.Query("type")
 	// default page to 0

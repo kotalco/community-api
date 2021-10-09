@@ -55,6 +55,9 @@ func (e *NodeHandler) List(c *fiber.Ctx) error {
 		})
 	}
 
+	c.Set("Access-Control-Expose-Headers", "X-Total-Count")
+	c.Set("X-Total-Count", fmt.Sprintf("%d", len(nodes.Items)))
+
 	nodeModels := []models.Node{}
 	// default page to 0
 	page, _ := strconv.Atoi(c.Query("page"))

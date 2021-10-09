@@ -52,6 +52,9 @@ func (v *ValidatorHandler) List(c *fiber.Ctx) error {
 		})
 	}
 
+	c.Set("Access-Control-Expose-Headers", "X-Total-Count")
+	c.Set("X-Total-Count", fmt.Sprintf("%d", len(validators.Items)))
+
 	page, _ := strconv.Atoi(c.Query("page"))
 
 	start, end := shared.Page(uint(len(validators.Items)), uint(page))
