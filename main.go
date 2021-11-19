@@ -8,6 +8,7 @@ import (
 	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/gofiber/fiber/v2/middleware/logger"
 	"github.com/gofiber/fiber/v2/middleware/recover"
+	chainlinkHandlers "github.com/kotalco/api/handlers/chainlink"
 	coreHandlers "github.com/kotalco/api/handlers/core"
 	ethereumHandlers "github.com/kotalco/api/handlers/ethereum"
 	ethereum2Handlers "github.com/kotalco/api/handlers/ethereum2"
@@ -33,6 +34,9 @@ func main() {
 	ethereum := v1.Group("ethereum")
 	nodes := ethereum.Group("nodes")
 
+	chainlink := v1.Group("chainlink")
+	chainlinkNodes := chainlink.Group("nodes")
+
 	ipfs := v1.Group("ipfs")
 	peers := ipfs.Group("peers")
 	clusterpeers := ipfs.Group("clusterpeers")
@@ -46,21 +50,14 @@ func main() {
 		return c.SendString("Kotal API")
 	})
 
-	nodeHandler := ethereumHandlers.NewNodeHandler()
-	peerHandler := ipfsHandlers.NewPeerHandler()
-	clusterPeerHandler := ipfsHandlers.NewClusterPeerHandler()
-	beaconHandler := ethereum2Handlers.NewBeaconNodeHandler()
-	validatorHandler := ethereum2Handlers.NewValidatorHandler()
-	secretHandler := coreHandlers.NewSecretHandler()
-	storageClassHandler := coreHandlers.NewStorageClassHandler()
-
-	nodeHandler.Register(nodes)
-	peerHandler.Register(peers)
-	clusterPeerHandler.Register(clusterpeers)
-	beaconHandler.Register(beaconnodes)
-	validatorHandler.Register(validators)
-	secretHandler.Register(secrets)
-	storageClassHandler.Register(storageClasses)
+	chainlinkHandlers.NewNodeHandler().Register(chainlinkNodes)
+	ethereumHandlers.NewNodeHandler().Register(nodes)
+	ipfsHandlers.NewPeerHandler().Register(peers)
+	ipfsHandlers.NewClusterPeerHandler().Register(clusterpeers)
+	ethereum2Handlers.NewBeaconNodeHandler().Register(beaconnodes)
+	ethereum2Handlers.NewValidatorHandler().Register(validators)
+	coreHandlers.NewSecretHandler().Register(secrets)
+	coreHandlers.NewStorageClassHandler().Register(storageClasses)
 
 	port := os.Getenv("KOTAL_API_SERVER_PORT")
 	if port == "" {
