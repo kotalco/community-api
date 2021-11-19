@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 	"sync"
 
+	chainlinkv1alpha1 "github.com/kotalco/kotal/apis/chainlink/v1alpha1"
 	ethereumv1alpha1 "github.com/kotalco/kotal/apis/ethereum/v1alpha1"
 	ethereum2v1alpha1 "github.com/kotalco/kotal/apis/ethereum2/v1alpha1"
 	ipfsv1alpha1 "github.com/kotalco/kotal/apis/ipfs/v1alpha1"
@@ -60,7 +61,7 @@ func Config() (*rest.Config, error) {
 		log.Println("creating k8s client using test environment ...")
 		testEnv := envtest.Environment{
 			CRDDirectoryPaths: []string{
-				filepath.Join(build.Default.GOPATH, "pkg", "mod", "github.com", "kotalco", "kotal@v0.0.0-20210817190935-979d6e70b8e5", "config", "crd", "bases"),
+				filepath.Join(build.Default.GOPATH, "pkg", "mod", "github.com", "kotalco", "kotal@v0.0.0-20211119165511-7ba5b2666a27", "config", "crd", "bases"),
 			},
 			ErrorIfCRDPathMissing: true,
 		}
@@ -89,6 +90,7 @@ func NewRuntimeClient() (client.Client, error) {
 	ethereumv1alpha1.AddToScheme(scheme)
 	ethereum2v1alpha1.AddToScheme(scheme)
 	ipfsv1alpha1.AddToScheme(scheme)
+	chainlinkv1alpha1.AddToScheme(scheme)
 
 	opts := client.Options{Scheme: scheme}
 
