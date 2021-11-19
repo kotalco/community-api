@@ -1,10 +1,18 @@
 package handlers
 
 import (
+	"fmt"
+	"log"
+	"net/http"
+
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/websocket/v2"
 	"github.com/kotalco/api/handlers"
 	sharedHandlers "github.com/kotalco/api/handlers/shared"
+	"github.com/kotalco/api/k8s"
+	chainlinkv1alpha1 "github.com/kotalco/kotal/apis/chainlink/v1alpha1"
+	"k8s.io/apimachinery/pkg/api/errors"
+	"k8s.io/apimachinery/pkg/types"
 )
 
 // Chainlink node handler
@@ -47,6 +55,29 @@ func (n *NodeHandler) Count(c *fiber.Ctx) error {
 
 // validateNodeExist validate node by name exist
 func validateNodeExist(c *fiber.Ctx) error {
+	name := c.Params("name")
+	node := &chainlinkv1alpha1.Node{}
+	key := types.NamespacedName{
+		Name:      name,
+		Namespace: "default",
+	}
+
+	if err := k8s.Client().Get(c.Context(), key, node); err != nil {
+
+		log.Print(err)
+
+		if errors.IsNotFound(err) {
+			return c.Status(http.StatusNotFound).JSON(map[string]string{
+				"error": fmt.Sprintf("node by name %s doesn't exist", name),
+			})
+		}
+
+		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
+			"error": fmt.Sprintf("can't get node by name %s", name),
+		})
+	}
+
+	c.Locals("node", node)
 	return c.Next()
 }
 
