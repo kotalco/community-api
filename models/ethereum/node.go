@@ -54,7 +54,7 @@ func FromEthereumNode(n *ethereumv1alpha1.Node) *Node {
 		Network:                  n.Spec.Network,
 		Client:                   string(n.Spec.Client),
 		Logging:                  string(n.Spec.Logging),
-		NodePrivateKeySecretName: n.Spec.NodePrivatekeySecretName,
+		NodePrivateKeySecretName: n.Spec.NodePrivateKeySecretName,
 		SyncMode:                 string(n.Spec.SyncMode),
 		P2PPort:                  n.Spec.P2PPort,
 		Miner:                    &n.Spec.Miner,

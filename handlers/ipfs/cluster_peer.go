@@ -109,7 +109,7 @@ func (cp *ClusterPeerHandler) Create(c *fiber.Ctx) error {
 	}
 
 	if model.PrivatekeySecretName != "" {
-		peer.Spec.PrivatekeySecretName = model.PrivatekeySecretName
+		peer.Spec.PrivateKeySecretName = model.PrivatekeySecretName
 	}
 
 	if len(model.TrustedPeers) != 0 {

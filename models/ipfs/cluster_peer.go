@@ -31,7 +31,7 @@ func FromIPFSClusterPeer(peer *ipfsv1alpha1.ClusterPeer) *ClusterPeer {
 			CreatedAt: peer.CreationTimestamp.UTC().Format(shared.JavascriptISOString),
 		},
 		ID:                   peer.Spec.ID,
-		PrivatekeySecretName: peer.Spec.PrivatekeySecretName,
+		PrivatekeySecretName: peer.Spec.PrivateKeySecretName,
 		TrustedPeers:         peer.Spec.TrustedPeers,
 		BootstrapPeers:       peer.Spec.BootstrapPeers,
 		Consensus:            string(peer.Spec.Consensus),

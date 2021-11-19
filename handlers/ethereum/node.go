@@ -95,7 +95,7 @@ func (e *NodeHandler) Create(c *fiber.Ctx) error {
 		Spec: ethereumv1alpha1.NodeSpec{
 			Network:                  model.Network,
 			Client:                   ethereumv1alpha1.EthereumClient(model.Client),
-			NodePrivatekeySecretName: model.NodePrivateKeySecretName,
+			NodePrivateKeySecretName: model.NodePrivateKeySecretName,
 			Resources: sharedAPIs.Resources{
 				StorageClass: model.StorageClass,
 			},
@@ -156,7 +156,7 @@ func (e *NodeHandler) Update(c *fiber.Ctx) error {
 	}
 
 	if model.NodePrivateKeySecretName != "" {
-		node.Spec.NodePrivatekeySecretName = model.NodePrivateKeySecretName
+		node.Spec.NodePrivateKeySecretName = model.NodePrivateKeySecretName
 	}
 
 	if model.SyncMode != "" {
