@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/websocket/v2"
@@ -13,6 +14,7 @@ import (
 	models "github.com/kotalco/api/models/chainlink"
 	chainlinkv1alpha1 "github.com/kotalco/kotal/apis/chainlink/v1alpha1"
 	"k8s.io/apimachinery/pkg/api/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 )
 
@@ -35,7 +37,42 @@ func (n *NodeHandler) Get(c *fiber.Ctx) error {
 
 // Create creates chainlink node from the given spec
 func (n *NodeHandler) Create(c *fiber.Ctx) error {
-	return nil
+	model := new(models.Node)
+
+	if err := c.BodyParser(model); err != nil {
+		return c.Status(http.StatusBadRequest).JSON(fiber.Map{
+			"error": "bad request",
+		})
+	}
+
+	node := &chainlinkv1alpha1.Node{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      model.Name,
+			Namespace: "default",
+		},
+		Spec: chainlinkv1alpha1.NodeSpec{},
+	}
+
+	if os.Getenv("MOCK") == "true" {
+		node.Default()
+	}
+
+	if err := k8s.Client().Create(c.Context(), node); err != nil {
+		log.Println(err)
+		if errors.IsAlreadyExists(err) {
+			return c.Status(http.StatusUnprocessableEntity).JSON(fiber.Map{
+				"error": fmt.Sprintf("node by name %s already exist", model.Name),
+			})
+		}
+
+		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
+			"error": "failed to create node",
+		})
+	}
+
+	return c.Status(http.StatusCreated).JSON(map[string]interface{}{
+		"node": models.FromChainlinkNode(node),
+	})
 }
 
 // Update updates a single chainlink node by name from spec
