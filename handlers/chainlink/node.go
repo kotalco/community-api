@@ -117,7 +117,16 @@ func (n *NodeHandler) List(c *fiber.Ctx) error {
 
 // Delete a single chainlink node by name
 func (n *NodeHandler) Delete(c *fiber.Ctx) error {
-	return nil
+	node := c.Locals("node").(*chainlinkv1alpha1.Node)
+
+	if err := k8s.Client().Delete(c.Context(), node); err != nil {
+		log.Println(err)
+		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
+			"error": fmt.Sprintf("can't delete node by name %s", c.Params("name")),
+		})
+	}
+
+	return c.SendStatus(http.StatusNoContent)
 }
 
 // Count returns total number of nodes
