@@ -131,7 +131,16 @@ func (n *NodeHandler) Delete(c *fiber.Ctx) error {
 
 // Count returns total number of nodes
 func (n *NodeHandler) Count(c *fiber.Ctx) error {
-	return nil
+	nodes := &chainlinkv1alpha1.NodeList{}
+	if err := k8s.Client().List(c.Context(), nodes, client.InNamespace("default")); err != nil {
+		log.Println(err)
+		return c.SendStatus(http.StatusInternalServerError)
+	}
+
+	c.Set("Access-Control-Expose-Headers", "X-Total-Count")
+	c.Set("X-Total-Count", fmt.Sprintf("%d", len(nodes.Items)))
+
+	return c.SendStatus(http.StatusOK)
 }
 
 // validateNodeExist validate node by name exist
