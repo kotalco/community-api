@@ -10,6 +10,7 @@ import (
 	"github.com/kotalco/api/handlers"
 	sharedHandlers "github.com/kotalco/api/handlers/shared"
 	"github.com/kotalco/api/k8s"
+	models "github.com/kotalco/api/models/chainlink"
 	chainlinkv1alpha1 "github.com/kotalco/kotal/apis/chainlink/v1alpha1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/types"
@@ -25,7 +26,11 @@ func NewNodeHandler() handlers.Handler {
 
 // Get returns a single chainlink node by name
 func (n *NodeHandler) Get(c *fiber.Ctx) error {
-	return nil
+	node := c.Locals("node").(*chainlinkv1alpha1.Node)
+
+	return c.JSON(fiber.Map{
+		"node": models.FromChainlinkNode(node),
+	})
 }
 
 // Create creates chainlink node from the given spec
