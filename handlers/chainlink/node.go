@@ -5,6 +5,8 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"sort"
+	"strconv"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/websocket/v2"
@@ -12,10 +14,12 @@ import (
 	sharedHandlers "github.com/kotalco/api/handlers/shared"
 	"github.com/kotalco/api/k8s"
 	models "github.com/kotalco/api/models/chainlink"
+	"github.com/kotalco/api/shared"
 	chainlinkv1alpha1 "github.com/kotalco/kotal/apis/chainlink/v1alpha1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 // Chainlink node handler
@@ -82,7 +86,33 @@ func (n *NodeHandler) Update(c *fiber.Ctx) error {
 
 // List returns all chainlink nodes
 func (n *NodeHandler) List(c *fiber.Ctx) error {
-	return nil
+	nodes := &chainlinkv1alpha1.NodeList{}
+	if err := k8s.Client().List(c.Context(), nodes, client.InNamespace("default")); err != nil {
+		log.Println(err)
+		c.Status(http.StatusInternalServerError).JSON(fiber.Map{
+			"error": "failed to get all nodes",
+		})
+	}
+
+	c.Set("Access-Control-Expose-Headers", "X-Total-Count")
+	c.Set("X-Total-Count", fmt.Sprintf("%d", len(nodes.Items)))
+
+	nodeModels := []models.Node{}
+	// default page to 0
+	page, _ := strconv.Atoi(c.Query("page"))
+
+	start, end := shared.Page(uint(len(nodes.Items)), uint(page))
+	sort.Slice(nodes.Items[:], func(i, j int) bool {
+		return nodes.Items[j].CreationTimestamp.Before(&nodes.Items[i].CreationTimestamp)
+	})
+
+	for _, node := range nodes.Items[start:end] {
+		nodeModels = append(nodeModels, *models.FromChainlinkNode(&node))
+	}
+
+	return c.Status(http.StatusOK).JSON(fiber.Map{
+		"nodes": nodeModels,
+	})
 }
 
 // Delete a single chainlink node by name
