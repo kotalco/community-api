@@ -60,6 +60,10 @@ func (n *NodeHandler) Create(c *fiber.Ctx) error {
 			EthereumWSEndpoint:         model.EthereumWSEndpoint,
 			DatabaseURL:                model.DatabaseURL,
 			KeystorePasswordSecretName: model.KeystorePasswordSecretName,
+			APICredentials: chainlinkv1alpha1.APICredentials{
+				Email:              model.APICredentials.Email,
+				PasswordSecretName: model.APICredentials.PasswordSecretName,
+			},
 		},
 	}
 
@@ -112,6 +116,11 @@ func (n *NodeHandler) Update(c *fiber.Ctx) error {
 
 	if model.KeystorePasswordSecretName != "" {
 		node.Spec.KeystorePasswordSecretName = model.KeystorePasswordSecretName
+	}
+
+	if model.APICredentials != nil {
+		node.Spec.APICredentials.Email = model.APICredentials.Email
+		node.Spec.APICredentials.PasswordSecretName = model.APICredentials.PasswordSecretName
 	}
 
 	if os.Getenv("MOCK") == "true" {
