@@ -55,7 +55,8 @@ func (n *NodeHandler) Create(c *fiber.Ctx) error {
 			Namespace: "default",
 		},
 		Spec: chainlinkv1alpha1.NodeSpec{
-			EthereumChainId: model.EthereumChainId,
+			EthereumChainId:     model.EthereumChainId,
+			LinkContractAddress: model.LinkContractAddress,
 		},
 	}
 
