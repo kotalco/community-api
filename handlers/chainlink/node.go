@@ -143,6 +143,10 @@ func (n *NodeHandler) Update(c *fiber.Ctx) error {
 		node.Spec.APIPort = model.APIPort
 	}
 
+	if model.SecureCookies != nil {
+		node.Spec.SecureCookies = *model.SecureCookies
+	}
+
 	if os.Getenv("MOCK") == "true" {
 		node.Default()
 	}
