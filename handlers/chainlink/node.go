@@ -127,6 +127,10 @@ func (n *NodeHandler) Update(c *fiber.Ctx) error {
 		node.Spec.CORSDomains = model.CORSDomains
 	}
 
+	if model.CertSecretName != "" {
+		node.Spec.CertSecretName = model.CertSecretName
+	}
+
 	if os.Getenv("MOCK") == "true" {
 		node.Default()
 	}
