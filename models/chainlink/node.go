@@ -16,6 +16,7 @@ type Node struct {
 	EthereumHTTPEndpoints      []string        `json:"ethereumHttpEndpoints"`
 	KeystorePasswordSecretName string          `json:"keystorePasswordSecretName"`
 	APICredentials             *APICredentials `json:"apiCredentials"`
+	CORSDomains                []string        `json:"corsDomains,omitempty"`
 }
 
 func FromChainlinkNode(node *chainlinkv1alpha1.Node) *Node {
@@ -31,5 +32,6 @@ func FromChainlinkNode(node *chainlinkv1alpha1.Node) *Node {
 			Email:              node.Spec.APICredentials.Email,
 			PasswordSecretName: node.Spec.APICredentials.PasswordSecretName,
 		},
+		CORSDomains: node.Spec.CORSDomains,
 	}
 }

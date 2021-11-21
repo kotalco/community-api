@@ -123,6 +123,10 @@ func (n *NodeHandler) Update(c *fiber.Ctx) error {
 		node.Spec.APICredentials.PasswordSecretName = model.APICredentials.PasswordSecretName
 	}
 
+	if len(model.CORSDomains) != 0 {
+		node.Spec.CORSDomains = model.CORSDomains
+	}
+
 	if os.Getenv("MOCK") == "true" {
 		node.Default()
 	}
