@@ -54,7 +54,9 @@ func (n *NodeHandler) Create(c *fiber.Ctx) error {
 			Name:      model.Name,
 			Namespace: "default",
 		},
-		Spec: chainlinkv1alpha1.NodeSpec{},
+		Spec: chainlinkv1alpha1.NodeSpec{
+			EthereumChainId: model.EthereumChainId,
+		},
 	}
 
 	if os.Getenv("MOCK") == "true" {
