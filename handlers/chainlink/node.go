@@ -105,6 +105,10 @@ func (n *NodeHandler) Update(c *fiber.Ctx) error {
 		node.Spec.DatabaseURL = model.DatabaseURL
 	}
 
+	if len(model.EthereumHTTPEndpoints) != 0 {
+		node.Spec.EthereumHTTPEndpoints = model.EthereumHTTPEndpoints
+	}
+
 	if os.Getenv("MOCK") == "true" {
 		node.Default()
 	}
