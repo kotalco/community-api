@@ -6,6 +6,7 @@ type Node struct {
 	Name                string `json:"name"`
 	EthereumChainId     uint   `json:"ethereumChainId"`
 	LinkContractAddress string `json:"linkContractAddress"`
+	EthereumWSEndpoint  string `json:"ethereumWsEndpoint"`
 }
 
 func FromChainlinkNode(node *chainlinkv1alpha1.Node) *Node {
@@ -13,5 +14,6 @@ func FromChainlinkNode(node *chainlinkv1alpha1.Node) *Node {
 		Name:                node.Name,
 		EthereumChainId:     node.Spec.EthereumChainId,
 		LinkContractAddress: node.Spec.LinkContractAddress,
+		EthereumWSEndpoint:  node.Spec.EthereumWSEndpoint,
 	}
 }

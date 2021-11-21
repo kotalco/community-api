@@ -57,6 +57,7 @@ func (n *NodeHandler) Create(c *fiber.Ctx) error {
 		Spec: chainlinkv1alpha1.NodeSpec{
 			EthereumChainId:     model.EthereumChainId,
 			LinkContractAddress: model.LinkContractAddress,
+			EthereumWSEndpoint:  model.EthereumWSEndpoint,
 		},
 	}
 
