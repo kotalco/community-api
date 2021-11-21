@@ -1,4 +1,4 @@
-FROM golang:1.16-alpine AS builder
+FROM golang:1.17-alpine AS builder
 
 RUN apk add --no-cache curl tar
 ENV K8S_VERSION=1.21.2
@@ -20,4 +20,5 @@ COPY --from=builder /go/pkg/mod/github.com/kotalco /go/pkg/mod/github.com/kotalc
 COPY --from=builder /usr/local/kubebuilder /usr/local/kubebuilder
 COPY --from=builder /api/server /api/server
 
+ENV ETCD_UNSUPPORTED_ARCH=arm64
 ENTRYPOINT [ "/api/server" ]
