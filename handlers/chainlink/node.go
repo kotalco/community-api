@@ -147,6 +147,10 @@ func (n *NodeHandler) Update(c *fiber.Ctx) error {
 		node.Spec.SecureCookies = *model.SecureCookies
 	}
 
+	if model.Logging != "" {
+		node.Spec.Logging = chainlinkv1alpha1.VerbosityLevel(model.Logging)
+	}
+
 	if os.Getenv("MOCK") == "true" {
 		node.Default()
 	}

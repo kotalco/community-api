@@ -22,6 +22,7 @@ type Node struct {
 	P2PPort                    uint            `json:"p2pPort"`
 	APIPort                    uint            `json:"apiPort"`
 	SecureCookies              *bool           `json:"secureCookies"`
+	Logging                    string          `json:"logging"`
 }
 
 func FromChainlinkNode(node *chainlinkv1alpha1.Node) *Node {
@@ -43,5 +44,6 @@ func FromChainlinkNode(node *chainlinkv1alpha1.Node) *Node {
 		P2PPort:        node.Spec.P2PPort,
 		APIPort:        node.Spec.APIPort,
 		SecureCookies:  &node.Spec.SecureCookies,
+		Logging:        string(node.Spec.Logging),
 	}
 }
