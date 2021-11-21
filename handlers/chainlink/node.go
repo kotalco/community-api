@@ -139,6 +139,10 @@ func (n *NodeHandler) Update(c *fiber.Ctx) error {
 		node.Spec.P2PPort = model.P2PPort
 	}
 
+	if model.APIPort != 0 {
+		node.Spec.APIPort = model.APIPort
+	}
+
 	if os.Getenv("MOCK") == "true" {
 		node.Default()
 	}

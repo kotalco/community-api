@@ -20,6 +20,7 @@ type Node struct {
 	CertSecretName             string          `json:"certSecretName"`
 	TLSPort                    uint            `json:"tlsPort"`
 	P2PPort                    uint            `json:"p2pPort"`
+	APIPort                    uint            `json:"apiPort"`
 }
 
 func FromChainlinkNode(node *chainlinkv1alpha1.Node) *Node {
@@ -39,5 +40,6 @@ func FromChainlinkNode(node *chainlinkv1alpha1.Node) *Node {
 		CertSecretName: node.Spec.CertSecretName,
 		TLSPort:        node.Spec.TLSPort,
 		P2PPort:        node.Spec.P2PPort,
+		APIPort:        node.Spec.APIPort,
 	}
 }
