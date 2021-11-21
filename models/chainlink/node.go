@@ -23,6 +23,12 @@ type Node struct {
 	APIPort                    uint            `json:"apiPort"`
 	SecureCookies              *bool           `json:"secureCookies"`
 	Logging                    string          `json:"logging"`
+	CPU                        string          `json:"cpu"`
+	CPULimit                   string          `json:"cpuLimit"`
+	Memory                     string          `json:"memory"`
+	MemoryLimit                string          `json:"memoryLimit"`
+	Storage                    string          `json:"storage"`
+	StorageClass               *string         `json:"storageClass"`
 }
 
 func FromChainlinkNode(node *chainlinkv1alpha1.Node) *Node {
@@ -45,5 +51,11 @@ func FromChainlinkNode(node *chainlinkv1alpha1.Node) *Node {
 		APIPort:        node.Spec.APIPort,
 		SecureCookies:  &node.Spec.SecureCookies,
 		Logging:        string(node.Spec.Logging),
+		CPU:            node.Spec.CPU,
+		CPULimit:       node.Spec.CPULimit,
+		Memory:         node.Spec.Memory,
+		MemoryLimit:    node.Spec.MemoryLimit,
+		Storage:        node.Spec.Storage,
+		StorageClass:   node.Spec.StorageClass,
 	}
 }

@@ -151,6 +151,22 @@ func (n *NodeHandler) Update(c *fiber.Ctx) error {
 		node.Spec.Logging = chainlinkv1alpha1.VerbosityLevel(model.Logging)
 	}
 
+	if model.CPU != "" {
+		node.Spec.CPU = model.CPU
+	}
+	if model.CPULimit != "" {
+		node.Spec.CPULimit = model.CPULimit
+	}
+	if model.Memory != "" {
+		node.Spec.Memory = model.Memory
+	}
+	if model.MemoryLimit != "" {
+		node.Spec.MemoryLimit = model.MemoryLimit
+	}
+	if model.Storage != "" {
+		node.Spec.Storage = model.Storage
+	}
+
 	if os.Getenv("MOCK") == "true" {
 		node.Default()
 	}
