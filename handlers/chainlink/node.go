@@ -55,10 +55,11 @@ func (n *NodeHandler) Create(c *fiber.Ctx) error {
 			Namespace: "default",
 		},
 		Spec: chainlinkv1alpha1.NodeSpec{
-			EthereumChainId:     model.EthereumChainId,
-			LinkContractAddress: model.LinkContractAddress,
-			EthereumWSEndpoint:  model.EthereumWSEndpoint,
-			DatabaseURL:         model.DatabaseURL,
+			EthereumChainId:            model.EthereumChainId,
+			LinkContractAddress:        model.LinkContractAddress,
+			EthereumWSEndpoint:         model.EthereumWSEndpoint,
+			DatabaseURL:                model.DatabaseURL,
+			KeystorePasswordSecretName: model.KeystorePasswordSecretName,
 		},
 	}
 
@@ -107,6 +108,10 @@ func (n *NodeHandler) Update(c *fiber.Ctx) error {
 
 	if len(model.EthereumHTTPEndpoints) != 0 {
 		node.Spec.EthereumHTTPEndpoints = model.EthereumHTTPEndpoints
+	}
+
+	if model.KeystorePasswordSecretName != "" {
+		node.Spec.KeystorePasswordSecretName = model.KeystorePasswordSecretName
 	}
 
 	if os.Getenv("MOCK") == "true" {
