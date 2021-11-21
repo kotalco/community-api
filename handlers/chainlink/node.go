@@ -85,7 +85,37 @@ func (n *NodeHandler) Create(c *fiber.Ctx) error {
 
 // Update updates a single chainlink node by name from spec
 func (n *NodeHandler) Update(c *fiber.Ctx) error {
-	return nil
+	model := new(models.Node)
+
+	if err := c.BodyParser(model); err != nil {
+		return c.Status(http.StatusBadRequest).JSON(fiber.Map{
+			"error": "bad request",
+		})
+	}
+
+	name := c.Params("name")
+	node := c.Locals("node").(*chainlinkv1alpha1.Node)
+
+	if model.EthereumWSEndpoint != "" {
+		node.Spec.EthereumWSEndpoint = model.EthereumWSEndpoint
+	}
+
+	if os.Getenv("MOCK") == "true" {
+		node.Default()
+	}
+
+	if err := k8s.Client().Update(c.Context(), node); err != nil {
+		log.Println(err)
+		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
+			"error": fmt.Sprintf("can't update node by name %s", name),
+		})
+	}
+
+	updatedModel := models.FromChainlinkNode(node)
+
+	return c.Status(http.StatusOK).JSON(fiber.Map{
+		"node": updatedModel,
+	})
 }
 
 // List returns all chainlink nodes
