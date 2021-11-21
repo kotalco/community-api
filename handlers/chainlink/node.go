@@ -58,6 +58,7 @@ func (n *NodeHandler) Create(c *fiber.Ctx) error {
 			EthereumChainId:     model.EthereumChainId,
 			LinkContractAddress: model.LinkContractAddress,
 			EthereumWSEndpoint:  model.EthereumWSEndpoint,
+			DatabaseURL:         model.DatabaseURL,
 		},
 	}
 
@@ -98,6 +99,10 @@ func (n *NodeHandler) Update(c *fiber.Ctx) error {
 
 	if model.EthereumWSEndpoint != "" {
 		node.Spec.EthereumWSEndpoint = model.EthereumWSEndpoint
+	}
+
+	if model.DatabaseURL != "" {
+		node.Spec.DatabaseURL = model.DatabaseURL
 	}
 
 	if os.Getenv("MOCK") == "true" {
