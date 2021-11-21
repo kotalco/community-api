@@ -131,6 +131,10 @@ func (n *NodeHandler) Update(c *fiber.Ctx) error {
 		node.Spec.CertSecretName = model.CertSecretName
 	}
 
+	if model.TLSPort != 0 {
+		node.Spec.TLSPort = model.TLSPort
+	}
+
 	if os.Getenv("MOCK") == "true" {
 		node.Default()
 	}

@@ -18,6 +18,7 @@ type Node struct {
 	APICredentials             *APICredentials `json:"apiCredentials"`
 	CORSDomains                []string        `json:"corsDomains"`
 	CertSecretName             string          `json:"certSecretName"`
+	TLSPort                    uint            `json:"tlsPort,omitempty"`
 }
 
 func FromChainlinkNode(node *chainlinkv1alpha1.Node) *Node {
@@ -35,5 +36,6 @@ func FromChainlinkNode(node *chainlinkv1alpha1.Node) *Node {
 		},
 		CORSDomains:    node.Spec.CORSDomains,
 		CertSecretName: node.Spec.CertSecretName,
+		TLSPort:        node.Spec.TLSPort,
 	}
 }
