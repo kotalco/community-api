@@ -42,7 +42,7 @@ func Logger(c *websocket.Conn) {
 	defer stream.Close()
 
 	for {
-		buf := make([]byte, 100)
+		buf := make([]byte, 1024)
 		numBytes, err := stream.Read(buf)
 		if err != nil {
 			break
