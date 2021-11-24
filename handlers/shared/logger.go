@@ -52,6 +52,6 @@ func Logger(c *websocket.Conn) {
 			continue
 		}
 
-		c.WriteMessage(2, buf[:numBytes])
+		c.WriteMessage(websocket.TextMessage, buf[:numBytes])
 	}
 }
