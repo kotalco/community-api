@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"math/rand"
 	"os"
 	"time"
 
@@ -16,14 +17,25 @@ import (
 )
 
 // Status returns a websocket that emits logs from pod
-// Possible values are: NotFound, Pending, ContainerCreating, Running, Terminating
+// Possible values are: NotFound, Pending, PodInitializing, ContainerCreating, Running, Error, Terminating
 func Status(c *websocket.Conn) {
 	defer c.Close()
 
 	if os.Getenv("MOCK") == "true" {
+		statuses := []string{
+			"NotFound",
+			"Pending",
+			"PodInitializing",
+			"ContainerCreating",
+			"Running",
+			"Error",
+			"Terminating",
+		}
+
 		for {
-			c.WriteMessage(websocket.TextMessage, []byte("running"))
-			time.Sleep(1 * time.Second)
+			i := rand.Intn(len(statuses))
+			c.WriteMessage(websocket.TextMessage, []byte(statuses[i]))
+			time.Sleep(time.Second)
 		}
 	}
 
