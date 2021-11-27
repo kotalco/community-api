@@ -1,6 +1,10 @@
 package models
 
-import chainlinkv1alpha1 "github.com/kotalco/kotal/apis/chainlink/v1alpha1"
+import (
+	"github.com/kotalco/api/models"
+	"github.com/kotalco/api/shared"
+	chainlinkv1alpha1 "github.com/kotalco/kotal/apis/chainlink/v1alpha1"
+)
 
 type APICredentials struct {
 	Email              string `json:"email"`
@@ -8,6 +12,7 @@ type APICredentials struct {
 }
 
 type Node struct {
+	models.Time
 	Name                       string          `json:"name"`
 	EthereumChainId            uint            `json:"ethereumChainId"`
 	LinkContractAddress        string          `json:"linkContractAddress"`
@@ -33,7 +38,10 @@ type Node struct {
 
 func FromChainlinkNode(node *chainlinkv1alpha1.Node) *Node {
 	return &Node{
-		Name:                       node.Name,
+		Name: node.Name,
+		Time: models.Time{
+			CreatedAt: node.CreationTimestamp.UTC().Format(shared.JavascriptISOString),
+		},
 		EthereumChainId:            node.Spec.EthereumChainId,
 		LinkContractAddress:        node.Spec.LinkContractAddress,
 		EthereumWSEndpoint:         node.Spec.EthereumWSEndpoint,
