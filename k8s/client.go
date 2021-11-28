@@ -11,6 +11,7 @@ import (
 	ethereumv1alpha1 "github.com/kotalco/kotal/apis/ethereum/v1alpha1"
 	ethereum2v1alpha1 "github.com/kotalco/kotal/apis/ethereum2/v1alpha1"
 	ipfsv1alpha1 "github.com/kotalco/kotal/apis/ipfs/v1alpha1"
+	polkadotv1alpha1 "github.com/kotalco/kotal/apis/polkadot/v1alpha1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/kubernetes"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
@@ -91,6 +92,7 @@ func NewRuntimeClient() (client.Client, error) {
 	ethereum2v1alpha1.AddToScheme(scheme)
 	ipfsv1alpha1.AddToScheme(scheme)
 	chainlinkv1alpha1.AddToScheme(scheme)
+	polkadotv1alpha1.AddToScheme(scheme)
 
 	opts := client.Options{Scheme: scheme}
 
