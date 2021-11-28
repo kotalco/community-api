@@ -86,7 +86,9 @@ func (n *NodeHandler) Create(c *fiber.Ctx) error {
 			Name:      model.Name,
 			Namespace: "default",
 		},
-		Spec: polkadotv1alpha1.NodeSpec{},
+		Spec: polkadotv1alpha1.NodeSpec{
+			Network: model.Network,
+		},
 	}
 
 	if os.Getenv("MOCK") == "true" {
