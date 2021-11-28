@@ -13,6 +13,7 @@ import (
 	ethereumHandlers "github.com/kotalco/api/handlers/ethereum"
 	ethereum2Handlers "github.com/kotalco/api/handlers/ethereum2"
 	ipfsHandlers "github.com/kotalco/api/handlers/ipfs"
+	polkadotHandlers "github.com/kotalco/api/handlers/polkadot"
 )
 
 func main() {
@@ -37,6 +38,9 @@ func main() {
 	chainlink := v1.Group("chainlink")
 	chainlinkNodes := chainlink.Group("nodes")
 
+	polkadot := v1.Group("polkadot")
+	polkadotNodes := polkadot.Group("nodes")
+
 	ipfs := v1.Group("ipfs")
 	peers := ipfs.Group("peers")
 	clusterpeers := ipfs.Group("clusterpeers")
@@ -51,6 +55,7 @@ func main() {
 	})
 
 	chainlinkHandlers.NewNodeHandler().Register(chainlinkNodes)
+	polkadotHandlers.NewNodeHandler().Register(polkadotNodes)
 	ethereumHandlers.NewNodeHandler().Register(nodes)
 	ipfsHandlers.NewPeerHandler().Register(peers)
 	ipfsHandlers.NewClusterPeerHandler().Register(clusterpeers)
