@@ -197,6 +197,10 @@ func (n *NodeHandler) Update(c *fiber.Ctx) error {
 		node.Spec.WSPort = model.WSPort
 	}
 
+	if len(model.CORSDomains) != 0 {
+		node.Spec.CORSDomains = model.CORSDomains
+	}
+
 	if os.Getenv("MOCK") == "true" {
 		node.Default()
 	}

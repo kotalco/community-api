@@ -3,22 +3,23 @@ package models
 import polkadotv1alpha1 "github.com/kotalco/kotal/apis/polkadot/v1alpha1"
 
 type Node struct {
-	Name                     string `json:"name"`
-	Network                  string `json:"network"`
-	NodePrivateKeySecretName string `json:"nodePrivateKeySecretName"`
-	Validator                *bool  `json:"validator"`
-	SyncMode                 string `json:"syncMode"`
-	Pruning                  *bool  `json:"pruning"`
-	RetainedBlocks           uint   `json:"retainedBlocks"`
-	Logging                  string `json:"logging"`
-	Telemetry                *bool  `json:"telemetry"`
-	TelemetryURL             string `json:"telemetryURL"`
-	Prometheus               *bool  `json:"prometheus"`
-	PrometheusPort           uint   `json:"prometheusPort"`
-	RPC                      *bool  `json:"rpc"`
-	RPCPort                  uint   `json:"rpcPort"`
-	WS                       *bool  `json:"ws"`
-	WSPort                   uint   `json:"wsPort"`
+	Name                     string   `json:"name"`
+	Network                  string   `json:"network"`
+	NodePrivateKeySecretName string   `json:"nodePrivateKeySecretName"`
+	Validator                *bool    `json:"validator"`
+	SyncMode                 string   `json:"syncMode"`
+	Pruning                  *bool    `json:"pruning"`
+	RetainedBlocks           uint     `json:"retainedBlocks"`
+	Logging                  string   `json:"logging"`
+	Telemetry                *bool    `json:"telemetry"`
+	TelemetryURL             string   `json:"telemetryURL"`
+	Prometheus               *bool    `json:"prometheus"`
+	PrometheusPort           uint     `json:"prometheusPort"`
+	RPC                      *bool    `json:"rpc"`
+	RPCPort                  uint     `json:"rpcPort"`
+	WS                       *bool    `json:"ws"`
+	WSPort                   uint     `json:"wsPort"`
+	CORSDomains              []string `json:"corsDomains"`
 }
 
 func FromPolkadotNode(node *polkadotv1alpha1.Node) *Node {
@@ -39,5 +40,6 @@ func FromPolkadotNode(node *polkadotv1alpha1.Node) *Node {
 		RPCPort:                  node.Spec.RPCPort,
 		WS:                       &node.Spec.WS,
 		WSPort:                   node.Spec.WSPort,
+		CORSDomains:              node.Spec.CORSDomains,
 	}
 }
