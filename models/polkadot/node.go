@@ -18,6 +18,7 @@ type Node struct {
 	RPC                      *bool  `json:"rpc"`
 	RPCPort                  uint   `json:"rpcPort"`
 	WS                       *bool  `json:"ws"`
+	WSPort                   uint   `json:"wsPort"`
 }
 
 func FromPolkadotNode(node *polkadotv1alpha1.Node) *Node {
@@ -37,5 +38,6 @@ func FromPolkadotNode(node *polkadotv1alpha1.Node) *Node {
 		RPC:                      &node.Spec.RPC,
 		RPCPort:                  node.Spec.RPCPort,
 		WS:                       &node.Spec.WS,
+		WSPort:                   node.Spec.WSPort,
 	}
 }

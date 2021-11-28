@@ -193,6 +193,10 @@ func (n *NodeHandler) Update(c *fiber.Ctx) error {
 		node.Spec.WS = *model.WS
 	}
 
+	if model.WSPort != 0 {
+		node.Spec.WSPort = model.WSPort
+	}
+
 	if os.Getenv("MOCK") == "true" {
 		node.Default()
 	}
