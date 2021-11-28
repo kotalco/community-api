@@ -7,6 +7,7 @@ type Node struct {
 	Network                  string `json:"network"`
 	NodePrivateKeySecretName string `json:"nodePrivateKeySecretName"`
 	Validator                *bool  `json:"validator"`
+	SyncMode                 string `json:"syncMode"`
 }
 
 func FromPolkadotNode(node *polkadotv1alpha1.Node) *Node {
@@ -15,5 +16,6 @@ func FromPolkadotNode(node *polkadotv1alpha1.Node) *Node {
 		Network:                  node.Spec.Network,
 		NodePrivateKeySecretName: node.Spec.NodePrivateKeySecretName,
 		Validator:                &node.Spec.Validator,
+		SyncMode:                 string(node.Spec.SyncMode),
 	}
 }

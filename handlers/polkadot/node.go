@@ -149,6 +149,10 @@ func (n *NodeHandler) Update(c *fiber.Ctx) error {
 		node.Spec.Validator = *model.Validator
 	}
 
+	if model.SyncMode != "" {
+		node.Spec.SyncMode = polkadotv1alpha1.SynchronizationMode(model.SyncMode)
+	}
+
 	if os.Getenv("MOCK") == "true" {
 		node.Default()
 	}
