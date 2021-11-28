@@ -141,6 +141,10 @@ func (n *NodeHandler) Update(c *fiber.Ctx) error {
 	name := c.Params("name")
 	node := c.Locals("node").(*polkadotv1alpha1.Node)
 
+	if model.NodePrivateKeySecretName != "" {
+		node.Spec.NodePrivateKeySecretName = model.NodePrivateKeySecretName
+	}
+
 	if os.Getenv("MOCK") == "true" {
 		node.Default()
 	}
