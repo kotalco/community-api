@@ -145,6 +145,10 @@ func (n *NodeHandler) Update(c *fiber.Ctx) error {
 		node.Spec.NodePrivateKeySecretName = model.NodePrivateKeySecretName
 	}
 
+	if model.Validator != nil {
+		node.Spec.Validator = *model.Validator
+	}
+
 	if os.Getenv("MOCK") == "true" {
 		node.Default()
 	}
