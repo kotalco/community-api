@@ -173,6 +173,10 @@ func (n *NodeHandler) Update(c *fiber.Ctx) error {
 		node.Spec.TelemetryURL = model.TelemetryURL
 	}
 
+	if model.Prometheus != nil {
+		node.Spec.Prometheus = *model.Prometheus
+	}
+
 	if os.Getenv("MOCK") == "true" {
 		node.Default()
 	}

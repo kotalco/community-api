@@ -13,6 +13,7 @@ type Node struct {
 	Logging                  string `json:"logging"`
 	Telemetry                *bool  `json:"telemetry"`
 	TelemetryURL             string `json:"telemetryURL"`
+	Prometheus               *bool  `json:"prometheus"`
 }
 
 func FromPolkadotNode(node *polkadotv1alpha1.Node) *Node {
@@ -27,5 +28,6 @@ func FromPolkadotNode(node *polkadotv1alpha1.Node) *Node {
 		Logging:                  string(node.Spec.Logging),
 		Telemetry:                &node.Spec.Telemetry,
 		TelemetryURL:             node.Spec.TelemetryURL,
+		Prometheus:               &node.Spec.Prometheus,
 	}
 }
