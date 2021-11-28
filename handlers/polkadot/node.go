@@ -161,6 +161,10 @@ func (n *NodeHandler) Update(c *fiber.Ctx) error {
 		node.Spec.RetainedBlocks = model.RetainedBlocks
 	}
 
+	if model.Logging != "" {
+		node.Spec.Logging = polkadotv1alpha1.VerbosityLevel(model.Logging)
+	}
+
 	if os.Getenv("MOCK") == "true" {
 		node.Default()
 	}
