@@ -20,6 +20,12 @@ type Node struct {
 	WS                       *bool    `json:"ws"`
 	WSPort                   uint     `json:"wsPort"`
 	CORSDomains              []string `json:"corsDomains"`
+	CPU                      string   `json:"cpu"`
+	CPULimit                 string   `json:"cpuLimit"`
+	Memory                   string   `json:"memory"`
+	MemoryLimit              string   `json:"memoryLimit"`
+	Storage                  string   `json:"storage"`
+	StorageClass             *string  `json:"storageClass"`
 }
 
 func FromPolkadotNode(node *polkadotv1alpha1.Node) *Node {
@@ -41,5 +47,11 @@ func FromPolkadotNode(node *polkadotv1alpha1.Node) *Node {
 		WS:                       &node.Spec.WS,
 		WSPort:                   node.Spec.WSPort,
 		CORSDomains:              node.Spec.CORSDomains,
+		CPU:                      node.Spec.CPU,
+		CPULimit:                 node.Spec.CPULimit,
+		Memory:                   node.Spec.Memory,
+		MemoryLimit:              node.Spec.MemoryLimit,
+		Storage:                  node.Spec.Storage,
+		StorageClass:             node.Spec.StorageClass,
 	}
 }
