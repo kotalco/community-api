@@ -157,6 +157,10 @@ func (n *NodeHandler) Update(c *fiber.Ctx) error {
 		node.Spec.Pruning = model.Pruning
 	}
 
+	if model.RetainedBlocks != 0 {
+		node.Spec.RetainedBlocks = model.RetainedBlocks
+	}
+
 	if os.Getenv("MOCK") == "true" {
 		node.Default()
 	}

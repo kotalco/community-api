@@ -9,6 +9,7 @@ type Node struct {
 	Validator                *bool  `json:"validator"`
 	SyncMode                 string `json:"syncMode"`
 	Pruning                  *bool  `json:"pruning"`
+	RetainedBlocks           uint   `json:"retainedBlocks"`
 }
 
 func FromPolkadotNode(node *polkadotv1alpha1.Node) *Node {
@@ -19,5 +20,6 @@ func FromPolkadotNode(node *polkadotv1alpha1.Node) *Node {
 		Validator:                &node.Spec.Validator,
 		SyncMode:                 string(node.Spec.SyncMode),
 		Pruning:                  node.Spec.Pruning,
+		RetainedBlocks:           node.Spec.RetainedBlocks,
 	}
 }
