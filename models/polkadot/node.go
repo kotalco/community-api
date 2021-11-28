@@ -11,6 +11,7 @@ type Node struct {
 	Pruning                  *bool  `json:"pruning"`
 	RetainedBlocks           uint   `json:"retainedBlocks"`
 	Logging                  string `json:"logging"`
+	Telemetry                *bool  `json:"telemetry"`
 }
 
 func FromPolkadotNode(node *polkadotv1alpha1.Node) *Node {
@@ -23,5 +24,6 @@ func FromPolkadotNode(node *polkadotv1alpha1.Node) *Node {
 		Pruning:                  node.Spec.Pruning,
 		RetainedBlocks:           node.Spec.RetainedBlocks,
 		Logging:                  string(node.Spec.Logging),
+		Telemetry:                &node.Spec.Telemetry,
 	}
 }

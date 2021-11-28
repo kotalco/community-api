@@ -165,6 +165,10 @@ func (n *NodeHandler) Update(c *fiber.Ctx) error {
 		node.Spec.Logging = polkadotv1alpha1.VerbosityLevel(model.Logging)
 	}
 
+	if model.Telemetry != nil {
+		node.Spec.Telemetry = *model.Telemetry
+	}
+
 	if os.Getenv("MOCK") == "true" {
 		node.Default()
 	}
