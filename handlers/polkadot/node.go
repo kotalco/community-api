@@ -169,6 +169,10 @@ func (n *NodeHandler) Update(c *fiber.Ctx) error {
 		node.Spec.Telemetry = *model.Telemetry
 	}
 
+	if model.TelemetryURL != "" {
+		node.Spec.TelemetryURL = model.TelemetryURL
+	}
+
 	if os.Getenv("MOCK") == "true" {
 		node.Default()
 	}
