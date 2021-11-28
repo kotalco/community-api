@@ -185,6 +185,10 @@ func (n *NodeHandler) Update(c *fiber.Ctx) error {
 		node.Spec.RPC = *model.RPC
 	}
 
+	if model.RPCPort != 0 {
+		node.Spec.RPCPort = model.RPCPort
+	}
+
 	if os.Getenv("MOCK") == "true" {
 		node.Default()
 	}
