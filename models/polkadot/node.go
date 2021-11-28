@@ -14,6 +14,7 @@ type Node struct {
 	Telemetry                *bool  `json:"telemetry"`
 	TelemetryURL             string `json:"telemetryURL"`
 	Prometheus               *bool  `json:"prometheus"`
+	PrometheusPort           uint   `json:"prometheusPort"`
 }
 
 func FromPolkadotNode(node *polkadotv1alpha1.Node) *Node {
@@ -29,5 +30,6 @@ func FromPolkadotNode(node *polkadotv1alpha1.Node) *Node {
 		Telemetry:                &node.Spec.Telemetry,
 		TelemetryURL:             node.Spec.TelemetryURL,
 		Prometheus:               &node.Spec.Prometheus,
+		PrometheusPort:           node.Spec.PrometheusPort,
 	}
 }

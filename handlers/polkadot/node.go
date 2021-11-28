@@ -177,6 +177,10 @@ func (n *NodeHandler) Update(c *fiber.Ctx) error {
 		node.Spec.Prometheus = *model.Prometheus
 	}
 
+	if model.PrometheusPort != 0 {
+		node.Spec.PrometheusPort = model.PrometheusPort
+	}
+
 	if os.Getenv("MOCK") == "true" {
 		node.Default()
 	}
