@@ -14,6 +14,7 @@ import (
 	ethereum2Handlers "github.com/kotalco/api/handlers/ethereum2"
 	ipfsHandlers "github.com/kotalco/api/handlers/ipfs"
 	polkadotHandlers "github.com/kotalco/api/handlers/polkadot"
+	_ "k8s.io/client-go/plugin/pkg/client/auth"
 )
 
 func main() {
