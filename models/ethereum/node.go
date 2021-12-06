@@ -22,8 +22,8 @@ type Node struct {
 	NodePrivateKeySecretName string           `json:"nodePrivateKeySecretName"`
 	SyncMode                 string           `json:"syncMode"`
 	P2PPort                  uint             `json:"p2pPort"`
-	StaticNodes              []string         `json:"staticNodes"`
-	Bootnodes                []string         `json:"bootnodes"`
+	StaticNodes              *[]string        `json:"staticNodes"`
+	Bootnodes                *[]string        `json:"bootnodes"`
 	Miner                    *bool            `json:"miner"`
 	Coinbase                 string           `json:"coinbase"`
 	Import                   *ImportedAccount `json:"import"`
@@ -113,13 +113,13 @@ func FromEthereumNode(n *ethereumv1alpha1.Node) *Node {
 	for _, enode := range n.Spec.StaticNodes {
 		staticNodes = append(staticNodes, string(enode))
 	}
-	model.StaticNodes = staticNodes
+	model.StaticNodes = &staticNodes
 
 	bootnodes := []string{}
 	for _, bootnode := range n.Spec.Bootnodes {
 		bootnodes = append(bootnodes, string(bootnode))
 	}
-	model.Bootnodes = bootnodes
+	model.Bootnodes = &bootnodes
 
 	return model
 

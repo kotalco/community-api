@@ -232,13 +232,17 @@ func (e *NodeHandler) Update(c *fiber.Ctx) error {
 
 	var bootnodes, staticNodes []ethereumv1alpha1.Enode
 
-	for _, bootnode := range model.Bootnodes {
-		bootnodes = append(bootnodes, ethereumv1alpha1.Enode(bootnode))
+	if model.Bootnodes != nil {
+		for _, bootnode := range *model.Bootnodes {
+			bootnodes = append(bootnodes, ethereumv1alpha1.Enode(bootnode))
+		}
 	}
 	node.Spec.Bootnodes = bootnodes
 
-	for _, staticNode := range model.StaticNodes {
-		staticNodes = append(staticNodes, ethereumv1alpha1.Enode(staticNode))
+	if model.StaticNodes != nil {
+		for _, staticNode := range *model.StaticNodes {
+			staticNodes = append(staticNodes, ethereumv1alpha1.Enode(staticNode))
+		}
 	}
 	node.Spec.StaticNodes = staticNodes
 
