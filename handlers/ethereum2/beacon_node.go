@@ -81,8 +81,9 @@ func (b *BeaconNodeHandler) Create(c *fiber.Ctx) error {
 		})
 	}
 
-	if model.Eth1Endpoints == nil {
-		model.Eth1Endpoints = []string{}
+	var endpoints []string
+	if model.Eth1Endpoints != nil {
+		endpoints = *model.Eth1Endpoints
 	}
 
 	client := ethereum2v1alpha1.Ethereum2Client(model.Client)
@@ -95,7 +96,7 @@ func (b *BeaconNodeHandler) Create(c *fiber.Ctx) error {
 		Spec: ethereum2v1alpha1.BeaconNodeSpec{
 			Network:       model.Network,
 			Client:        client,
-			Eth1Endpoints: model.Eth1Endpoints,
+			Eth1Endpoints: endpoints,
 			RPC:           client == ethereum2v1alpha1.PrysmClient,
 			Resources: sharedAPIs.Resources{
 				StorageClass: model.StorageClass,
@@ -151,8 +152,15 @@ func (b *BeaconNodeHandler) Update(c *fiber.Ctx) error {
 
 	beaconnode := c.Locals("node").(*ethereum2v1alpha1.BeaconNode)
 
-	if len(model.Eth1Endpoints) != 0 {
-		beaconnode.Spec.Eth1Endpoints = model.Eth1Endpoints
+	endpoints := model.Eth1Endpoints
+	if endpoints != nil {
+		// all clients can clear ethereum endpoints
+		// prysm can clear ethereum endpoints only if network is mainnet
+		if beaconnode.Spec.Client == ethereum2v1alpha1.PrysmClient && beaconnode.Spec.Network != "mainnet" && len(*endpoints) == 0 {
+			// do nothing
+		} else {
+			beaconnode.Spec.Eth1Endpoints = *endpoints
+		}
 	}
 
 	if model.REST != nil {
