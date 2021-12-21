@@ -1,8 +1,12 @@
 # :fire: Kotal API
 
-Kotal api server listens on port `3000` and responds to versioned api calls.
+Kotal API is used by Kotal Dashboard to manage [Kotal Operator]() custom resources like IPFS peers, Polkadot validator nodes, Chainlink nodes, Ethereum nodes ... etc.
 
-Running the api server against real k8s cluster requires:
+Kotal API server listens on port `3000` and responds to versioned API calls.
+
+API server port can be changed using `KOTAL_API_SERVER_PORT` environment variable.
+
+Running the API server against real k8s cluster requires:
 
 - [kotal operator](https://github.com/kotalco/kotal) to deployed in the cluster
 - api server to be deployed with correct role and role bindings
@@ -25,6 +29,8 @@ API server can run simple by cloning this repository, then:
 go run main.go
 ```
 
+**NOTE:** This command will run the API server and expects an actual k8s cluster with kubeconfig available in the default kubeconfig dir.
+
 To run the mocking API server, use the `MOCK=true` environment variable:
 
 ```
@@ -36,7 +42,7 @@ MOCK=true go run main.go
 To run the API server from the docker image:
 
 ```
-docker run -p 3000:3000 -e MOCK=true kotalco/api:0.1
+docker run -p 3000:3000 -e MOCK=true kotalco/api:develop
 ```
 
 ## :telephone_receiver: Sample cURL Calls
@@ -44,7 +50,7 @@ docker run -p 3000:3000 -e MOCK=true kotalco/api:0.1
 Create a new node:
 
 ```
-curl -X POST -d '{"name": "my-node", "network": "mainnet", "client": "parity"}' -H 'content-type: application/json' localhost:3000/api/v1/ethereum/nodes
+curl -X POST -d '{"name": "my-node", "network": "mainnet", "client": "besu"}' -H 'content-type: application/json' localhost:3000/api/v1/ethereum/nodes
 ```
 
 Get node by name:
@@ -59,14 +65,14 @@ List all nodes:
 curl localhost:3000/api/v1/ethereum/nodes
 ```
 
+Update node by name:
+
+```
+curl -X PUT -d '{"rpc": true}' -H 'content-type: application/json' localhost:3000/api/v1/ethereum/nodes/my-node
+```
+
 Delete node by name:
 
 ```
 curl -X DELETE localhost:3000/api/v1/ethereum/nodes/my-node
-```
-
-Update node by name:
-
-```
-curl -X PUT -d '{"client": "geth"}' -H 'content-type: application/json' localhost:3000/api/v1/ethereum/nodes/my-node
 ```
