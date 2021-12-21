@@ -1,6 +1,6 @@
 # :fire: Kotal API
 
-Kotal API is used by Kotal Dashboard to manage [Kotal Operator]() custom resources like IPFS peers, Polkadot validator nodes, Chainlink nodes, Ethereum nodes ... etc.
+Kotal API is used by Kotal Dashboard to manage [Kotal Operator](https://github.com/kotalco/kotal) custom resources like IPFS peers, Polkadot validator nodes, Chainlink nodes, Ethereum nodes ... etc.
 
 Kotal API server listens on port `3000` and responds to versioned API calls.
 
