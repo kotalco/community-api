@@ -16,6 +16,7 @@ import (
 	models "github.com/kotalco/api/models/chainlink"
 	"github.com/kotalco/api/shared"
 	chainlinkv1alpha1 "github.com/kotalco/kotal/apis/chainlink/v1alpha1"
+	sharedAPI "github.com/kotalco/kotal/apis/shared"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
@@ -148,7 +149,7 @@ func (n *NodeHandler) Update(c *fiber.Ctx) error {
 	}
 
 	if model.Logging != "" {
-		node.Spec.Logging = chainlinkv1alpha1.VerbosityLevel(model.Logging)
+		node.Spec.Logging = sharedAPI.VerbosityLevel(model.Logging)
 	}
 
 	if model.CPU != "" {

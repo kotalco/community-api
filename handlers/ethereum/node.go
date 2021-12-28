@@ -20,6 +20,7 @@ import (
 	models "github.com/kotalco/api/models/ethereum"
 	"github.com/kotalco/api/shared"
 	ethereumv1alpha1 "github.com/kotalco/kotal/apis/ethereum/v1alpha1"
+	sharedAPI "github.com/kotalco/kotal/apis/shared"
 	sharedAPIs "github.com/kotalco/kotal/apis/shared"
 	"github.com/ybbus/jsonrpc/v2"
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -152,7 +153,7 @@ func (e *NodeHandler) Update(c *fiber.Ctx) error {
 	node := c.Locals("node").(*ethereumv1alpha1.Node)
 
 	if model.Logging != "" {
-		node.Spec.Logging = ethereumv1alpha1.VerbosityLevel(model.Logging)
+		node.Spec.Logging = sharedAPI.VerbosityLevel(model.Logging)
 	}
 
 	if model.NodePrivateKeySecretName != "" {
