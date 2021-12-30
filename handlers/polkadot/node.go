@@ -158,6 +158,10 @@ func (n *NodeHandler) Update(c *fiber.Ctx) error {
 		node.Spec.Pruning = model.Pruning
 	}
 
+	if model.P2PPort != 0 {
+		node.Spec.P2PPort = model.P2PPort
+	}
+
 	if model.RetainedBlocks != 0 {
 		node.Spec.RetainedBlocks = model.RetainedBlocks
 	}

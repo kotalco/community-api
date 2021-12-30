@@ -8,6 +8,7 @@ type Node struct {
 	NodePrivateKeySecretName string   `json:"nodePrivateKeySecretName"`
 	Validator                *bool    `json:"validator"`
 	SyncMode                 string   `json:"syncMode"`
+	P2PPort                  uint     `json:"p2pPort"`
 	Pruning                  *bool    `json:"pruning"`
 	RetainedBlocks           uint     `json:"retainedBlocks"`
 	Logging                  string   `json:"logging"`
@@ -35,6 +36,7 @@ func FromPolkadotNode(node *polkadotv1alpha1.Node) *Node {
 		NodePrivateKeySecretName: node.Spec.NodePrivateKeySecretName,
 		Validator:                &node.Spec.Validator,
 		SyncMode:                 string(node.Spec.SyncMode),
+		P2PPort:                  node.Spec.P2PPort,
 		Pruning:                  node.Spec.Pruning,
 		RetainedBlocks:           node.Spec.RetainedBlocks,
 		Logging:                  string(node.Spec.Logging),
