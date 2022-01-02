@@ -10,6 +10,7 @@ import (
 type Node struct {
 	models.Time
 	Name         string  `json:"name"`
+	Network      string  `json:"network"`
 	CPU          string  `json:"cpu"`
 	CPULimit     string  `json:"cpuLimit"`
 	Memory       string  `json:"memory"`
@@ -25,6 +26,7 @@ func FromFilecoinNode(node *filecoinv1alpha1.Node) *Node {
 		Time: models.Time{
 			CreatedAt: node.CreationTimestamp.UTC().Format(shared.JavascriptISOString),
 		},
+		Network:      string(node.Spec.Network),
 		CPU:          node.Spec.CPU,
 		CPULimit:     node.Spec.CPULimit,
 		Memory:       node.Spec.Memory,

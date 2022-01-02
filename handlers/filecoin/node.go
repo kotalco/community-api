@@ -88,6 +88,7 @@ func (n *NodeHandler) Create(c *fiber.Ctx) error {
 			Namespace: "default",
 		},
 		Spec: filecoinv1alpha1.NodeSpec{
+			Network: filecoinv1alpha1.FilecoinNetwork(model.Network),
 			Resources: sharedAPIs.Resources{
 				StorageClass: model.StorageClass,
 			},
