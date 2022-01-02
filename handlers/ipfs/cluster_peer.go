@@ -193,6 +193,10 @@ func (cp *ClusterPeerHandler) Update(c *fiber.Ctx) error {
 		peer.Spec.PeerEndpoint = model.PeerEndpoint
 	}
 
+	if len(model.BootstrapPeers) != 0 {
+		peer.Spec.BootstrapPeers = model.BootstrapPeers
+	}
+
 	if model.CPU != "" {
 		peer.Spec.CPU = model.CPU
 	}
