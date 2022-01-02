@@ -145,6 +145,10 @@ func (n *NodeHandler) Update(c *fiber.Ctx) error {
 	name := c.Params("name")
 	node := c.Locals("node").(*filecoinv1alpha1.Node)
 
+	if model.API != nil {
+		node.Spec.API = *model.API
+	}
+
 	if model.CPU != "" {
 		node.Spec.CPU = model.CPU
 	}
