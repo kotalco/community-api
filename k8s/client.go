@@ -10,6 +10,7 @@ import (
 	chainlinkv1alpha1 "github.com/kotalco/kotal/apis/chainlink/v1alpha1"
 	ethereumv1alpha1 "github.com/kotalco/kotal/apis/ethereum/v1alpha1"
 	ethereum2v1alpha1 "github.com/kotalco/kotal/apis/ethereum2/v1alpha1"
+	filecoinv1alpha1 "github.com/kotalco/kotal/apis/filecoin/v1alpha1"
 	ipfsv1alpha1 "github.com/kotalco/kotal/apis/ipfs/v1alpha1"
 	polkadotv1alpha1 "github.com/kotalco/kotal/apis/polkadot/v1alpha1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -91,6 +92,7 @@ func NewRuntimeClient() (client.Client, error) {
 	ethereumv1alpha1.AddToScheme(scheme)
 	ethereum2v1alpha1.AddToScheme(scheme)
 	ipfsv1alpha1.AddToScheme(scheme)
+	filecoinv1alpha1.AddToScheme(scheme)
 	chainlinkv1alpha1.AddToScheme(scheme)
 	polkadotv1alpha1.AddToScheme(scheme)
 

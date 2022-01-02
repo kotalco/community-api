@@ -12,6 +12,7 @@ import (
 	coreHandlers "github.com/kotalco/api/handlers/core"
 	ethereumHandlers "github.com/kotalco/api/handlers/ethereum"
 	ethereum2Handlers "github.com/kotalco/api/handlers/ethereum2"
+	filecoinHandlers "github.com/kotalco/api/handlers/filecoin"
 	ipfsHandlers "github.com/kotalco/api/handlers/ipfs"
 	polkadotHandlers "github.com/kotalco/api/handlers/polkadot"
 	_ "k8s.io/client-go/plugin/pkg/client/auth"
@@ -46,6 +47,9 @@ func main() {
 	peers := ipfs.Group("peers")
 	clusterpeers := ipfs.Group("clusterpeers")
 
+	filecoin := v1.Group("filecoin")
+	filecoinNodes := filecoin.Group("nodes")
+
 	ethereum2 := v1.Group("ethereum2")
 	beaconnodes := ethereum2.Group("beaconnodes")
 	validators := ethereum2.Group("validators")
@@ -60,6 +64,7 @@ func main() {
 	ethereumHandlers.NewNodeHandler().Register(nodes)
 	ipfsHandlers.NewPeerHandler().Register(peers)
 	ipfsHandlers.NewClusterPeerHandler().Register(clusterpeers)
+	filecoinHandlers.NewNodeHandler().Register(filecoinNodes)
 	ethereum2Handlers.NewBeaconNodeHandler().Register(beaconnodes)
 	ethereum2Handlers.NewValidatorHandler().Register(validators)
 	coreHandlers.NewSecretHandler().Register(secrets)
