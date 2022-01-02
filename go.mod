@@ -5,7 +5,7 @@ go 1.17
 require (
 	github.com/gofiber/fiber/v2 v2.18.0
 	github.com/gofiber/websocket/v2 v2.0.10
-	github.com/kotalco/kotal v0.0.0-20211225234345-b07aa1a91d79
+	github.com/kotalco/kotal v0.0.0-20211230162042-e7dc4d1b39fb
 	github.com/ybbus/jsonrpc/v2 v2.1.6
 	k8s.io/api v0.22.3
 	k8s.io/apimachinery v0.22.3
