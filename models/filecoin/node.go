@@ -12,6 +12,7 @@ type Node struct {
 	Name         string  `json:"name"`
 	Network      string  `json:"network"`
 	API          *bool   `json:"api"`
+	APIPort      uint    `json:"apiPort"`
 	CPU          string  `json:"cpu"`
 	CPULimit     string  `json:"cpuLimit"`
 	Memory       string  `json:"memory"`
@@ -29,6 +30,7 @@ func FromFilecoinNode(node *filecoinv1alpha1.Node) *Node {
 		},
 		Network:      string(node.Spec.Network),
 		API:          &node.Spec.API,
+		APIPort:      node.Spec.APIPort,
 		CPU:          node.Spec.CPU,
 		CPULimit:     node.Spec.CPULimit,
 		Memory:       node.Spec.Memory,
