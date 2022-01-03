@@ -9,18 +9,19 @@ import (
 // Node is Filecoin node
 type Node struct {
 	models.Time
-	Name              string  `json:"name"`
-	Network           string  `json:"network"`
-	API               *bool   `json:"api"`
-	APIPort           uint    `json:"apiPort"`
-	APIHost           string  `json:"apiHost"`
-	APIRequestTimeout uint    `json:"apiRequestTimeout"`
-	CPU               string  `json:"cpu"`
-	CPULimit          string  `json:"cpuLimit"`
-	Memory            string  `json:"memory"`
-	MemoryLimit       string  `json:"memoryLimit"`
-	Storage           string  `json:"storage"`
-	StorageClass      *string `json:"storageClass"`
+	Name               string  `json:"name"`
+	Network            string  `json:"network"`
+	API                *bool   `json:"api"`
+	APIPort            uint    `json:"apiPort"`
+	APIHost            string  `json:"apiHost"`
+	APIRequestTimeout  uint    `json:"apiRequestTimeout"`
+	DisableMetadataLog *bool   `json:"disableMetadataLog"`
+	CPU                string  `json:"cpu"`
+	CPULimit           string  `json:"cpuLimit"`
+	Memory             string  `json:"memory"`
+	MemoryLimit        string  `json:"memoryLimit"`
+	Storage            string  `json:"storage"`
+	StorageClass       *string `json:"storageClass"`
 }
 
 // FromFilecoinNode creates node model from Filecoin node
@@ -30,16 +31,17 @@ func FromFilecoinNode(node *filecoinv1alpha1.Node) *Node {
 		Time: models.Time{
 			CreatedAt: node.CreationTimestamp.UTC().Format(shared.JavascriptISOString),
 		},
-		Network:           string(node.Spec.Network),
-		API:               &node.Spec.API,
-		APIPort:           node.Spec.APIPort,
-		APIHost:           node.Spec.APIHost,
-		APIRequestTimeout: node.Spec.APIRequestTimeout,
-		CPU:               node.Spec.CPU,
-		CPULimit:          node.Spec.CPULimit,
-		Memory:            node.Spec.Memory,
-		MemoryLimit:       node.Spec.MemoryLimit,
-		Storage:           node.Spec.Storage,
-		StorageClass:      node.Spec.StorageClass,
+		Network:            string(node.Spec.Network),
+		API:                &node.Spec.API,
+		APIPort:            node.Spec.APIPort,
+		APIHost:            node.Spec.APIHost,
+		APIRequestTimeout:  node.Spec.APIRequestTimeout,
+		DisableMetadataLog: &node.Spec.DisableMetadataLog,
+		CPU:                node.Spec.CPU,
+		CPULimit:           node.Spec.CPULimit,
+		Memory:             node.Spec.Memory,
+		MemoryLimit:        node.Spec.MemoryLimit,
+		Storage:            node.Spec.Storage,
+		StorageClass:       node.Spec.StorageClass,
 	}
 }

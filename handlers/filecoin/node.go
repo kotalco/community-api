@@ -161,6 +161,10 @@ func (n *NodeHandler) Update(c *fiber.Ctx) error {
 		node.Spec.APIRequestTimeout = model.APIRequestTimeout
 	}
 
+	if model.DisableMetadataLog != nil {
+		node.Spec.DisableMetadataLog = *model.DisableMetadataLog
+	}
+
 	if model.CPU != "" {
 		node.Spec.CPU = model.CPU
 	}
