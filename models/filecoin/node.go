@@ -16,6 +16,7 @@ type Node struct {
 	APIHost            string  `json:"apiHost"`
 	APIRequestTimeout  uint    `json:"apiRequestTimeout"`
 	DisableMetadataLog *bool   `json:"disableMetadataLog"`
+	P2PPort            uint    `json:"p2pPort"`
 	CPU                string  `json:"cpu"`
 	CPULimit           string  `json:"cpuLimit"`
 	Memory             string  `json:"memory"`
@@ -37,6 +38,7 @@ func FromFilecoinNode(node *filecoinv1alpha1.Node) *Node {
 		APIHost:            node.Spec.APIHost,
 		APIRequestTimeout:  node.Spec.APIRequestTimeout,
 		DisableMetadataLog: &node.Spec.DisableMetadataLog,
+		P2PPort:            node.Spec.P2PPort,
 		CPU:                node.Spec.CPU,
 		CPULimit:           node.Spec.CPULimit,
 		Memory:             node.Spec.Memory,

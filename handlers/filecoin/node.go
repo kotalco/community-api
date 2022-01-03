@@ -165,6 +165,10 @@ func (n *NodeHandler) Update(c *fiber.Ctx) error {
 		node.Spec.DisableMetadataLog = *model.DisableMetadataLog
 	}
 
+	if model.P2PPort != 0 {
+		node.Spec.P2PPort = model.P2PPort
+	}
+
 	if model.CPU != "" {
 		node.Spec.CPU = model.CPU
 	}
