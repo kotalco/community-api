@@ -173,6 +173,10 @@ func (n *NodeHandler) Update(c *fiber.Ctx) error {
 		node.Spec.P2PHost = model.P2PHost
 	}
 
+	if model.IPFSPeerEndpoint != "" {
+		node.Spec.IPFSPeerEndpoint = model.IPFSPeerEndpoint
+	}
+
 	if model.CPU != "" {
 		node.Spec.CPU = model.CPU
 	}

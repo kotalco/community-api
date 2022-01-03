@@ -18,6 +18,7 @@ type Node struct {
 	DisableMetadataLog *bool   `json:"disableMetadataLog"`
 	P2PPort            uint    `json:"p2pPort"`
 	P2PHost            string  `json:"p2pHost"`
+	IPFSPeerEndpoint   string  `json:"ipfsPeerEndpoint"`
 	CPU                string  `json:"cpu"`
 	CPULimit           string  `json:"cpuLimit"`
 	Memory             string  `json:"memory"`
@@ -41,6 +42,7 @@ func FromFilecoinNode(node *filecoinv1alpha1.Node) *Node {
 		DisableMetadataLog: &node.Spec.DisableMetadataLog,
 		P2PPort:            node.Spec.P2PPort,
 		P2PHost:            node.Spec.P2PHost,
+		IPFSPeerEndpoint:   node.Spec.IPFSPeerEndpoint,
 		CPU:                node.Spec.CPU,
 		CPULimit:           node.Spec.CPULimit,
 		Memory:             node.Spec.Memory,
