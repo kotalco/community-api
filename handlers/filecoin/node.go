@@ -157,6 +157,10 @@ func (n *NodeHandler) Update(c *fiber.Ctx) error {
 		node.Spec.APIHost = model.APIHost
 	}
 
+	if model.APIRequestTimeout != 0 {
+		node.Spec.APIRequestTimeout = model.APIRequestTimeout
+	}
+
 	if model.CPU != "" {
 		node.Spec.CPU = model.CPU
 	}
