@@ -177,6 +177,10 @@ func (n *NodeHandler) Update(c *fiber.Ctx) error {
 		node.Spec.IPFSPeerEndpoint = model.IPFSPeerEndpoint
 	}
 
+	if model.IPFSOnlineMode != nil {
+		node.Spec.IPFSOnlineMode = *model.IPFSOnlineMode
+	}
+
 	if model.CPU != "" {
 		node.Spec.CPU = model.CPU
 	}
