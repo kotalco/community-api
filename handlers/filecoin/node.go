@@ -153,6 +153,10 @@ func (n *NodeHandler) Update(c *fiber.Ctx) error {
 		node.Spec.APIPort = model.APIPort
 	}
 
+	if model.APIHost != "" {
+		node.Spec.APIHost = model.APIHost
+	}
+
 	if model.CPU != "" {
 		node.Spec.CPU = model.CPU
 	}
