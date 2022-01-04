@@ -181,6 +181,10 @@ func (n *NodeHandler) Update(c *fiber.Ctx) error {
 		node.Spec.IPFSOnlineMode = *model.IPFSOnlineMode
 	}
 
+	if model.IPFSForRetrieval != nil {
+		node.Spec.IPFSForRetrieval = *model.IPFSForRetrieval
+	}
+
 	if model.CPU != "" {
 		node.Spec.CPU = model.CPU
 	}

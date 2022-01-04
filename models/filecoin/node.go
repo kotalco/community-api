@@ -20,6 +20,7 @@ type Node struct {
 	P2PHost            string  `json:"p2pHost"`
 	IPFSPeerEndpoint   string  `json:"ipfsPeerEndpoint"`
 	IPFSOnlineMode     *bool   `json:"ipfsOnlineMode"`
+	IPFSForRetrieval   *bool   `json:"ipfsForRetrieval"`
 	CPU                string  `json:"cpu"`
 	CPULimit           string  `json:"cpuLimit"`
 	Memory             string  `json:"memory"`
@@ -45,6 +46,7 @@ func FromFilecoinNode(node *filecoinv1alpha1.Node) *Node {
 		P2PHost:            node.Spec.P2PHost,
 		IPFSPeerEndpoint:   node.Spec.IPFSPeerEndpoint,
 		IPFSOnlineMode:     &node.Spec.IPFSOnlineMode,
+		IPFSForRetrieval:   &node.Spec.IPFSForRetrieval,
 		CPU:                node.Spec.CPU,
 		CPULimit:           node.Spec.CPULimit,
 		Memory:             node.Spec.Memory,
