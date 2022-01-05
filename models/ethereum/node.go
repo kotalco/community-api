@@ -60,8 +60,13 @@ func FromEthereumNode(n *ethereumv1alpha1.Node) *Node {
 		Miner:                    &n.Spec.Miner,
 		Coinbase:                 string(n.Spec.Coinbase),
 		RPC:                      &n.Spec.RPC,
+		RPCPort:                  n.Spec.RPCPort,
 		WS:                       &n.Spec.WS,
+		WSPort:                   n.Spec.WSPort,
 		GraphQL:                  &n.Spec.GraphQL,
+		GraphQLPort:              n.Spec.GraphQLPort,
+		Hosts:                    n.Spec.Hosts,
+		CORSDomains:              n.Spec.CORSDomains,
 		CPU:                      n.Spec.CPU,
 		CPULimit:                 n.Spec.CPULimit,
 		Memory:                   n.Spec.Memory,
@@ -78,36 +83,16 @@ func FromEthereumNode(n *ethereumv1alpha1.Node) *Node {
 	}
 
 	var rpcAPI []string
-	if n.Spec.RPC {
-		rpcAPI = []string{}
-		for _, api := range n.Spec.RPCAPI {
-			rpcAPI = append(rpcAPI, string(api))
-		}
-		model.RPCPort = n.Spec.RPCPort
-		model.RPCAPI = rpcAPI
+	for _, api := range n.Spec.RPCAPI {
+		rpcAPI = append(rpcAPI, string(api))
 	}
+	model.RPCAPI = rpcAPI
 
 	var wsAPI []string
-	if n.Spec.WS {
-		wsAPI = []string{}
-		for _, api := range n.Spec.WSAPI {
-			wsAPI = append(wsAPI, string(api))
-		}
-		model.WSPort = n.Spec.WSPort
-		model.WSAPI = wsAPI
+	for _, api := range n.Spec.WSAPI {
+		wsAPI = append(wsAPI, string(api))
 	}
-
-	if n.Spec.GraphQL {
-		model.GraphQLPort = n.Spec.GraphQLPort
-	}
-
-	if len(n.Spec.Hosts) != 0 {
-		model.Hosts = n.Spec.Hosts
-	}
-
-	if len(n.Spec.CORSDomains) != 0 {
-		model.CORSDomains = n.Spec.CORSDomains
-	}
+	model.WSAPI = wsAPI
 
 	staticNodes := []string{}
 	for _, enode := range n.Spec.StaticNodes {
