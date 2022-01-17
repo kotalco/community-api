@@ -14,6 +14,7 @@ import (
 	ethereum2Handlers "github.com/kotalco/api/handlers/ethereum2"
 	filecoinHandlers "github.com/kotalco/api/handlers/filecoin"
 	ipfsHandlers "github.com/kotalco/api/handlers/ipfs"
+	nearHandlers "github.com/kotalco/api/handlers/near"
 	polkadotHandlers "github.com/kotalco/api/handlers/polkadot"
 	_ "k8s.io/client-go/plugin/pkg/client/auth"
 )
@@ -50,6 +51,9 @@ func main() {
 	filecoin := v1.Group("filecoin")
 	filecoinNodes := filecoin.Group("nodes")
 
+	near := v1.Group("near")
+	nearNodes := near.Group("nodes")
+
 	ethereum2 := v1.Group("ethereum2")
 	beaconnodes := ethereum2.Group("beaconnodes")
 	validators := ethereum2.Group("validators")
@@ -69,6 +73,7 @@ func main() {
 	ethereum2Handlers.NewValidatorHandler().Register(validators)
 	coreHandlers.NewSecretHandler().Register(secrets)
 	coreHandlers.NewStorageClassHandler().Register(storageClasses)
+	nearHandlers.NewNodeHandler().Register(nearNodes)
 
 	port := os.Getenv("KOTAL_API_SERVER_PORT")
 	if port == "" {
