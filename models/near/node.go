@@ -10,6 +10,7 @@ import (
 type Node struct {
 	models.Time
 	Name         string  `json:"name"`
+	Archive      bool    `json:"archive"`
 	Network      string  `json:"network"`
 	CPU          string  `json:"cpu"`
 	CPULimit     string  `json:"cpuLimit"`
@@ -27,6 +28,7 @@ func FromNEARNode(node *nearv1alpha1.Node) *Node {
 			CreatedAt: node.CreationTimestamp.UTC().Format(shared.JavascriptISOString),
 		},
 		Network:      string(node.Spec.Network),
+		Archive:      node.Spec.Archive,
 		CPU:          node.Spec.CPU,
 		CPULimit:     node.Spec.CPULimit,
 		Memory:       node.Spec.Memory,

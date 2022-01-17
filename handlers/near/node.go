@@ -89,6 +89,7 @@ func (n *NodeHandler) Create(c *fiber.Ctx) error {
 		},
 		Spec: nearv1alpha1.NodeSpec{
 			Network: model.Network,
+			Archive: model.Archive,
 			Resources: sharedAPIs.Resources{
 				StorageClass: model.StorageClass,
 			},
