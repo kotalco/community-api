@@ -158,6 +158,14 @@ func (n *NodeHandler) Update(c *fiber.Ctx) error {
 		node.Spec.MinPeers = model.MinPeers
 	}
 
+	if model.P2PPort != 0 {
+		node.Spec.P2PPort = model.P2PPort
+	}
+
+	if model.P2PHost != "" {
+		node.Spec.P2PHost = model.P2PHost
+	}
+
 	if model.CPU != "" {
 		node.Spec.CPU = model.CPU
 	}

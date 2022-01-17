@@ -15,6 +15,8 @@ type Node struct {
 	NodePrivateKeySecretName string  `json:"nodePrivateKeySecretName"`
 	ValidatorSecretName      string  `json:"validatorSecretName"`
 	MinPeers                 uint    `json:"minPeers"`
+	P2PPort                  uint    `json:"p2pPort"`
+	P2PHost                  string  `json:"p2pHost"`
 	CPU                      string  `json:"cpu"`
 	CPULimit                 string  `json:"cpuLimit"`
 	Memory                   string  `json:"memory"`
@@ -35,6 +37,8 @@ func FromNEARNode(node *nearv1alpha1.Node) *Node {
 		NodePrivateKeySecretName: node.Spec.NodePrivateKeySecretName,
 		ValidatorSecretName:      node.Spec.ValidatorSecretName,
 		MinPeers:                 node.Spec.MinPeers,
+		P2PPort:                  node.Spec.P2PPort,
+		P2PHost:                  node.Spec.P2PHost,
 		CPU:                      node.Spec.CPU,
 		CPULimit:                 node.Spec.CPULimit,
 		Memory:                   node.Spec.Memory,
