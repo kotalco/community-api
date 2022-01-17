@@ -12,6 +12,7 @@ import (
 	ethereum2v1alpha1 "github.com/kotalco/kotal/apis/ethereum2/v1alpha1"
 	filecoinv1alpha1 "github.com/kotalco/kotal/apis/filecoin/v1alpha1"
 	ipfsv1alpha1 "github.com/kotalco/kotal/apis/ipfs/v1alpha1"
+	nearv1alpha1 "github.com/kotalco/kotal/apis/near/v1alpha1"
 	polkadotv1alpha1 "github.com/kotalco/kotal/apis/polkadot/v1alpha1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/kubernetes"
@@ -63,7 +64,7 @@ func Config() (*rest.Config, error) {
 		log.Println("creating k8s client using test environment ...")
 		testEnv := envtest.Environment{
 			CRDDirectoryPaths: []string{
-				filepath.Join(build.Default.GOPATH, "pkg", "mod", "github.com", "kotalco", "kotal@v0.0.0-20211230162042-e7dc4d1b39fb", "config", "crd", "bases"),
+				filepath.Join(build.Default.GOPATH, "pkg", "mod", "github.com", "kotalco", "kotal@v0.0.0-20220117145334-7bdbeb90323c", "config", "crd", "bases"),
 			},
 			ErrorIfCRDPathMissing: true,
 		}
@@ -95,6 +96,7 @@ func NewRuntimeClient() (client.Client, error) {
 	filecoinv1alpha1.AddToScheme(scheme)
 	chainlinkv1alpha1.AddToScheme(scheme)
 	polkadotv1alpha1.AddToScheme(scheme)
+	nearv1alpha1.AddToScheme(scheme)
 
 	opts := client.Options{Scheme: scheme}
 
