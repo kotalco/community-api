@@ -154,6 +154,10 @@ func (n *NodeHandler) Update(c *fiber.Ctx) error {
 		node.Spec.ValidatorSecretName = model.ValidatorSecretName
 	}
 
+	if model.MinPeers != 0 {
+		node.Spec.MinPeers = model.MinPeers
+	}
+
 	if model.CPU != "" {
 		node.Spec.CPU = model.CPU
 	}
