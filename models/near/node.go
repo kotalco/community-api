@@ -12,6 +12,7 @@ type Node struct {
 	Name                     string  `json:"name"`
 	Archive                  bool    `json:"archive"`
 	NodePrivateKeySecretName string  `json:"nodePrivateKeySecretName"`
+	ValidatorSecretName      string  `json:"validatorSecretName"`
 	Network                  string  `json:"network"`
 	CPU                      string  `json:"cpu"`
 	CPULimit                 string  `json:"cpuLimit"`
@@ -31,6 +32,7 @@ func FromNEARNode(node *nearv1alpha1.Node) *Node {
 		Network:                  string(node.Spec.Network),
 		Archive:                  node.Spec.Archive,
 		NodePrivateKeySecretName: node.Spec.NodePrivateKeySecretName,
+		ValidatorSecretName:      node.Spec.ValidatorSecretName,
 		CPU:                      node.Spec.CPU,
 		CPULimit:                 node.Spec.CPULimit,
 		Memory:                   node.Spec.Memory,

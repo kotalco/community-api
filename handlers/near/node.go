@@ -150,6 +150,10 @@ func (n *NodeHandler) Update(c *fiber.Ctx) error {
 		node.Spec.NodePrivateKeySecretName = model.NodePrivateKeySecretName
 	}
 
+	if model.ValidatorSecretName != "" {
+		node.Spec.ValidatorSecretName = model.ValidatorSecretName
+	}
+
 	if model.CPU != "" {
 		node.Spec.CPU = model.CPU
 	}
