@@ -190,6 +190,10 @@ func (n *NodeHandler) Update(c *fiber.Ctx) error {
 		node.Spec.TelemetryURL = model.TelemetryURL
 	}
 
+	if bootnodes := model.Bootnodes; bootnodes != nil {
+		node.Spec.Bootnodes = *bootnodes
+	}
+
 	if model.CPU != "" {
 		node.Spec.CPU = model.CPU
 	}

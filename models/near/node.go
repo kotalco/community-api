@@ -9,26 +9,27 @@ import (
 // Node is NEAR node
 type Node struct {
 	models.Time
-	Name                     string  `json:"name"`
-	Network                  string  `json:"network"`
-	Archive                  bool    `json:"archive"`
-	NodePrivateKeySecretName string  `json:"nodePrivateKeySecretName"`
-	ValidatorSecretName      string  `json:"validatorSecretName"`
-	MinPeers                 uint    `json:"minPeers"`
-	P2PPort                  uint    `json:"p2pPort"`
-	P2PHost                  string  `json:"p2pHost"`
-	RPC                      *bool   `json:"rpc"`
-	RPCPort                  uint    `json:"rpcPort"`
-	RPCHost                  string  `json:"rpcHost"`
-	PrometheusPort           uint    `json:"prometheusPort"`
-	PrometheusHost           string  `json:"prometheusHost"`
-	TelemetryURL             string  `json:"telemetryURL"`
-	CPU                      string  `json:"cpu"`
-	CPULimit                 string  `json:"cpuLimit"`
-	Memory                   string  `json:"memory"`
-	MemoryLimit              string  `json:"memoryLimit"`
-	Storage                  string  `json:"storage"`
-	StorageClass             *string `json:"storageClass"`
+	Name                     string    `json:"name"`
+	Network                  string    `json:"network"`
+	Archive                  bool      `json:"archive"`
+	NodePrivateKeySecretName string    `json:"nodePrivateKeySecretName"`
+	ValidatorSecretName      string    `json:"validatorSecretName"`
+	MinPeers                 uint      `json:"minPeers"`
+	P2PPort                  uint      `json:"p2pPort"`
+	P2PHost                  string    `json:"p2pHost"`
+	RPC                      *bool     `json:"rpc"`
+	RPCPort                  uint      `json:"rpcPort"`
+	RPCHost                  string    `json:"rpcHost"`
+	PrometheusPort           uint      `json:"prometheusPort"`
+	PrometheusHost           string    `json:"prometheusHost"`
+	TelemetryURL             string    `json:"telemetryURL"`
+	Bootnodes                *[]string `json:"bootnodes"`
+	CPU                      string    `json:"cpu"`
+	CPULimit                 string    `json:"cpuLimit"`
+	Memory                   string    `json:"memory"`
+	MemoryLimit              string    `json:"memoryLimit"`
+	Storage                  string    `json:"storage"`
+	StorageClass             *string   `json:"storageClass"`
 }
 
 // FromNEARNode creates node model from NEAR node
@@ -51,6 +52,7 @@ func FromNEARNode(node *nearv1alpha1.Node) *Node {
 		PrometheusPort:           node.Spec.PrometheusPort,
 		PrometheusHost:           node.Spec.PrometheusHost,
 		TelemetryURL:             node.Spec.TelemetryURL,
+		Bootnodes:                &node.Spec.Bootnodes,
 		CPU:                      node.Spec.CPU,
 		CPULimit:                 node.Spec.CPULimit,
 		Memory:                   node.Spec.Memory,
