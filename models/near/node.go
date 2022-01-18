@@ -20,6 +20,8 @@ type Node struct {
 	RPC                      *bool   `json:"rpc"`
 	RPCPort                  uint    `json:"rpcPort"`
 	RPCHost                  string  `json:"rpcHost"`
+	PrometheusPort           uint    `json:"prometheusPort"`
+	PrometheusHost           string  `json:"prometheusHost"`
 	CPU                      string  `json:"cpu"`
 	CPULimit                 string  `json:"cpuLimit"`
 	Memory                   string  `json:"memory"`
@@ -45,6 +47,8 @@ func FromNEARNode(node *nearv1alpha1.Node) *Node {
 		RPC:                      &node.Spec.RPC,
 		RPCPort:                  node.Spec.RPCPort,
 		RPCHost:                  node.Spec.RPCHost,
+		PrometheusPort:           node.Spec.PrometheusPort,
+		PrometheusHost:           node.Spec.PrometheusHost,
 		CPU:                      node.Spec.CPU,
 		CPULimit:                 node.Spec.CPULimit,
 		Memory:                   node.Spec.Memory,

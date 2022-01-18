@@ -178,6 +178,14 @@ func (n *NodeHandler) Update(c *fiber.Ctx) error {
 		}
 	}
 
+	if model.PrometheusPort != 0 {
+		node.Spec.PrometheusPort = model.PrometheusPort
+	}
+
+	if model.PrometheusHost != "" {
+		node.Spec.PrometheusHost = model.PrometheusHost
+	}
+
 	if model.CPU != "" {
 		node.Spec.CPU = model.CPU
 	}
