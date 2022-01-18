@@ -22,6 +22,7 @@ type Node struct {
 	RPCHost                  string  `json:"rpcHost"`
 	PrometheusPort           uint    `json:"prometheusPort"`
 	PrometheusHost           string  `json:"prometheusHost"`
+	TelemetryURL             string  `json:"telemetryURL"`
 	CPU                      string  `json:"cpu"`
 	CPULimit                 string  `json:"cpuLimit"`
 	Memory                   string  `json:"memory"`
@@ -49,6 +50,7 @@ func FromNEARNode(node *nearv1alpha1.Node) *Node {
 		RPCHost:                  node.Spec.RPCHost,
 		PrometheusPort:           node.Spec.PrometheusPort,
 		PrometheusHost:           node.Spec.PrometheusHost,
+		TelemetryURL:             node.Spec.TelemetryURL,
 		CPU:                      node.Spec.CPU,
 		CPULimit:                 node.Spec.CPULimit,
 		Memory:                   node.Spec.Memory,

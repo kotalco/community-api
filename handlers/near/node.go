@@ -186,6 +186,10 @@ func (n *NodeHandler) Update(c *fiber.Ctx) error {
 		node.Spec.PrometheusHost = model.PrometheusHost
 	}
 
+	if model.TelemetryURL != "" {
+		node.Spec.TelemetryURL = model.TelemetryURL
+	}
+
 	if model.CPU != "" {
 		node.Spec.CPU = model.CPU
 	}
