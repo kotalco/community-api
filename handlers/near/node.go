@@ -166,6 +166,18 @@ func (n *NodeHandler) Update(c *fiber.Ctx) error {
 		node.Spec.P2PHost = model.P2PHost
 	}
 
+	if model.RPC != nil {
+		node.Spec.RPC = *model.RPC
+	}
+	if node.Spec.RPC {
+		if model.RPCPort != 0 {
+			node.Spec.RPCPort = model.RPCPort
+		}
+		if model.RPCHost != "" {
+			node.Spec.RPCHost = model.RPCHost
+		}
+	}
+
 	if model.CPU != "" {
 		node.Spec.CPU = model.CPU
 	}
