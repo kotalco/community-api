@@ -1,12 +1,15 @@
 package handlers
 
 import (
+	"context"
+	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
 	"os"
 	"sort"
 	"strconv"
+	"time"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/websocket/v2"
@@ -17,6 +20,7 @@ import (
 	"github.com/kotalco/api/shared"
 	polkadotv1alpha1 "github.com/kotalco/kotal/apis/polkadot/v1alpha1"
 	sharedAPI "github.com/kotalco/kotal/apis/shared"
+	"github.com/ybbus/jsonrpc/v2"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
@@ -258,6 +262,112 @@ func (n *NodeHandler) Count(c *fiber.Ctx) error {
 	return c.SendStatus(http.StatusOK)
 }
 
+func (e *NodeHandler) Stats(c *websocket.Conn) {
+	defer c.Close()
+
+	type Result struct {
+		Error string `json:"error,omitempty"`
+		// system_syncState call
+		CurrentBlock uint `json:"currentBlock,omitempty"`
+		HighestBlock uint `json:"highestBlock,omitempty"`
+		// system_health call
+		Peers   uint `json:"peersCount,omitempty"`
+		Syncing bool `json:"syncing"`
+	}
+
+	// Mock serever
+	if os.Getenv("MOCK") == "true" {
+		var currentBlock, highestBlock, peersCount uint
+		for {
+			currentBlock += 3
+			highestBlock += 32
+			peersCount += 1
+
+			r := &Result{
+				CurrentBlock: currentBlock,
+				HighestBlock: highestBlock,
+				Peers:        peersCount,
+				Syncing:      peersCount%4 != 0,
+			}
+
+			var msg []byte
+
+			if peersCount > 40 {
+				peersCount = 0
+				r = &Result{
+					Error: "JSON-RPC server is not enabled",
+				}
+			}
+
+			msg, _ = json.Marshal(r)
+			c.WriteMessage(websocket.TextMessage, []byte(msg))
+			time.Sleep(time.Second)
+		}
+	}
+
+	name := c.Params("name")
+	node := &polkadotv1alpha1.Node{}
+	key := types.NamespacedName{
+		Namespace: "default",
+		Name:      name,
+	}
+
+	for {
+
+		err := k8s.Client().Get(context.Background(), key, node)
+		if errors.IsNotFound(err) {
+			c.WriteJSON(fiber.Map{
+				"error": fmt.Sprintf("node by name %s doesn't exist", name),
+			})
+			return
+		}
+
+		if !node.Spec.RPC {
+			c.WriteJSON(fiber.Map{
+				"error": "JSON-RPC server is not enabled",
+			})
+			time.Sleep(time.Second)
+			continue
+		}
+
+		client := jsonrpc.NewClient(fmt.Sprintf("http://%s:%d", node.Name, node.Spec.RPCPort))
+
+		type SyncState struct {
+			CurrentBlock uint `json:"currentBlock"`
+			HighestBlock uint `json:"highestBlock"`
+		}
+
+		// sync state rpc call
+		syncState := &SyncState{}
+		err = client.CallFor(syncState, "system_syncState")
+		if err != nil {
+			fmt.Println(err)
+		}
+
+		// system_health .isSyncing .peers
+		type SystemHealth struct {
+			Syncing    bool `json:"isSyncing"`
+			PeersCount uint `json:"peers"`
+		}
+
+		// system health rpc call
+		systemHealth := &SystemHealth{}
+		err = client.CallFor(systemHealth, "system_health")
+		if err != nil {
+			fmt.Println(err)
+		}
+
+		c.WriteJSON(fiber.Map{
+			"currentBlock": syncState.CurrentBlock,
+			"highestBlock": syncState.HighestBlock,
+			"peersCount":   systemHealth.PeersCount,
+			"syncing":      systemHealth.Syncing,
+		})
+
+		time.Sleep(time.Second)
+	}
+}
+
 // validateNodeExist validates Polkadot node by name exist
 func validateNodeExist(c *fiber.Ctx) error {
 	name := c.Params("name")
@@ -293,6 +403,7 @@ func (n *NodeHandler) Register(router fiber.Router) {
 	router.Get("/:name", validateNodeExist, n.Get)
 	router.Get("/:name/logs", websocket.New(sharedHandlers.Logger))
 	router.Get("/:name/status", websocket.New(sharedHandlers.Status))
+	router.Get("/:name/stats", websocket.New(n.Stats))
 	router.Put("/:name", validateNodeExist, n.Update)
 	router.Delete("/:name", validateNodeExist, n.Delete)
 }
