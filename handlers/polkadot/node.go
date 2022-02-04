@@ -93,6 +93,7 @@ func (n *NodeHandler) Create(c *fiber.Ctx) error {
 		},
 		Spec: polkadotv1alpha1.NodeSpec{
 			Network: model.Network,
+			RPC:     true,
 		},
 	}
 
