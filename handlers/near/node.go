@@ -319,7 +319,8 @@ func (e *NodeHandler) Stats(c *websocket.Conn) {
 			c.WriteJSON(fiber.Map{
 				"error": "rpc is not enabled",
 			})
-			return
+			time.Sleep(time.Second)
+			continue
 		}
 
 		client := jsonrpc.NewClient(fmt.Sprintf("http://%s:%d", node.Name, node.Spec.RPCPort))
