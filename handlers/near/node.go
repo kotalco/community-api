@@ -317,7 +317,7 @@ func (e *NodeHandler) Stats(c *websocket.Conn) {
 
 		if !node.Spec.RPC {
 			c.WriteJSON(fiber.Map{
-				"error": "rpc is not enabled",
+				"error": "JSON-RPC server is not enabled",
 			})
 			time.Sleep(time.Second)
 			continue
