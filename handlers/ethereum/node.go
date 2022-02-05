@@ -96,6 +96,7 @@ func (e *NodeHandler) Create(c *fiber.Ctx) error {
 		Spec: ethereumv1alpha1.NodeSpec{
 			Network:                  model.Network,
 			Client:                   ethereumv1alpha1.EthereumClient(model.Client),
+			RPC:                      true,
 			NodePrivateKeySecretName: model.NodePrivateKeySecretName,
 			Resources: sharedAPI.Resources{
 				StorageClass: model.StorageClass,
