@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"log"
 	"math/big"
@@ -21,7 +22,6 @@ import (
 	"github.com/kotalco/api/shared"
 	ethereumv1alpha1 "github.com/kotalco/kotal/apis/ethereum/v1alpha1"
 	sharedAPI "github.com/kotalco/kotal/apis/shared"
-	sharedAPIs "github.com/kotalco/kotal/apis/shared"
 	"github.com/ybbus/jsonrpc/v2"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -97,7 +97,7 @@ func (e *NodeHandler) Create(c *fiber.Ctx) error {
 			Network:                  model.Network,
 			Client:                   ethereumv1alpha1.EthereumClient(model.Client),
 			NodePrivateKeySecretName: model.NodePrivateKeySecretName,
-			Resources: sharedAPIs.Resources{
+			Resources: sharedAPI.Resources{
 				StorageClass: model.StorageClass,
 			},
 		},
@@ -297,6 +297,44 @@ func (e *NodeHandler) Count(c *fiber.Ctx) error {
 
 func (e *NodeHandler) Stats(c *websocket.Conn) {
 	defer c.Close()
+
+	type Result struct {
+		Error string `json:"error,omitempty"`
+		// eth_syncing call
+		CurrentBlock uint `json:"currentBlock,omitempty"`
+		HighestBlock uint `json:"highestBlock,omitempty"`
+		// net_peerCount call
+		Peers uint `json:"peersCount,omitempty"`
+	}
+
+	// Mock serever
+	if os.Getenv("MOCK") == "true" {
+		var currentBlock, highestBlock, peersCount uint
+		for {
+			currentBlock += 3
+			highestBlock += 32
+			peersCount += 1
+
+			r := &Result{
+				CurrentBlock: currentBlock,
+				HighestBlock: highestBlock,
+				Peers:        peersCount,
+			}
+
+			var msg []byte
+
+			if peersCount > 20 {
+				peersCount = 0
+				r = &Result{
+					Error: "JSON-RPC server is not enabled",
+				}
+			}
+
+			msg, _ = json.Marshal(r)
+			c.WriteMessage(websocket.TextMessage, []byte(msg))
+			time.Sleep(time.Second)
+		}
+	}
 
 	name := c.Params("name")
 	node := &ethereumv1alpha1.Node{}
