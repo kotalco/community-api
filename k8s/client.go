@@ -20,14 +20,18 @@ import (
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
 	"k8s.io/client-go/util/homedir"
+	metrics "k8s.io/metrics/pkg/client/clientset/versioned"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/envtest"
 )
 
 var ControllerRuntimeClient client.Client
 var KubernetesClientset *kubernetes.Clientset
+var metricsClientset *metrics.Clientset
+
 var clientOnce sync.Once
 var clientsetOnce sync.Once
+var metricsClientsetOnce sync.Once
 
 // Client create k8s client once
 func Client() client.Client {
@@ -53,6 +57,19 @@ func Clientset() *kubernetes.Clientset {
 		}
 	})
 	return KubernetesClientset
+}
+
+// MetricsClientset create k8s metrics client once
+func MetricsClientset() *metrics.Clientset {
+	var err error
+	metricsClientsetOnce.Do(func() {
+		metricsClientset, err = NewMetricsClientset()
+		if err != nil {
+			// TODO: Don't panic
+			panic(err)
+		}
+	})
+	return metricsClientset
 }
 
 // Config returns REST config based on the environment
@@ -111,5 +128,14 @@ func NewClientset() (*kubernetes.Clientset, error) {
 	}
 
 	return kubernetes.NewForConfig(config)
+}
 
+// NewMetricsClientset returns metrics client
+func NewMetricsClientset() (*metrics.Clientset, error) {
+	config, err := Config()
+	if err != nil {
+		return nil, err
+	}
+
+	return metrics.NewForConfig(config)
 }
