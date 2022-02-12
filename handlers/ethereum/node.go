@@ -388,7 +388,7 @@ func (e *NodeHandler) Stats(c *websocket.Conn) {
 		c.WriteJSON(fiber.Map{
 			"currentBlock": current.String(),
 			"highestBlock": highest.String(),
-			"peerCount":    count,
+			"peersCount":   count,
 		})
 
 		time.Sleep(time.Second)
