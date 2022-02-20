@@ -1,10 +1,11 @@
-package kotalco_logger
+package logger
+
 import (
-"fmt"
-"go.uber.org/zap"
-"go.uber.org/zap/zapcore"
-"os"
-"strings"
+	"fmt"
+	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
+	"os"
+	"strings"
 )
 
 const (

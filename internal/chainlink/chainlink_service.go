@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"github.com/kotalco/api/pkg/errors"
 	"github.com/kotalco/api/pkg/k8s"
-	"github.com/kotalco/api/pkg/kotalco_logger"
+	"github.com/kotalco/api/pkg/logger"
 	chainlinkv1alpha1 "github.com/kotalco/kotal/apis/chainlink/v1alpha1"
 	k8errors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/types"
@@ -42,7 +42,7 @@ func (service chainlinkService) Get(name string) (*chainlinkv1alpha1.Node, *erro
 		if k8errors.IsNotFound(err) {
 			return nil, errors.NewNotFoundError(fmt.Sprintf("node by name %s doesn't exist", name))
 		}
-		go kotalco_logger.Error("Error Getting Node", err)
+		go logger.Error("Error Getting Node", err)
 		return nil, errors.NewInternalServerError(fmt.Sprintf("can't get node by name %s", name))
 	}
 
@@ -61,7 +61,7 @@ func (service chainlinkService) Create(node *chainlinkv1alpha1.Node) (*chainlink
 		if k8errors.IsAlreadyExists(err) {
 			return nil, errors.NewBadRequestError(fmt.Sprintf("node by name %s already exist", node.Name))
 		}
-		go kotalco_logger.Error("error creating chainlink node", err)
+		go logger.Error("error creating chainlink node", err)
 		return nil, errors.NewInternalServerError("failed to create node")
 	}
 
@@ -76,7 +76,7 @@ func (service chainlinkService) Update(node *chainlinkv1alpha1.Node) (*chainlink
 
 	err := k8s.Client().Update(context.Background(), node)
 	if err != nil {
-		go kotalco_logger.Error("error updating chainlink node", err)
+		go logger.Error("error updating chainlink node", err)
 		return nil, errors.NewInternalServerError(fmt.Sprintf("can't update node by name %s", node.Name))
 	}
 
@@ -89,7 +89,7 @@ func (service chainlinkService) List() (*chainlinkv1alpha1.NodeList, *errors.Res
 
 	err := k8s.Client().List(context.Background(), nodes, client.InNamespace("default"))
 	if err != nil {
-		go kotalco_logger.Error("Error listing chainlink nodes", err)
+		go logger.Error("Error listing chainlink nodes", err)
 		return nil, errors.NewInternalServerError("failed to get all nodes")
 	}
 
@@ -101,7 +101,7 @@ func (service chainlinkService) Delete(node *chainlinkv1alpha1.Node) *errors.Res
 	err := k8s.Client().Delete(context.Background(), node)
 
 	if err != nil {
-		go kotalco_logger.Error("Error deleting chainlink node", err)
+		go logger.Error("Error deleting chainlink node", err)
 		return errors.NewInternalServerError(fmt.Sprintf("can't delete node by name %s", node.Name))
 	}
 

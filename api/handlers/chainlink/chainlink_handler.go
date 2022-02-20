@@ -7,7 +7,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/kotalco/api/internal/chainlink"
 	restError "github.com/kotalco/api/pkg/errors"
-	"github.com/kotalco/api/pkg/kotalco_logger"
+	"github.com/kotalco/api/pkg/logger"
 	"github.com/kotalco/api/pkg/shared"
 	chainlinkv1alpha1 "github.com/kotalco/kotal/apis/chainlink/v1alpha1"
 	sharedAPI "github.com/kotalco/kotal/apis/shared"
@@ -27,9 +27,10 @@ func Get(c *fiber.Ctx) error {
 
 // Create creates chainlink node from the given spec
 func Create(c *fiber.Ctx) error {
+	//Todo add Validation
 	request := new(Node)
 	if err := c.BodyParser(request); err != nil {
-		go kotalco_logger.Error("error parsing create chainlink node", err)
+		go logger.Error("error parsing create chainlink node", err)
 		badReqErr := restError.NewBadRequestError("invalid request body")
 		return c.Status(badReqErr.Status).JSON(badReqErr)
 	}
