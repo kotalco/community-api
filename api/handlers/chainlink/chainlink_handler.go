@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"github.com/gofiber/fiber/v2"
 	"github.com/kotalco/api/internal/chainlink"
-	"github.com/kotalco/api/internal/models/chainlink"
 	restError "github.com/kotalco/api/pkg/errors"
 	"github.com/kotalco/api/pkg/kotalco_logger"
 	"github.com/kotalco/api/pkg/shared"
@@ -31,7 +30,7 @@ func Create(c *fiber.Ctx) error {
 	request := new(Node)
 	if err := c.BodyParser(request); err != nil {
 		go kotalco_logger.Error("error parsing create chainlink node", err)
-		badReqErr := restError.NewBadRequestError("Bad Request")
+		badReqErr := restError.NewBadRequestError("invalid request body")
 		return c.Status(badReqErr.Status).JSON(badReqErr)
 	}
 
@@ -63,12 +62,11 @@ func Create(c *fiber.Ctx) error {
 
 // Update updates a single chainlink node by name from spec
 func Update(c *fiber.Ctx) error {
-	request := new(models.Node)
+	request := new(Node)
 
 	if err := c.BodyParser(request); err != nil {
-		return c.Status(http.StatusBadRequest).JSON(fiber.Map{
-			"error": "bad request",
-		})
+		badReq := restError.NewBadRequestError("invalid request body")
+		return c.Status(badReq.Status).JSON(err)
 	}
 
 	node := c.Locals("node").(*chainlinkv1alpha1.Node)

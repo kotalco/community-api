@@ -1,79 +1,119 @@
-package chainlink
+package ethereum
 
 import (
 	"github.com/kotalco/api/internal/models"
 	"github.com/kotalco/api/pkg/shared"
-	chainlinkv1alpha1 "github.com/kotalco/kotal/apis/chainlink/v1alpha1"
+	ethereumv1alpha1 "github.com/kotalco/kotal/apis/ethereum/v1alpha1"
 )
 
-type apiCredentials struct {
-	Email              string `json:"email"`
-	PasswordSecretName string `json:"passwordSecretName"`
+// ImportedAccount is account derived from private key
+type ImportedAccount struct {
+	PrivateKeySecretName string `json:"privateKeySecretName"`
+	PasswordSecretName   string `json:"passwordSecretName"`
 }
 
+// Node is Ethereum node
 type Node struct {
 	models.Time
-	Name                       string          `json:"name"`
-	EthereumChainId            uint            `json:"ethereumChainId"`
-	LinkContractAddress        string          `json:"linkContractAddress"`
-	EthereumWSEndpoint         string          `json:"ethereumWsEndpoint"`
-	DatabaseURL                string          `json:"databaseURL"`
-	EthereumHTTPEndpoints      []string        `json:"ethereumHttpEndpoints"`
-	KeystorePasswordSecretName string          `json:"keystorePasswordSecretName"`
-	APICredentials             *apiCredentials `json:"apiCredentials"`
-	CORSDomains                []string        `json:"corsDomains"`
-	CertSecretName             string          `json:"certSecretName"`
-	TLSPort                    uint            `json:"tlsPort"`
-	P2PPort                    uint            `json:"p2pPort"`
-	APIPort                    uint            `json:"apiPort"`
-	SecureCookies              *bool           `json:"secureCookies"`
-	Logging                    string          `json:"logging"`
-	CPU                        string          `json:"cpu"`
-	CPULimit                   string          `json:"cpuLimit"`
-	Memory                     string          `json:"memory"`
-	MemoryLimit                string          `json:"memoryLimit"`
-	Storage                    string          `json:"storage"`
-	StorageClass               *string         `json:"storageClass"`
+	Name                     string           `json:"name"`
+	Network                  string           `json:"network"`
+	Client                   string           `json:"client"`
+	Logging                  string           `json:"logging"`
+	NodePrivateKeySecretName string           `json:"nodePrivateKeySecretName"`
+	SyncMode                 string           `json:"syncMode"`
+	P2PPort                  uint             `json:"p2pPort"`
+	StaticNodes              *[]string        `json:"staticNodes"`
+	Bootnodes                *[]string        `json:"bootnodes"`
+	Miner                    *bool            `json:"miner"`
+	Coinbase                 string           `json:"coinbase"`
+	Import                   *ImportedAccount `json:"import"`
+	RPC                      *bool            `json:"rpc"`
+	RPCPort                  uint             `json:"rpcPort"`
+	RPCAPI                   []string         `json:"rpcAPI"`
+	WS                       *bool            `json:"ws"`
+	WSPort                   uint             `json:"wsPort"`
+	WSAPI                    []string         `json:"wsAPI"`
+	GraphQL                  *bool            `json:"graphql"`
+	GraphQLPort              uint             `json:"graphqlPort"`
+	Hosts                    []string         `json:"hosts"`
+	CORSDomains              []string         `json:"corsDomains"`
+	CPU                      string           `json:"cpu"`
+	CPULimit                 string           `json:"cpuLimit"`
+	Memory                   string           `json:"memory"`
+	MemoryLimit              string           `json:"memoryLimit"`
+	Storage                  string           `json:"storage"`
+	StorageClass             *string          `json:"storageClass"`
 }
-
 type Nodes []Node
 
-func (node Node) FromChainlinkNode(model *chainlinkv1alpha1.Node) *Node {
-	return &Node{
-		Name: model.Name,
+func (node Node) FromEthereumNode(n *ethereumv1alpha1.Node) *Node {
+	model := &Node{
+		Name: n.Name,
 		Time: models.Time{
-			CreatedAt: model.CreationTimestamp.UTC().Format(shared.JavascriptISOString),
+			CreatedAt: n.CreationTimestamp.UTC().Format(shared.JavascriptISOString),
 		},
-		EthereumChainId:            model.Spec.EthereumChainId,
-		LinkContractAddress:        model.Spec.LinkContractAddress,
-		EthereumWSEndpoint:         model.Spec.EthereumWSEndpoint,
-		DatabaseURL:                model.Spec.DatabaseURL,
-		EthereumHTTPEndpoints:      model.Spec.EthereumHTTPEndpoints,
-		KeystorePasswordSecretName: model.Spec.KeystorePasswordSecretName,
-		APICredentials: &apiCredentials{
-			Email:              model.Spec.APICredentials.Email,
-			PasswordSecretName: model.Spec.APICredentials.PasswordSecretName,
-		},
-		CORSDomains:    model.Spec.CORSDomains,
-		CertSecretName: model.Spec.CertSecretName,
-		TLSPort:        model.Spec.TLSPort,
-		P2PPort:        model.Spec.P2PPort,
-		APIPort:        model.Spec.APIPort,
-		SecureCookies:  &model.Spec.SecureCookies,
-		Logging:        string(model.Spec.Logging),
-		CPU:            model.Spec.CPU,
-		CPULimit:       model.Spec.CPULimit,
-		Memory:         model.Spec.Memory,
-		MemoryLimit:    model.Spec.MemoryLimit,
-		Storage:        model.Spec.Storage,
-		StorageClass:   model.Spec.StorageClass,
+		Network:                  n.Spec.Network,
+		Client:                   string(n.Spec.Client),
+		Logging:                  string(n.Spec.Logging),
+		NodePrivateKeySecretName: n.Spec.NodePrivateKeySecretName,
+		SyncMode:                 string(n.Spec.SyncMode),
+		P2PPort:                  n.Spec.P2PPort,
+		Miner:                    &n.Spec.Miner,
+		Coinbase:                 string(n.Spec.Coinbase),
+		RPC:                      &n.Spec.RPC,
+		RPCPort:                  n.Spec.RPCPort,
+		WS:                       &n.Spec.WS,
+		WSPort:                   n.Spec.WSPort,
+		GraphQL:                  &n.Spec.GraphQL,
+		GraphQLPort:              n.Spec.GraphQLPort,
+		Hosts:                    n.Spec.Hosts,
+		CORSDomains:              n.Spec.CORSDomains,
+		CPU:                      n.Spec.CPU,
+		CPULimit:                 n.Spec.CPULimit,
+		Memory:                   n.Spec.Memory,
+		MemoryLimit:              n.Spec.MemoryLimit,
+		Storage:                  n.Spec.Storage,
+		StorageClass:             n.Spec.StorageClass,
 	}
+
+	if n.Spec.Miner && n.Spec.Import != nil {
+		model.Import = &ImportedAccount{
+			PrivateKeySecretName: n.Spec.Import.PrivateKeySecretName,
+			PasswordSecretName:   n.Spec.Import.PasswordSecretName,
+		}
+	}
+
+	var rpcAPI []string
+	for _, api := range n.Spec.RPCAPI {
+		rpcAPI = append(rpcAPI, string(api))
+	}
+	model.RPCAPI = rpcAPI
+
+	var wsAPI []string
+	for _, api := range n.Spec.WSAPI {
+		wsAPI = append(wsAPI, string(api))
+	}
+	model.WSAPI = wsAPI
+
+	staticNodes := []string{}
+	for _, enode := range n.Spec.StaticNodes {
+		staticNodes = append(staticNodes, string(enode))
+	}
+	model.StaticNodes = &staticNodes
+
+	bootnodes := []string{}
+	for _, bootnode := range n.Spec.Bootnodes {
+		bootnodes = append(bootnodes, string(bootnode))
+	}
+	model.Bootnodes = &bootnodes
+
+	return model
 }
 
-func (nodes Nodes) FromChainlinkNode(models []chainlinkv1alpha1.Node) Nodes {
+func (nodes Nodes) FromEthereumNode(models []ethereumv1alpha1.Node) Nodes {
 	result := make(Nodes, len(models))
-	for index, model := range models {
-		result[index] = *(Node{}.FromChainlinkNode(&model))
+	for index, v := range models {
+		result[index] = *(Node{}.FromEthereumNode(&v))
 	}
 	return result
 }

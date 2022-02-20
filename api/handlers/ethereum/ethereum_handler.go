@@ -1,54 +1,58 @@
-// Package chainlink  handler is the representation layer for the  chainlink node
+// Package ethereum  handler is the representation layer for the  ethereum node
 // uses the k8 client to CRUD the nodes
-package chainlink
+package ethereum
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/gofiber/fiber/v2"
-	"github.com/kotalco/api/internal/chainlink"
-	"github.com/kotalco/api/internal/models/chainlink"
+	"github.com/gofiber/websocket/v2"
+	"github.com/kotalco/api/internal/ethereum"
 	restError "github.com/kotalco/api/pkg/errors"
-	"github.com/kotalco/api/pkg/kotalco_logger"
 	"github.com/kotalco/api/pkg/shared"
-	chainlinkv1alpha1 "github.com/kotalco/kotal/apis/chainlink/v1alpha1"
+	ethereumv1alpha1 "github.com/kotalco/kotal/apis/ethereum/v1alpha1"
 	sharedAPI "github.com/kotalco/kotal/apis/shared"
+	"github.com/ybbus/jsonrpc/v2"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"math/big"
 	"net/http"
+	"os"
 	"sort"
 	"strconv"
+	"strings"
+	"time"
 )
 
-var service = chainlink.ChainlinkService
+var service = ethereum.EthereumService
 
 // Get returns a single chainlink node by name
 func Get(c *fiber.Ctx) error {
-	node := c.Locals("node").(*chainlinkv1alpha1.Node)
-	return c.JSON(shared.NewResponse(new(Node).FromChainlinkNode(node)))
+	node := c.Locals("node").(*ethereumv1alpha1.Node)
+
+	return c.JSON(shared.NewResponse(new(Node).FromEthereumNode(node)))
 }
 
 // Create creates chainlink node from the given spec
 func Create(c *fiber.Ctx) error {
 	request := new(Node)
 	if err := c.BodyParser(request); err != nil {
-		go kotalco_logger.Error("error parsing create chainlink node", err)
-		badReqErr := restError.NewBadRequestError("Bad Request")
-		return c.Status(badReqErr.Status).JSON(badReqErr)
+		//Todo add Validation
+		badReq := restError.NewBadRequestError("invalid request body")
+		return c.Status(badReq.Status).JSON(badReq)
 	}
 
-	node := &chainlinkv1alpha1.Node{
+	node := &ethereumv1alpha1.Node{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      request.Name,
 			Namespace: "default",
 		},
-		Spec: chainlinkv1alpha1.NodeSpec{
-			EthereumChainId:            request.EthereumChainId,
-			LinkContractAddress:        request.LinkContractAddress,
-			EthereumWSEndpoint:         request.EthereumWSEndpoint,
-			DatabaseURL:                request.DatabaseURL,
-			KeystorePasswordSecretName: request.KeystorePasswordSecretName,
-			APICredentials: chainlinkv1alpha1.APICredentials{
-				Email:              request.APICredentials.Email,
-				PasswordSecretName: request.APICredentials.PasswordSecretName,
+		Spec: ethereumv1alpha1.NodeSpec{
+			Network:                  request.Network,
+			Client:                   ethereumv1alpha1.EthereumClient(request.Client),
+			RPC:                      true,
+			NodePrivateKeySecretName: request.NodePrivateKeySecretName,
+			Resources: sharedAPI.Resources{
+				StorageClass: request.StorageClass,
 			},
 		},
 	}
@@ -58,69 +62,111 @@ func Create(c *fiber.Ctx) error {
 		return c.Status(err.Status).JSON(err)
 	}
 
-	return c.Status(http.StatusCreated).JSON(shared.NewResponse(new(Node).FromChainlinkNode(node)))
+	return c.Status(http.StatusCreated).JSON(shared.NewResponse(new(Node).FromEthereumNode(node)))
 }
 
 // Update updates a single chainlink node by name from spec
 func Update(c *fiber.Ctx) error {
-	request := new(models.Node)
-
+	request := new(Node)
 	if err := c.BodyParser(request); err != nil {
-		return c.Status(http.StatusBadRequest).JSON(fiber.Map{
-			"error": "bad request",
-		})
+		//Todo add Validation
+		badReq := restError.NewBadRequestError("invalid request body")
+		return c.Status(badReq.Status).JSON(badReq)
 	}
 
-	node := c.Locals("node").(*chainlinkv1alpha1.Node)
-
-	if request.EthereumWSEndpoint != "" {
-		node.Spec.EthereumWSEndpoint = request.EthereumWSEndpoint
+	node := c.Locals("node").(*ethereumv1alpha1.Node)
+	if request.Logging != "" {
+		node.Spec.Logging = sharedAPI.VerbosityLevel(request.Logging)
+	}
+	if request.NodePrivateKeySecretName != "" {
+		node.Spec.NodePrivateKeySecretName = request.NodePrivateKeySecretName
+	}
+	if request.SyncMode != "" {
+		node.Spec.SyncMode = ethereumv1alpha1.SynchronizationMode(request.SyncMode)
+	}
+	if request.P2PPort != 0 {
+		node.Spec.P2PPort = request.P2PPort
 	}
 
-	if request.DatabaseURL != "" {
-		node.Spec.DatabaseURL = request.DatabaseURL
+	if request.Miner != nil {
+		node.Spec.Miner = *request.Miner
+	}
+	if node.Spec.Miner {
+		if request.Coinbase != "" {
+			node.Spec.Coinbase = ethereumv1alpha1.EthereumAddress(request.Coinbase)
+		}
+		if request.Import != nil {
+			node.Spec.Import = &ethereumv1alpha1.ImportedAccount{
+				PrivateKeySecretName: request.Import.PrivateKeySecretName,
+				PasswordSecretName:   request.Import.PasswordSecretName,
+			}
+		}
 	}
 
-	if len(request.EthereumHTTPEndpoints) != 0 {
-		node.Spec.EthereumHTTPEndpoints = request.EthereumHTTPEndpoints
+	if request.RPC != nil {
+		node.Spec.RPC = *request.RPC
+	}
+	if node.Spec.RPC {
+		if len(request.RPCAPI) != 0 {
+			rpcAPI := []ethereumv1alpha1.API{}
+			for _, api := range request.RPCAPI {
+				rpcAPI = append(rpcAPI, ethereumv1alpha1.API(api))
+			}
+			node.Spec.RPCAPI = rpcAPI
+		}
+		if request.RPCPort != 0 {
+			node.Spec.RPCPort = request.RPCPort
+		}
 	}
 
-	if request.KeystorePasswordSecretName != "" {
-		node.Spec.KeystorePasswordSecretName = request.KeystorePasswordSecretName
+	if request.WS != nil {
+		node.Spec.WS = *request.WS
+	}
+	if node.Spec.WS {
+		if len(request.WSAPI) != 0 {
+			wsAPI := []ethereumv1alpha1.API{}
+			for _, api := range request.WSAPI {
+				wsAPI = append(wsAPI, ethereumv1alpha1.API(api))
+			}
+			node.Spec.WSAPI = wsAPI
+		}
+		if request.WSPort != 0 {
+			node.Spec.WSPort = request.WSPort
+		}
 	}
 
-	if request.APICredentials != nil {
-		node.Spec.APICredentials.Email = request.APICredentials.Email
-		node.Spec.APICredentials.PasswordSecretName = request.APICredentials.PasswordSecretName
+	if request.GraphQL != nil {
+		node.Spec.GraphQL = *request.GraphQL
+	}
+	if node.Spec.GraphQL {
+		if request.GraphQLPort != 0 {
+			node.Spec.GraphQLPort = request.GraphQLPort
+		}
+	}
+
+	if len(request.Hosts) != 0 {
+		node.Spec.Hosts = request.Hosts
 	}
 
 	if len(request.CORSDomains) != 0 {
 		node.Spec.CORSDomains = request.CORSDomains
 	}
 
-	if request.CertSecretName != "" {
-		node.Spec.CertSecretName = request.CertSecretName
-	}
+	var bootnodes, staticNodes []ethereumv1alpha1.Enode
 
-	if request.TLSPort != 0 {
-		node.Spec.TLSPort = request.TLSPort
+	if request.Bootnodes != nil {
+		for _, bootnode := range *request.Bootnodes {
+			bootnodes = append(bootnodes, ethereumv1alpha1.Enode(bootnode))
+		}
 	}
+	node.Spec.Bootnodes = bootnodes
 
-	if request.P2PPort != 0 {
-		node.Spec.P2PPort = request.P2PPort
+	if request.StaticNodes != nil {
+		for _, staticNode := range *request.StaticNodes {
+			staticNodes = append(staticNodes, ethereumv1alpha1.Enode(staticNode))
+		}
 	}
-
-	if request.APIPort != 0 {
-		node.Spec.APIPort = request.APIPort
-	}
-
-	if request.SecureCookies != nil {
-		node.Spec.SecureCookies = *request.SecureCookies
-	}
-
-	if request.Logging != "" {
-		node.Spec.Logging = sharedAPI.VerbosityLevel(request.Logging)
-	}
+	node.Spec.StaticNodes = staticNodes
 
 	if request.CPU != "" {
 		node.Spec.CPU = request.CPU
@@ -142,8 +188,8 @@ func Update(c *fiber.Ctx) error {
 	if err != nil {
 		return c.Status(err.Status).JSON(err)
 	}
-	return c.Status(http.StatusOK).JSON(shared.NewResponse(node))
 
+	return c.Status(http.StatusOK).JSON(shared.NewResponse(new(Node).FromEthereumNode(node)))
 }
 
 // List returns all chainlink nodes
@@ -164,13 +210,13 @@ func List(c *fiber.Ctx) error {
 		return nodes.Items[j].CreationTimestamp.Before(&nodes.Items[i].CreationTimestamp)
 	})
 
-	nodeModels := new(Nodes).FromChainlinkNode(nodes.Items[start:end])
+	nodeModels := new(Nodes).FromEthereumNode(nodes.Items[start:end])
 	return c.Status(http.StatusOK).JSON(shared.NewResponse(nodeModels))
 }
 
 // Delete a single chainlink node by name
 func Delete(c *fiber.Ctx) error {
-	node := c.Locals("node").(*chainlinkv1alpha1.Node)
+	node := c.Locals("node").(*ethereumv1alpha1.Node)
 
 	err := service.Delete(node)
 	if err != nil {
@@ -191,6 +237,97 @@ func Count(c *fiber.Ctx) error {
 	c.Set("X-Total-Count", fmt.Sprintf("%d", len(nodes.Items)))
 
 	return c.SendStatus(http.StatusOK)
+}
+
+func Stats(c *websocket.Conn) {
+	defer c.Close()
+
+	type Result struct {
+		Error string `json:"error,omitempty"`
+		// eth_syncing call
+		CurrentBlock uint `json:"currentBlock,omitempty"`
+		HighestBlock uint `json:"highestBlock,omitempty"`
+		// net_peerCount call
+		Peers uint `json:"peersCount,omitempty"`
+	}
+
+	// Mock serever
+	if os.Getenv("MOCK") == "true" {
+		var currentBlock, highestBlock, peersCount uint
+		for {
+			currentBlock += 3
+			highestBlock += 32
+			peersCount += 1
+
+			r := &Result{
+				CurrentBlock: currentBlock,
+				HighestBlock: highestBlock,
+				Peers:        peersCount,
+			}
+
+			var msg []byte
+
+			if peersCount > 20 {
+				peersCount = 0
+				r = &Result{
+					Error: "JSON-RPC server is not enabled",
+				}
+			}
+
+			msg, _ = json.Marshal(r)
+			c.WriteMessage(websocket.TextMessage, []byte(msg))
+			time.Sleep(time.Second)
+		}
+	}
+
+	name := c.Params("name")
+
+	for {
+
+		node, err := service.Get(name)
+
+		if err != nil {
+			c.WriteJSON(err)
+			return
+		}
+
+		if !node.Spec.RPC {
+			c.WriteJSON(restError.NewBadRequestError("rpc is not enabled"))
+			return
+		}
+
+		client := jsonrpc.NewClient(fmt.Sprintf("http://%s:%d", node.Name, node.Spec.RPCPort))
+
+		type SyncStatus struct {
+			CurrentBlock string `json:"currentBlock"`
+			HighestBlock string `json:"highestBlock"`
+		}
+
+		// sync status
+		syncStatus := SyncStatus{}
+		client.CallFor(&syncStatus, "eth_syncing")
+
+		current := new(big.Int)
+		current.SetString(strings.Replace(syncStatus.CurrentBlock, "0x", "", 1), 16)
+
+		highest := new(big.Int)
+		highest.SetString(strings.Replace(syncStatus.HighestBlock, "0x", "", 1), 16)
+
+		// peer count
+		var peerCount string
+		client.CallFor(&peerCount, "net_peerCount")
+
+		count := new(big.Int)
+		count.SetString(strings.Replace(peerCount, "0x", "", 1), 16)
+
+		c.WriteJSON(fiber.Map{
+			"currentBlock": current.String(),
+			"highestBlock": highest.String(),
+			"peersCount":   count,
+		})
+
+		time.Sleep(time.Second)
+	}
 }
 
 // validateNodeExist validate node by name exist

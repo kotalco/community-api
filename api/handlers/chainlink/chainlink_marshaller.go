@@ -38,35 +38,35 @@ type Node struct {
 
 type Nodes []Node
 
-func (node Node) FromChainlinkNode(model *chainlinkv1alpha1.Node) *Node {
+func (node Node) FromChainlinkNode(n *chainlinkv1alpha1.Node) *Node {
 	return &Node{
-		Name: model.Name,
+		Name: n.Name,
 		Time: models.Time{
-			CreatedAt: model.CreationTimestamp.UTC().Format(shared.JavascriptISOString),
+			CreatedAt: n.CreationTimestamp.UTC().Format(shared.JavascriptISOString),
 		},
-		EthereumChainId:            model.Spec.EthereumChainId,
-		LinkContractAddress:        model.Spec.LinkContractAddress,
-		EthereumWSEndpoint:         model.Spec.EthereumWSEndpoint,
-		DatabaseURL:                model.Spec.DatabaseURL,
-		EthereumHTTPEndpoints:      model.Spec.EthereumHTTPEndpoints,
-		KeystorePasswordSecretName: model.Spec.KeystorePasswordSecretName,
+		EthereumChainId:            n.Spec.EthereumChainId,
+		LinkContractAddress:        n.Spec.LinkContractAddress,
+		EthereumWSEndpoint:         n.Spec.EthereumWSEndpoint,
+		DatabaseURL:                n.Spec.DatabaseURL,
+		EthereumHTTPEndpoints:      n.Spec.EthereumHTTPEndpoints,
+		KeystorePasswordSecretName: n.Spec.KeystorePasswordSecretName,
 		APICredentials: &apiCredentials{
-			Email:              model.Spec.APICredentials.Email,
-			PasswordSecretName: model.Spec.APICredentials.PasswordSecretName,
+			Email:              n.Spec.APICredentials.Email,
+			PasswordSecretName: n.Spec.APICredentials.PasswordSecretName,
 		},
-		CORSDomains:    model.Spec.CORSDomains,
-		CertSecretName: model.Spec.CertSecretName,
-		TLSPort:        model.Spec.TLSPort,
-		P2PPort:        model.Spec.P2PPort,
-		APIPort:        model.Spec.APIPort,
-		SecureCookies:  &model.Spec.SecureCookies,
-		Logging:        string(model.Spec.Logging),
-		CPU:            model.Spec.CPU,
-		CPULimit:       model.Spec.CPULimit,
-		Memory:         model.Spec.Memory,
-		MemoryLimit:    model.Spec.MemoryLimit,
-		Storage:        model.Spec.Storage,
-		StorageClass:   model.Spec.StorageClass,
+		CORSDomains:    n.Spec.CORSDomains,
+		CertSecretName: n.Spec.CertSecretName,
+		TLSPort:        n.Spec.TLSPort,
+		P2PPort:        n.Spec.P2PPort,
+		APIPort:        n.Spec.APIPort,
+		SecureCookies:  &n.Spec.SecureCookies,
+		Logging:        string(n.Spec.Logging),
+		CPU:            n.Spec.CPU,
+		CPULimit:       n.Spec.CPULimit,
+		Memory:         n.Spec.Memory,
+		MemoryLimit:    n.Spec.MemoryLimit,
+		Storage:        n.Spec.Storage,
+		StorageClass:   n.Spec.StorageClass,
 	}
 }
 

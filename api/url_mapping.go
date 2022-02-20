@@ -4,6 +4,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/websocket/v2"
 	"github.com/kotalco/api/api/handlers/chainlink"
+	"github.com/kotalco/api/api/handlers/ethereum"
 	"github.com/kotalco/api/api/handlers/shared"
 )
 
@@ -17,8 +18,8 @@ func MapUrl(app *fiber.App) {
 	v1 := api.Group("v1")
 
 	// chainlink group
-	chainlink_version := v1.Group("chainlink")
-	chainlinkNodes := chainlink_version.Group("nodes")
+	chainlinkGroup := v1.Group("chainlink")
+	chainlinkNodes := chainlinkGroup.Group("nodes")
 	chainlinkNodes.Post("/", chainlink.Create)
 	chainlinkNodes.Head("/", chainlink.Count)
 	chainlinkNodes.Get("/", chainlink.List)
@@ -27,5 +28,18 @@ func MapUrl(app *fiber.App) {
 	chainlinkNodes.Get("/:name/status", websocket.New(shared.Status))
 	chainlinkNodes.Put("/:name", chainlink.ValidateNodeExist, chainlink.Update)
 	chainlinkNodes.Delete("/:name", chainlink.ValidateNodeExist, chainlink.Delete)
+
+	//ethereum group
+	ethereumGroup := v1.Group("ethereum")
+	ethereumNodes := ethereumGroup.Group("nodes")
+	ethereumNodes.Post("/", ethereum.Create)
+	ethereumNodes.Head("/", ethereum.Count)
+	ethereumNodes.Get("/", ethereum.List)
+	ethereumNodes.Get("/:name", ethereum.ValidateNodeExist, ethereum.Get)
+	ethereumNodes.Get("/:name/logs", websocket.New(shared.Logger))
+	ethereumNodes.Get("/:name/status", websocket.New(shared.Status))
+	ethereumNodes.Get("/:name/stats", websocket.New(ethereum.Stats))
+	ethereumNodes.Put("/:name", ethereum.ValidateNodeExist, ethereum.Update)
+	ethereumNodes.Delete("/:name", ethereum.ValidateNodeExist, ethereum.Delete)
 
 }
