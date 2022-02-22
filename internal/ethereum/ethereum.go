@@ -13,7 +13,7 @@ type ImportedAccount struct {
 }
 
 // Node is Ethereum node
-type Node struct {
+type EthereumDto struct {
 	models.Time
 	Name                     string           `json:"name"`
 	Network                  string           `json:"network"`
@@ -44,10 +44,10 @@ type Node struct {
 	Storage                  string           `json:"storage"`
 	StorageClass             *string          `json:"storageClass"`
 }
-type Nodes []Node
+type EthereumListDto []EthereumDto
 
-func (node Node) FromEthereumNode(n *ethereumv1alpha1.Node) *Node {
-	model := &Node{
+func (node EthereumDto) FromEthereumNode(n *ethereumv1alpha1.Node) *EthereumDto {
+	model := &EthereumDto{
 		Name: n.Name,
 		Time: models.Time{
 			CreatedAt: n.CreationTimestamp.UTC().Format(shared.JavascriptISOString),
@@ -110,10 +110,10 @@ func (node Node) FromEthereumNode(n *ethereumv1alpha1.Node) *Node {
 	return model
 }
 
-func (nodes Nodes) FromEthereumNode(models []ethereumv1alpha1.Node) Nodes {
-	result := make(Nodes, len(models))
+func (nodes EthereumListDto) FromEthereumNode(models []ethereumv1alpha1.Node) EthereumListDto {
+	result := make(EthereumListDto, len(models))
 	for index, v := range models {
-		result[index] = *(Node{}.FromEthereumNode(&v))
+		result[index] = *(EthereumDto{}.FromEthereumNode(&v))
 	}
 	return result
 }

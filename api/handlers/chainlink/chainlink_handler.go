@@ -122,7 +122,7 @@ func Count(c *fiber.Ctx) error {
 	return c.SendStatus(http.StatusOK)
 }
 
-// ValidateNodeExist validate node by name exist acts as a validation for all handlers the needs to find secret by name
+// ValidateNodeExist validate node by name exist acts as a validation for all handlers the needs to find chainlink node by name
 // 1-call chainlink service to check if node exits
 // 2-return 404 if it's not
 // 3-save the node to local with the key node to be used by the other handlers
