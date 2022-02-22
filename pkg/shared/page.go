@@ -1,6 +1,6 @@
 package shared
 
-const PerPage = 10
+const PerPage = 2
 
 type Pagination struct {
 	Page int

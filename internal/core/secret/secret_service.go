@@ -8,13 +8,11 @@ import (
 	"github.com/kotalco/api/pkg/errors"
 	"github.com/kotalco/api/pkg/k8s"
 	"github.com/kotalco/api/pkg/logger"
-	"github.com/kotalco/api/pkg/shared"
 	corev1 "k8s.io/api/core/v1"
 	k8errors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
-	"sort"
 )
 
 type secretService struct{}
@@ -22,7 +20,7 @@ type secretService struct{}
 type secretServiceInterface interface {
 	Get(name string) (*corev1.Secret, *errors.RestErr)
 	Create(*SecretDto) (*corev1.Secret, *errors.RestErr)
-	List(string, *shared.Pagination) (SecretsDto, *errors.RestErr)
+	List() (*corev1.SecretList, *errors.RestErr)
 	Delete(secret *corev1.Secret) *errors.RestErr
 	Count() (*int, *errors.RestErr)
 }
@@ -79,7 +77,7 @@ func (service secretService) Create(dto *SecretDto) (*corev1.Secret, *errors.Res
 }
 
 // List returns all secrets
-func (service secretService) List(secretType string, pagination *shared.Pagination) (SecretsDto, *errors.RestErr) {
+func (service secretService) List() (*corev1.SecretList, *errors.RestErr) {
 	secrets := &corev1.SecretList{}
 
 	if err := k8s.Client().List(context.Background(), secrets, client.InNamespace("default"), client.HasLabels{"app.kubernetes.io/created-by"}); err != nil {
@@ -87,21 +85,7 @@ func (service secretService) List(secretType string, pagination *shared.Paginati
 		return nil, errors.NewInternalServerError("failed to get all secrets")
 	}
 
-	start, end := shared.Page(uint(len(secrets.Items)), uint(pagination.Page))
-	sort.Slice(secrets.Items[:], func(i, j int) bool {
-		return secrets.Items[j].CreationTimestamp.Before(&secrets.Items[i].CreationTimestamp)
-	})
-
-	var marshaledSecrets = make([]SecretDto, 0)
-	for _, sec := range secrets.Items[start:end] {
-		keyType := sec.Labels["kotal.io/key-type"]
-		if keyType == "" || secretType != "" && keyType != secretType {
-			continue
-		}
-		marshaledSecrets = append(marshaledSecrets, *SecretDto{}.FromCoreSecret(&sec))
-	}
-
-	return marshaledSecrets, nil
+	return secrets, nil
 }
 
 // Delete a single secret node by name

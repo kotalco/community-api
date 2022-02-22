@@ -11,7 +11,7 @@ type apiCredentials struct {
 	PasswordSecretName string `json:"passwordSecretName"`
 }
 
-type Node struct {
+type ChainlinkDto struct {
 	models.Time
 	Name                       string          `json:"name"`
 	EthereumChainId            uint            `json:"ethereumChainId"`
@@ -36,10 +36,10 @@ type Node struct {
 	StorageClass               *string         `json:"storageClass"`
 }
 
-type Nodes []Node
+type ChainlinkListDto []ChainlinkDto
 
-func (node Node) FromChainlinkNode(n *chainlinkv1alpha1.Node) *Node {
-	return &Node{
+func (node ChainlinkDto) FromChainlinkNode(n *chainlinkv1alpha1.Node) *ChainlinkDto {
+	return &ChainlinkDto{
 		Name: n.Name,
 		Time: models.Time{
 			CreatedAt: n.CreationTimestamp.UTC().Format(shared.JavascriptISOString),
@@ -70,10 +70,10 @@ func (node Node) FromChainlinkNode(n *chainlinkv1alpha1.Node) *Node {
 	}
 }
 
-func (nodes Nodes) FromChainlinkNode(models []chainlinkv1alpha1.Node) Nodes {
-	result := make(Nodes, len(models))
+func (nodes ChainlinkListDto) FromChainlinkNode(models []chainlinkv1alpha1.Node) ChainlinkListDto {
+	result := make(ChainlinkListDto, len(models))
 	for index, model := range models {
-		result[index] = *(Node{}.FromChainlinkNode(&model))
+		result[index] = *(ChainlinkDto{}.FromChainlinkNode(&model))
 	}
 	return result
 }

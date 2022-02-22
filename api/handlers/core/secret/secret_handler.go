@@ -10,12 +10,13 @@ import (
 	"github.com/kotalco/api/pkg/shared"
 	corev1 "k8s.io/api/core/v1"
 	"net/http"
+	"sort"
 	"strconv"
 )
 
 var service = secret.SecretService
 
-// Get gets a single k8s secret by name
+// Get gets a single  secret by name
 // 1-get the node validated from ValidateSecretExist method
 // 2-marshall secretModel and format the reponse
 func Get(c *fiber.Ctx) error {
@@ -25,20 +26,34 @@ func Get(c *fiber.Ctx) error {
 }
 
 // List returns all k8s secrets
-// 1-create the pagination struct based on request qs
+// 1-get the pagination and type qs
 // 2-call service to return secret models
+// 3-paginate the list
 // 3-marshall secrets model to secrets dto and format the response using NewResponse
 func List(c *fiber.Ctx) error {
 	secretType := c.Query("type")
 	page, _ := strconv.Atoi(c.Query("page")) // default page to 0
-	pagination := shared.Pagination{Page: page}
 
-	secrets, err := service.List(secretType, &pagination)
+	secrets, err := service.List()
 	if err != nil {
 		return c.Status(err.Status).JSON(err)
 	}
 
-	return c.Status(http.StatusOK).JSON(shared.NewResponse(secrets))
+	start, end := shared.Page(uint(len(secrets.Items)), uint(page))
+	sort.Slice(secrets.Items[:], func(i, j int) bool {
+		return secrets.Items[j].CreationTimestamp.Before(&secrets.Items[i].CreationTimestamp)
+	})
+
+	var secretListDto = make([]secret.SecretDto, 0)
+	for _, sec := range secrets.Items[start:end] {
+		keyType := sec.Labels["kotal.io/key-type"]
+		if keyType == "" || secretType != "" && keyType != secretType {
+			continue
+		}
+		secretListDto = append(secretListDto, *secret.SecretDto{}.FromCoreSecret(&sec))
+	}
+
+	return c.Status(http.StatusOK).JSON(shared.NewResponse(secretListDto))
 }
 
 // Create creates k8s secret from spec
@@ -53,12 +68,12 @@ func Create(c *fiber.Ctx) error {
 		return c.Status(badReq.Status).JSON(err)
 	}
 
-	sec, err := service.Create(dto)
+	secretModel, err := service.Create(dto)
 	if err != nil {
 		return c.Status(err.Status).JSON(err)
 	}
 
-	return c.Status(http.StatusCreated).JSON(shared.NewResponse(new(secret.SecretDto).FromCoreSecret(sec)))
+	return c.Status(http.StatusCreated).JSON(shared.NewResponse(new(secret.SecretDto).FromCoreSecret(secretModel)))
 }
 
 // Delete deletes k8s secret by name
