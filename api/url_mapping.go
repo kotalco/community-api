@@ -6,6 +6,7 @@ import (
 	"github.com/kotalco/api/api/handlers/chainlink"
 	"github.com/kotalco/api/api/handlers/core/secret"
 	"github.com/kotalco/api/api/handlers/ethereum"
+	"github.com/kotalco/api/api/handlers/ethereum2/beacon_node"
 	"github.com/kotalco/api/api/handlers/shared"
 )
 
@@ -45,7 +46,6 @@ func MapUrl(app *fiber.App) {
 
 	//core group
 	coreGroup := v1.Group("core")
-
 	//secret group
 	secrets := coreGroup.Group("secrets")
 	secrets.Post("/", secret.Create)
@@ -54,5 +54,17 @@ func MapUrl(app *fiber.App) {
 	secrets.Get("/:name", secret.ValidateSecretExist, secret.Get)
 	secrets.Put("/:name", secret.ValidateSecretExist, secret.Update)
 	secrets.Delete("/:name", secret.ValidateSecretExist, secret.Delete)
+
+	//ethereum2 group
+	ethereum2 := v1.Group("ethereum2")
+	beaconnodes := ethereum2.Group("beaconnodes")
+	beaconnodes.Post("/", beacon_node.Create)
+	beaconnodes.Head("/", beacon_node.Count)
+	beaconnodes.Get("/", beacon_node.List)
+	beaconnodes.Get("/:name", beacon_node.ValidateBeaconNodeExist, beacon_node.Get)
+	beaconnodes.Get("/:name/logs", websocket.New(shared.Logger))
+	beaconnodes.Get("/:name/status", websocket.New(shared.Status))
+	beaconnodes.Put("/:name", beacon_node.ValidateBeaconNodeExist, beacon_node.Update)
+	beaconnodes.Delete("/:name", beacon_node.ValidateBeaconNodeExist, beacon_node.Delete)
 
 }

@@ -1,9 +1,7 @@
-package handlers
+package beacon_node
 
 import (
 	"fmt"
-	"github.com/kotalco/api/api/handlers"
-	shared2 "github.com/kotalco/api/api/handlers/shared"
 	"github.com/kotalco/api/internal/models/ethereum2"
 	"github.com/kotalco/api/pkg/k8s"
 	"github.com/kotalco/api/pkg/shared"
@@ -14,7 +12,6 @@ import (
 	"strconv"
 
 	"github.com/gofiber/fiber/v2"
-	"github.com/gofiber/websocket/v2"
 	ethereum2v1alpha1 "github.com/kotalco/kotal/apis/ethereum2/v1alpha1"
 	sharedAPIs "github.com/kotalco/kotal/apis/shared"
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -25,11 +22,6 @@ import (
 
 // BeaconNodeHandler is ethereum 2.0 beacon node handler
 type BeaconNodeHandler struct{}
-
-// NewBeaconNodeHandler creates a new ethereum 2.0 beacon node handler
-func NewBeaconNodeHandler() handlers.Handler {
-	return &BeaconNodeHandler{}
-}
 
 // Get gets a single ethereum 2.0 beacon node by name
 func (b *BeaconNodeHandler) Get(c *fiber.Ctx) error {
@@ -274,16 +266,4 @@ func validateBeaconNodeExist(c *fiber.Ctx) error {
 
 	return c.Next()
 
-}
-
-// Register registers all handlers on the given router
-func (b *BeaconNodeHandler) Register(router fiber.Router) {
-	router.Post("/", b.Create)
-	router.Head("/", b.Count)
-	router.Get("/", b.List)
-	router.Get("/:name", validateBeaconNodeExist, b.Get)
-	router.Get("/:name/logs", websocket.New(shared2.Logger))
-	router.Get("/:name/status", websocket.New(shared2.Status))
-	router.Put("/:name", validateBeaconNodeExist, b.Update)
-	router.Delete("/:name", validateBeaconNodeExist, b.Delete)
 }

@@ -117,7 +117,7 @@ func Count(c *fiber.Ctx) error {
 	}
 
 	c.Set("Access-Control-Expose-Headers", "X-Total-Count")
-	c.Set("X-Total-Count", fmt.Sprintf("%d", length))
+	c.Set("X-Total-Count", fmt.Sprintf("%d", *length))
 
 	return c.SendStatus(http.StatusOK)
 }
