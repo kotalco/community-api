@@ -8,7 +8,7 @@ type RestErr struct {
 	Message     string            `json:"message"`
 	Status      int               `json:"status"`
 	Error       string            `json:"error"`
-	Validations map[string]string `json:"validations"`
+	Validations map[string]string `json:"validations,omitempty"`
 }
 
 func NewValidationError(validations map[string]string) *RestErr {

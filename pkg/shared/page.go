@@ -2,6 +2,10 @@ package shared
 
 const PerPage = 10
 
+type Pagination struct {
+	Page int
+}
+
 // Page returns page start and end index
 // given a length and page index
 // it returns 0,0 [] if length or page is 0

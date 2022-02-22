@@ -4,6 +4,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/websocket/v2"
 	"github.com/kotalco/api/api/handlers/chainlink"
+	"github.com/kotalco/api/api/handlers/core/secret"
 	"github.com/kotalco/api/api/handlers/ethereum"
 	"github.com/kotalco/api/api/handlers/shared"
 )
@@ -41,5 +42,17 @@ func MapUrl(app *fiber.App) {
 	ethereumNodes.Get("/:name/stats", websocket.New(ethereum.Stats))
 	ethereumNodes.Put("/:name", ethereum.ValidateNodeExist, ethereum.Update)
 	ethereumNodes.Delete("/:name", ethereum.ValidateNodeExist, ethereum.Delete)
+
+	//core group
+	coreGroup := v1.Group("core")
+
+	//secret group
+	secrets := coreGroup.Group("secrets")
+	secrets.Post("/", secret.Create)
+	secrets.Head("/", secret.Count)
+	secrets.Get("/", secret.List)
+	secrets.Get("/:name", secret.ValidateSecretExist, secret.Get)
+	secrets.Put("/:name", secret.ValidateSecretExist, secret.Update)
+	secrets.Delete("/:name", secret.ValidateSecretExist, secret.Delete)
 
 }

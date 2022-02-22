@@ -70,7 +70,7 @@ func main() {
 
 	port := os.Getenv("KOTAL_API_SERVER_PORT")
 	if port == "" {
-		port = "5000"
+		port = "3000"
 	}
 
 	if err := app.Listen(fmt.Sprintf(":%s", port)); err != nil {
