@@ -219,7 +219,7 @@ func Stats(c *websocket.Conn) {
 	}
 }
 
-// ValidateNodeExist validate node by name exist acts as a validation for all handlers the needs to find secret by name
+// ValidateNodeExist validate node by name exist acts as a validation for all handlers the needs to find ethereum by name
 // 1-call ethereum service to check if node exits
 // 2-return 404 if it's not
 // 3-save the node to local with the key node to be used by the other handlers
