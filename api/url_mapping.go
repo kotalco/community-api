@@ -5,6 +5,7 @@ import (
 	"github.com/gofiber/websocket/v2"
 	"github.com/kotalco/api/api/handlers/chainlink"
 	"github.com/kotalco/api/api/handlers/core/secret"
+	"github.com/kotalco/api/api/handlers/core/storage_class"
 	"github.com/kotalco/api/api/handlers/ethereum"
 	"github.com/kotalco/api/api/handlers/ethereum2/beacon_node"
 	"github.com/kotalco/api/api/handlers/ethereum2/validator"
@@ -56,6 +57,13 @@ func MapUrl(app *fiber.App) {
 	secrets.Get("/:name", secret.ValidateSecretExist, secret.Get)
 	secrets.Put("/:name", secret.ValidateSecretExist, secret.Update)
 	secrets.Delete("/:name", secret.ValidateSecretExist, secret.Delete)
+	//storage class group
+	storageClasses := coreGroup.Group("storageclasses")
+	storageClasses.Post("/", storage_class.Create)
+	storageClasses.Get("/", storage_class.List)
+	storageClasses.Get("/:name", storage_class.ValidateStorageClassExist, storage_class.Get)
+	storageClasses.Put("/:name", storage_class.ValidateStorageClassExist, storage_class.Update)
+	storageClasses.Delete("/:name", storage_class.ValidateStorageClassExist, storage_class.Delete)
 
 	//ethereum2 group
 	ethereum2 := v1.Group("ethereum2")
