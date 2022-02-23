@@ -8,6 +8,7 @@ import (
 	"github.com/kotalco/api/api/handlers/ethereum"
 	"github.com/kotalco/api/api/handlers/ethereum2/beacon_node"
 	"github.com/kotalco/api/api/handlers/ethereum2/validator"
+	"github.com/kotalco/api/api/handlers/filecoin"
 	"github.com/kotalco/api/api/handlers/shared"
 )
 
@@ -68,7 +69,7 @@ func MapUrl(app *fiber.App) {
 	beaconnodesGroup.Get("/:name/status", websocket.New(shared.Status))
 	beaconnodesGroup.Put("/:name", beacon_node.ValidateBeaconNodeExist, beacon_node.Update)
 	beaconnodesGroup.Delete("/:name", beacon_node.ValidateBeaconNodeExist, beacon_node.Delete)
-
+	//validators group
 	validatorsGroup := ethereum2.Group("validators")
 	validatorsGroup.Post("/", validator.Create)
 	validatorsGroup.Head("/", validator.Count)
@@ -78,5 +79,17 @@ func MapUrl(app *fiber.App) {
 	validatorsGroup.Get("/:name/status", websocket.New(shared.Status))
 	validatorsGroup.Put("/:name", validator.ValidateValidatorExist, validator.Update)
 	validatorsGroup.Delete("/:name", validator.ValidateValidatorExist, validator.Delete)
+
+	//filecoin group
+	filecoinGroup := v1.Group("filecoin")
+	filecoinNodes := filecoinGroup.Group("nodes")
+	filecoinNodes.Post("/", filecoin.Create)
+	filecoinNodes.Head("/", filecoin.Count)
+	filecoinNodes.Get("/", filecoin.List)
+	filecoinNodes.Get("/:name", filecoin.ValidateNodeExist, filecoin.Get)
+	filecoinNodes.Get("/:name/logs", websocket.New(shared.Logger))
+	filecoinNodes.Get("/:name/status", websocket.New(shared.Status))
+	filecoinNodes.Put("/:name", filecoin.ValidateNodeExist, filecoin.Update)
+	filecoinNodes.Delete("/:name", filecoin.ValidateNodeExist, filecoin.Delete)
 
 }

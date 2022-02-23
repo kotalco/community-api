@@ -1,4 +1,4 @@
-package models
+package filecoin
 
 import (
 	"github.com/kotalco/api/internal/models"
@@ -7,7 +7,7 @@ import (
 )
 
 // Node is Filecoin node
-type Node struct {
+type FilecoinDto struct {
 	models.Time
 	Name               string  `json:"name"`
 	Network            string  `json:"network"`
@@ -29,9 +29,11 @@ type Node struct {
 	StorageClass       *string `json:"storageClass"`
 }
 
-// FromFilecoinNode creates node model from Filecoin node
-func FromFilecoinNode(node *filecoinv1alpha1.Node) *Node {
-	return &Node{
+type FilecoinListDto []FilecoinDto
+
+// FromFilecoinNode creates node dto from Filecoin node
+func (filecoinDto FilecoinDto) FromFilecoinNode(node *filecoinv1alpha1.Node) *FilecoinDto {
+	return &FilecoinDto{
 		Name: node.Name,
 		Time: models.Time{
 			CreatedAt: node.CreationTimestamp.UTC().Format(shared.JavascriptISOString),
@@ -54,4 +56,13 @@ func FromFilecoinNode(node *filecoinv1alpha1.Node) *Node {
 		Storage:            node.Spec.Storage,
 		StorageClass:       node.Spec.StorageClass,
 	}
+}
+
+// FromFilecoinNode creates node dto from Filecoin node list
+func (filecoinListDto FilecoinListDto) FromFilecoinNode(nodes []filecoinv1alpha1.Node) FilecoinListDto {
+	result := make(FilecoinListDto, len(nodes))
+	for index, v := range nodes {
+		result[index] = *(FilecoinDto{}.FromFilecoinNode(&v))
+	}
+	return result
 }

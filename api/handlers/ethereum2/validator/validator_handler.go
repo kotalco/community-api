@@ -28,7 +28,7 @@ func Get(c *fiber.Ctx) error {
 // 1-get the pagination qs default to 0
 // 2-call service to return node models
 // 3-make the pagination
-// 3-marshall nodes  to beacon node dto and format the response using NewResponse
+// 3-marshall nodes  to validator dto and format the response using NewResponse
 func List(c *fiber.Ctx) error {
 	page, _ := strconv.Atoi(c.Query("page"))
 

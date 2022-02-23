@@ -25,14 +25,7 @@ func main() {
 	//v1 := api.Group("v1")
 	//
 	//core := v1.Group("core")
-	//secrets := core.Group("secrets")
 	//storageClasses := core.Group("storageclasses")
-	//
-	//ethereum := v1.Group("ethereum")
-	//nodes := ethereum.Group("nodes")
-	//
-	////chainlink := v1.Group("chainlink")
-	////chainlinkNodes := chainlink.Group("nodes")
 	//
 	//polkadot := v1.Group("polkadot")
 	//polkadotNodes := polkadot.Group("nodes")
@@ -40,9 +33,6 @@ func main() {
 	//ipfs := v1.Group("ipfs")
 	//peers := ipfs.Group("peers")
 	//clusterpeers := ipfs.Group("clusterpeers")
-	//
-	//filecoin := v1.Group("filecoin")
-	//filecoinNodes := filecoin.Group("nodes")
 	//
 	//near := v1.Group("near")
 	//nearNodes := near.Group("nodes")
