@@ -7,6 +7,7 @@ import (
 	"github.com/kotalco/api/api/handlers/core/secret"
 	"github.com/kotalco/api/api/handlers/ethereum"
 	"github.com/kotalco/api/api/handlers/ethereum2/beacon_node"
+	"github.com/kotalco/api/api/handlers/ethereum2/validator"
 	"github.com/kotalco/api/api/handlers/shared"
 )
 
@@ -57,14 +58,25 @@ func MapUrl(app *fiber.App) {
 
 	//ethereum2 group
 	ethereum2 := v1.Group("ethereum2")
-	beaconnodes := ethereum2.Group("beaconnodes")
-	beaconnodes.Post("/", beacon_node.Create)
-	beaconnodes.Head("/", beacon_node.Count)
-	beaconnodes.Get("/", beacon_node.List)
-	beaconnodes.Get("/:name", beacon_node.ValidateBeaconNodeExist, beacon_node.Get)
-	beaconnodes.Get("/:name/logs", websocket.New(shared.Logger))
-	beaconnodes.Get("/:name/status", websocket.New(shared.Status))
-	beaconnodes.Put("/:name", beacon_node.ValidateBeaconNodeExist, beacon_node.Update)
-	beaconnodes.Delete("/:name", beacon_node.ValidateBeaconNodeExist, beacon_node.Delete)
+	//beaconnodes group
+	beaconnodesGroup := ethereum2.Group("beaconnodes")
+	beaconnodesGroup.Post("/", beacon_node.Create)
+	beaconnodesGroup.Head("/", beacon_node.Count)
+	beaconnodesGroup.Get("/", beacon_node.List)
+	beaconnodesGroup.Get("/:name", beacon_node.ValidateBeaconNodeExist, beacon_node.Get)
+	beaconnodesGroup.Get("/:name/logs", websocket.New(shared.Logger))
+	beaconnodesGroup.Get("/:name/status", websocket.New(shared.Status))
+	beaconnodesGroup.Put("/:name", beacon_node.ValidateBeaconNodeExist, beacon_node.Update)
+	beaconnodesGroup.Delete("/:name", beacon_node.ValidateBeaconNodeExist, beacon_node.Delete)
+
+	validatorsGroup := ethereum2.Group("validators")
+	validatorsGroup.Post("/", validator.Create)
+	validatorsGroup.Head("/", validator.Count)
+	validatorsGroup.Get("/", validator.List)
+	validatorsGroup.Get("/:name", validator.ValidateValidatorExist, validator.Get)
+	validatorsGroup.Get("/:name/logs", websocket.New(shared.Logger))
+	validatorsGroup.Get("/:name/status", websocket.New(shared.Status))
+	validatorsGroup.Put("/:name", validator.ValidateValidatorExist, validator.Update)
+	validatorsGroup.Delete("/:name", validator.ValidateValidatorExist, validator.Delete)
 
 }
