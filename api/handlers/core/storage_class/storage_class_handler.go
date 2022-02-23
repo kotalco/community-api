@@ -15,6 +15,8 @@ import (
 var service = storage_class.StorageClassService
 
 // Get gets a single k8s storage class
+// 1-get the node validated from ValidateStorageClassExist method
+// 2-marshall storageClass model and format the reponse
 func Get(c *fiber.Ctx) error {
 	storageClass := c.Locals("storage_class").(*storagev1.StorageClass)
 
@@ -22,6 +24,10 @@ func Get(c *fiber.Ctx) error {
 }
 
 // List returns all k8s storage classes
+// 1-get the pagination qs default to 0
+// 2-call service to return node models
+// 3-make the pagination
+// 3-marshall nodes  to storage class dto and format the response using NewResponse
 func List(c *fiber.Ctx) error {
 	page, _ := strconv.Atoi(c.Query("page")) // default page to 0
 
@@ -42,16 +48,19 @@ func List(c *fiber.Ctx) error {
 }
 
 // Create creates k8s storage class from spec
+//todo
 func Create(c *fiber.Ctx) error {
 	return c.SendStatus(http.StatusMethodNotAllowed)
 }
 
 // Delete deletes k8s storage class by name
+//todo
 func Delete(c *fiber.Ctx) error {
 	return c.SendStatus(http.StatusMethodNotAllowed)
 }
 
 // Update updates k8s storage class by name from spec
+//todo
 func Update(c *fiber.Ctx) error {
 	return c.SendStatus(http.StatusMethodNotAllowed)
 }

@@ -31,7 +31,7 @@ var (
 
 func init() { StorageClassService = &storageClassService{} }
 
-// Get returns a single secret  by name
+// Get returns a single storage class  by name
 func (service storageClassService) Get(name string) (*storagev1.StorageClass, *errors.RestErr) {
 	storageClass := &storagev1.StorageClass{}
 	key := types.NamespacedName{
@@ -50,17 +50,19 @@ func (service storageClassService) Get(name string) (*storagev1.StorageClass, *e
 	return storageClass, nil
 }
 
-// Create creates a secret from the given spec
+// Create creates a storage class from the given spec
+//todo
 func (service storageClassService) Create(dto *StorageClassDto) (*storagev1.StorageClass, *errors.RestErr) {
 	return nil, nil
 }
 
-// Create creates a secret from the given spec
+// Create creates a storage class from the given spec
+//todo
 func (service storageClassService) Update(dto *StorageClassDto, storageClass *storagev1.StorageClass) (*storagev1.StorageClass, *errors.RestErr) {
 	return nil, nil
 }
 
-// List returns all secrets
+// List returns all storage classes
 func (service storageClassService) List() (*storagev1.StorageClassList, *errors.RestErr) {
 	storageClasses := &storagev1.StorageClassList{}
 
@@ -72,12 +74,14 @@ func (service storageClassService) List() (*storagev1.StorageClassList, *errors.
 	return storageClasses, nil
 }
 
-// Delete a single secret node by name
+// Delete a single storage node by name
+//todo
 func (service storageClassService) Delete(storageClass *storagev1.StorageClass) *errors.RestErr {
 	return nil
 }
 
-// Delete a list of secrets
+// Delete a list of storage classes
+//todo
 func (service storageClassService) Count() (*int, *errors.RestErr) {
 	return nil, nil
 }
