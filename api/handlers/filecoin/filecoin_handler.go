@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"github.com/gofiber/fiber/v2"
 	"github.com/kotalco/api/internal/filecoin"
-	restError "github.com/kotalco/api/pkg/errors"
+	restErrors "github.com/kotalco/api/pkg/errors"
 	"github.com/kotalco/api/pkg/shared"
 	filecoinv1alpha1 "github.com/kotalco/kotal/apis/filecoin/v1alpha1"
 	"net/http"
@@ -55,7 +55,7 @@ func Create(c *fiber.Ctx) error {
 	dto := new(filecoin.FilecoinDto)
 
 	if err := c.BodyParser(dto); err != nil {
-		badReq := restError.NewBadRequestError("invalid request body")
+		badReq := restErrors.NewBadRequestError("invalid request body")
 		return c.Status(badReq.Status).JSON(badReq)
 	}
 
@@ -90,7 +90,7 @@ func Delete(c *fiber.Ctx) error {
 func Update(c *fiber.Ctx) error {
 	dto := new(filecoin.FilecoinDto)
 	if err := c.BodyParser(dto); err != nil {
-		badReq := restError.NewBadRequestError("invalid request body")
+		badReq := restErrors.NewBadRequestError("invalid request body")
 		return c.Status(badReq.Status).JSON(badReq)
 	}
 

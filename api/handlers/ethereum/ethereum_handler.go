@@ -8,7 +8,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/websocket/v2"
 	"github.com/kotalco/api/internal/ethereum"
-	restError "github.com/kotalco/api/pkg/errors"
+	restErrors "github.com/kotalco/api/pkg/errors"
 	"github.com/kotalco/api/pkg/shared"
 	ethereumv1alpha1 "github.com/kotalco/kotal/apis/ethereum/v1alpha1"
 	"github.com/ybbus/jsonrpc/v2"
@@ -39,7 +39,7 @@ func Get(c *fiber.Ctx) error {
 func Create(c *fiber.Ctx) error {
 	dto := new(ethereum.EthereumDto)
 	if err := c.BodyParser(dto); err != nil {
-		badReq := restError.NewBadRequestError("invalid request body")
+		badReq := restErrors.NewBadRequestError("invalid request body")
 		return c.Status(badReq.Status).JSON(badReq)
 	}
 
@@ -59,7 +59,7 @@ func Create(c *fiber.Ctx) error {
 func Update(c *fiber.Ctx) error {
 	dto := new(ethereum.EthereumDto)
 	if err := c.BodyParser(dto); err != nil {
-		badReq := restError.NewBadRequestError("invalid request body")
+		badReq := restErrors.NewBadRequestError("invalid request body")
 		return c.Status(badReq.Status).JSON(badReq)
 	}
 
@@ -181,7 +181,7 @@ func Stats(c *websocket.Conn) {
 		}
 
 		if !node.Spec.RPC {
-			c.WriteJSON(restError.NewBadRequestError("rpc is not enabled"))
+			c.WriteJSON(restErrors.NewBadRequestError("rpc is not enabled"))
 			return
 		}
 

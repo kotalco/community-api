@@ -10,7 +10,7 @@ import (
 	"github.com/kotalco/api/pkg/logger"
 	ethereum2v1alpha1 "github.com/kotalco/kotal/apis/ethereum2/v1alpha1"
 	sharedAPIs "github.com/kotalco/kotal/apis/shared"
-	k8errors "k8s.io/apimachinery/pkg/api/errors"
+	apiErrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"os"
@@ -43,7 +43,7 @@ func (service beaconNodeService) Get(name string) (*ethereum2v1alpha1.BeaconNode
 	}
 
 	if err := k8s.Client().Get(context.Background(), key, node); err != nil {
-		if k8errors.IsNotFound(err) {
+		if apiErrors.IsNotFound(err) {
 			return nil, errors.NewNotFoundError(fmt.Sprintf("beacon node by name %s doesn't exist", name))
 		}
 		go logger.Error("ERROR GETTING BEACON_NODE", err)
@@ -84,7 +84,7 @@ func (service beaconNodeService) Create(dto *BeaconNodeDto) (*ethereum2v1alpha1.
 	}
 
 	if err := k8s.Client().Create(context.Background(), beaconnode); err != nil {
-		if k8errors.IsAlreadyExists(err) {
+		if apiErrors.IsAlreadyExists(err) {
 			return nil, errors.NewBadRequestError(fmt.Sprintf("beacon node by name %s already exist", dto.Name))
 		}
 		go logger.Error("ERROR CREATING BEACON_NODE", err)

@@ -3,7 +3,7 @@ package validator
 import (
 	"fmt"
 	"github.com/kotalco/api/internal/ethereum2/validator"
-	restError "github.com/kotalco/api/pkg/errors"
+	restErrors "github.com/kotalco/api/pkg/errors"
 	"github.com/kotalco/api/pkg/shared"
 	"net/http"
 	"sort"
@@ -56,7 +56,7 @@ func Create(c *fiber.Ctx) error {
 	dto := new(validator.ValidatorDto)
 
 	if err := c.BodyParser(dto); err != nil {
-		badReq := restError.NewBadRequestError("invalid request body")
+		badReq := restErrors.NewBadRequestError("invalid request body")
 		return c.Status(badReq.Status).JSON(badReq)
 	}
 
@@ -92,7 +92,7 @@ func Update(c *fiber.Ctx) error {
 	dto := new(validator.ValidatorDto)
 
 	if err := c.BodyParser(dto); err != nil {
-		badReq := restError.NewBadRequestError("invalid request body")
+		badReq := restErrors.NewBadRequestError("invalid request body")
 		return c.Status(badReq.Status).JSON(err)
 	}
 

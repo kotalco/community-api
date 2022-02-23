@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"github.com/gofiber/fiber/v2"
 	"github.com/kotalco/api/internal/core/secret"
-	restError "github.com/kotalco/api/pkg/errors"
+	restErrors "github.com/kotalco/api/pkg/errors"
 	"github.com/kotalco/api/pkg/shared"
 	corev1 "k8s.io/api/core/v1"
 	"net/http"
@@ -64,7 +64,7 @@ func Create(c *fiber.Ctx) error {
 
 	dto := new(secret.SecretDto)
 	if err := c.BodyParser(dto); err != nil {
-		badReq := restError.NewBadRequestError("invalid request body")
+		badReq := restErrors.NewBadRequestError("invalid request body")
 		return c.Status(badReq.Status).JSON(err)
 	}
 

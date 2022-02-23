@@ -10,7 +10,7 @@ import (
 	"github.com/kotalco/api/pkg/logger"
 	ethereumv1alpha1 "github.com/kotalco/kotal/apis/ethereum/v1alpha1"
 	sharedAPI "github.com/kotalco/kotal/apis/shared"
-	k8errors "k8s.io/apimachinery/pkg/api/errors"
+	apiErrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"os"
@@ -42,7 +42,7 @@ func (service ethereumService) Get(name string) (*ethereumv1alpha1.Node, *errors
 		Namespace: "default",
 	}
 	if err := k8s.Client().Get(context.Background(), key, node); err != nil {
-		if k8errors.IsNotFound(err) {
+		if apiErrors.IsNotFound(err) {
 			return nil, errors.NewNotFoundError(fmt.Sprintf("node by name %s doesn't exist", name))
 		}
 		go logger.Error("Error Getting ethereum Node", err)
@@ -77,7 +77,7 @@ func (service ethereumService) Create(dto *EthereumDto) (*ethereumv1alpha1.Node,
 
 	err := k8s.Client().Create(context.Background(), node)
 	if err != nil {
-		if k8errors.IsAlreadyExists(err) {
+		if apiErrors.IsAlreadyExists(err) {
 			return nil, errors.NewBadRequestError(fmt.Sprintf("node by name %s already exist", node.Name))
 		}
 		go logger.Error("error creating ethereum node", err)

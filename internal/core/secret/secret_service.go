@@ -9,7 +9,7 @@ import (
 	"github.com/kotalco/api/pkg/k8s"
 	"github.com/kotalco/api/pkg/logger"
 	corev1 "k8s.io/api/core/v1"
-	k8errors "k8s.io/apimachinery/pkg/api/errors"
+	apiErrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -40,7 +40,7 @@ func (service secretService) Get(name string) (*corev1.Secret, *errors.RestErr) 
 	}
 
 	if err := k8s.Client().Get(context.Background(), key, secret); err != nil {
-		if k8errors.IsNotFound(err) {
+		if apiErrors.IsNotFound(err) {
 			return nil, errors.NewNotFoundError(fmt.Sprintf("secret by name %s doesn't exist", name))
 		}
 		go logger.Error("error getting secret", err)
@@ -67,7 +67,7 @@ func (service secretService) Create(dto *SecretDto) (*corev1.Secret, *errors.Res
 	}
 
 	if err := k8s.Client().Create(context.Background(), secret); err != nil {
-		if k8errors.IsAlreadyExists(err) {
+		if apiErrors.IsAlreadyExists(err) {
 			return nil, errors.NewBadRequestError(fmt.Sprintf("secret by name %s already exist", dto.Name))
 		}
 		go logger.Error("error creating secret", err)

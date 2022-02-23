@@ -3,7 +3,7 @@ package beacon_node
 import (
 	"fmt"
 	"github.com/kotalco/api/internal/ethereum2/beacon_node"
-	restError "github.com/kotalco/api/pkg/errors"
+	restErrors "github.com/kotalco/api/pkg/errors"
 	"github.com/kotalco/api/pkg/shared"
 	"net/http"
 	"sort"
@@ -55,7 +55,7 @@ func List(c *fiber.Ctx) error {
 func Create(c *fiber.Ctx) error {
 	dto := new(beacon_node.BeaconNodeDto)
 	if err := c.BodyParser(dto); err != nil {
-		badReq := restError.NewBadRequestError("invalid request body")
+		badReq := restErrors.NewBadRequestError("invalid request body")
 		return c.Status(badReq.Status).JSON(err)
 	}
 
@@ -91,7 +91,7 @@ func Update(c *fiber.Ctx) error {
 	dto := new(beacon_node.BeaconNodeDto)
 
 	if err := c.BodyParser(dto); err != nil {
-		badReq := restError.NewBadRequestError("invalid reqeust body")
+		badReq := restErrors.NewBadRequestError("invalid reqeust body")
 		return c.Status(badReq.Status).JSON(badReq)
 	}
 

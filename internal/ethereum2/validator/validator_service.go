@@ -8,7 +8,7 @@ import (
 	"github.com/kotalco/api/pkg/logger"
 	ethereum2v1alpha1 "github.com/kotalco/kotal/apis/ethereum2/v1alpha1"
 	sharedAPIs "github.com/kotalco/kotal/apis/shared"
-	k8errors "k8s.io/apimachinery/pkg/api/errors"
+	apiErrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"os"
@@ -42,7 +42,7 @@ func (service validatorService) Get(name string) (*ethereum2v1alpha1.Validator, 
 	}
 
 	if err := k8s.Client().Get(context.Background(), key, validator); err != nil {
-		if k8errors.IsNotFound(err) {
+		if apiErrors.IsNotFound(err) {
 			return nil, errors.NewNotFoundError(fmt.Sprintf("validator by name %s doesn't exit", name))
 		}
 		go logger.Error("ERROR GETTING A VALIDATOR", err)
@@ -90,7 +90,7 @@ func (service validatorService) Create(dto *ValidatorDto) (*ethereum2v1alpha1.Va
 	}
 
 	if err := k8s.Client().Create(context.Background(), validator); err != nil {
-		if k8errors.IsAlreadyExists(err) {
+		if apiErrors.IsAlreadyExists(err) {
 			return nil, errors.NewNotFoundError(fmt.Sprintf("validator by name %s already exits", validator.Name))
 		}
 		go logger.Error("ERROR_IN_CREATE_VALIDATOR", err)

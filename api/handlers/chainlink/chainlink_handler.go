@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"github.com/gofiber/fiber/v2"
 	"github.com/kotalco/api/internal/chainlink"
-	restError "github.com/kotalco/api/pkg/errors"
+	restErrors "github.com/kotalco/api/pkg/errors"
 	"github.com/kotalco/api/pkg/shared"
 	chainlinkv1alpha1 "github.com/kotalco/kotal/apis/chainlink/v1alpha1"
 	"net/http"
@@ -31,7 +31,7 @@ func Get(c *fiber.Ctx) error {
 func Create(c *fiber.Ctx) error {
 	chainlinkDto := new(chainlink.ChainlinkDto)
 	if err := c.BodyParser(chainlinkDto); err != nil {
-		badReqErr := restError.NewBadRequestError("invalid request body")
+		badReqErr := restErrors.NewBadRequestError("invalid request body")
 		return c.Status(badReqErr.Status).JSON(badReqErr)
 	}
 
@@ -51,7 +51,7 @@ func Create(c *fiber.Ctx) error {
 func Update(c *fiber.Ctx) error {
 	dto := new(chainlink.ChainlinkDto)
 	if err := c.BodyParser(dto); err != nil {
-		badReq := restError.NewBadRequestError("invalid request body")
+		badReq := restErrors.NewBadRequestError("invalid request body")
 		return c.Status(badReq.Status).JSON(err)
 	}
 
