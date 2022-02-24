@@ -1,4 +1,4 @@
-package models
+package near
 
 import (
 	"github.com/kotalco/api/internal/models"
@@ -6,8 +6,8 @@ import (
 	nearv1alpha1 "github.com/kotalco/kotal/apis/near/v1alpha1"
 )
 
-// Node is NEAR node
-type Node struct {
+// NearDto is NEAR node
+type NearDto struct {
 	models.Time
 	Name                     string    `json:"name"`
 	Network                  string    `json:"network"`
@@ -32,9 +32,11 @@ type Node struct {
 	StorageClass             *string   `json:"storageClass"`
 }
 
+type NearListDto []NearDto
+
 // FromNEARNode creates node model from NEAR node
-func FromNEARNode(node *nearv1alpha1.Node) *Node {
-	return &Node{
+func (dto NearDto) FromNEARNode(node *nearv1alpha1.Node) *NearDto {
+	return &NearDto{
 		Name: node.Name,
 		Time: models.Time{
 			CreatedAt: node.CreationTimestamp.UTC().Format(shared.JavascriptISOString),
@@ -60,4 +62,12 @@ func FromNEARNode(node *nearv1alpha1.Node) *Node {
 		Storage:                  node.Spec.Storage,
 		StorageClass:             node.Spec.StorageClass,
 	}
+}
+
+func (listDto NearListDto) FromNEARNode(nodes []nearv1alpha1.Node) NearListDto {
+	result := make(NearListDto, len(nodes))
+	for index, v := range nodes {
+		result[index] = *(NearDto{}.FromNEARNode(&v))
+	}
+	return result
 }

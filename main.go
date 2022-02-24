@@ -27,18 +27,7 @@ func main() {
 	//
 	//polkadot := v1.Group("polkadot")
 	//polkadotNodes := polkadot.Group("nodes")
-	//
-	//ipfs := v1.Group("ipfs")
-	//peers := ipfs.Group("peers")
-	//clusterpeers := ipfs.Group("clusterpeers")
-	//
-	//near := v1.Group("near")
-	//nearNodes := near.Group("nodes")
-	//
-	//ethereum2 := v1.Group("ethereum2")
-	//beaconnodes := ethereum2.Group("beaconnodes")
-	//validators := ethereum2.Group("validators")
-	//
+
 	//// register handlers
 	//app.Get("/", func(c *fiber.Ctx) error {
 	//	return c.SendString("Kotal API")

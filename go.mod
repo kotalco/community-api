@@ -5,7 +5,7 @@ go 1.17
 require (
 	github.com/gofiber/fiber/v2 v2.26.0
 	github.com/gofiber/websocket/v2 v2.0.16
-	github.com/kotalco/kotal v0.0.0-20220117145334-7bdbeb90323c
+	github.com/kotalco/kotal v0.0.0-20220212203531-a88fa0a8809f
 	github.com/stretchr/testify v1.7.0
 	github.com/ybbus/jsonrpc/v2 v2.1.6
 	go.uber.org/zap v1.19.1

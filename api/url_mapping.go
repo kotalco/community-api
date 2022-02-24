@@ -12,6 +12,7 @@ import (
 	"github.com/kotalco/api/api/handlers/filecoin"
 	"github.com/kotalco/api/api/handlers/ipfs/ipfs_cluster_peer"
 	"github.com/kotalco/api/api/handlers/ipfs/ipfs_peer"
+	"github.com/kotalco/api/api/handlers/near"
 	"github.com/kotalco/api/api/handlers/shared"
 )
 
@@ -124,5 +125,18 @@ func MapUrl(app *fiber.App) {
 	clusterpeersGroup.Get("/:name/status", websocket.New(shared.Status))
 	clusterpeersGroup.Put("/:name", ipfs_cluster_peer.ValidateClusterPeerExist, ipfs_cluster_peer.Update)
 	clusterpeersGroup.Delete("/:name", ipfs_cluster_peer.ValidateClusterPeerExist, ipfs_cluster_peer.Delete)
+
+	//near group
+	nearGroup := v1.Group("near")
+	nearNodesGroup := nearGroup.Group("nodes")
+	nearNodesGroup.Post("/", near.Create)
+	nearNodesGroup.Head("/", near.Count)
+	nearNodesGroup.Get("/", near.List)
+	nearNodesGroup.Get("/:name", near.ValidateNodeExist, near.Get)
+	nearNodesGroup.Get("/:name/logs", websocket.New(shared.Logger))
+	nearNodesGroup.Get("/:name/status", websocket.New(shared.Status))
+	nearNodesGroup.Get("/:name/stats", websocket.New(near.Stats))
+	nearNodesGroup.Put("/:name", near.ValidateNodeExist, near.Update)
+	nearNodesGroup.Delete("/:name", near.ValidateNodeExist, near.Delete)
 
 }
