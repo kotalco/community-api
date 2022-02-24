@@ -1,8 +1,7 @@
-package handlers
+package ipfs_peer
 
 import (
 	"fmt"
-	"github.com/kotalco/api/api/handlers"
 	shared2 "github.com/kotalco/api/api/handlers/shared"
 	"github.com/kotalco/api/internal/models/ipfs"
 	"github.com/kotalco/api/pkg/k8s"
@@ -25,11 +24,6 @@ import (
 
 // PeerHandler is IPFS peer handler
 type PeerHandler struct{}
-
-// NewPeerHandler creates a new IPFS peer handler
-func NewPeerHandler() handlers.Handler {
-	return &PeerHandler{}
-}
 
 // Get gets a single IPFS peer by name
 func (pr *PeerHandler) Get(c *fiber.Ctx) error {

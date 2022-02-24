@@ -1,4 +1,4 @@
-// Package secret internal is the domain layer for creating storage_class
+// Package storage_class internal is the domain layer for creating storage_class
 // uses the k8 client to CRUD the storage_class
 package storage_class
 
@@ -56,7 +56,7 @@ func (service storageClassService) Create(dto *StorageClassDto) (*storagev1.Stor
 	return nil, nil
 }
 
-// Create creates a storage class from the given spec
+// Update creates a storage class from the given spec
 //todo
 func (service storageClassService) Update(dto *StorageClassDto, storageClass *storagev1.StorageClass) (*storagev1.StorageClass, *errors.RestErr) {
 	return nil, nil
@@ -80,7 +80,7 @@ func (service storageClassService) Delete(storageClass *storagev1.StorageClass) 
 	return nil
 }
 
-// Delete a list of storage classes
+// Count a list of storage classes
 //todo
 func (service storageClassService) Count() (*int, *errors.RestErr) {
 	return nil, nil

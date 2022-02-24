@@ -1,4 +1,4 @@
-package handlers
+package ipfs_cluster_peer
 
 import (
 	"fmt"
