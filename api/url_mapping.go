@@ -10,6 +10,7 @@ import (
 	"github.com/kotalco/api/api/handlers/ethereum2/beacon_node"
 	"github.com/kotalco/api/api/handlers/ethereum2/validator"
 	"github.com/kotalco/api/api/handlers/filecoin"
+	"github.com/kotalco/api/api/handlers/ipfs/ipfs_cluster_peer"
 	"github.com/kotalco/api/api/handlers/ipfs/ipfs_peer"
 	"github.com/kotalco/api/api/handlers/shared"
 )
@@ -103,6 +104,7 @@ func MapUrl(app *fiber.App) {
 
 	//ipfs group
 	ipfsGroup := v1.Group("ipfs")
+	//ipfs peer group
 	ipfsPeersGroup := ipfsGroup.Group("peers")
 	ipfsPeersGroup.Post("/", ipfs_peer.Create)
 	ipfsPeersGroup.Head("/", ipfs_peer.Count)
@@ -112,5 +114,15 @@ func MapUrl(app *fiber.App) {
 	ipfsPeersGroup.Get("/:name/status", websocket.New(shared.Status))
 	ipfsPeersGroup.Put("/:name", ipfs_peer.ValidatePeerExist, ipfs_peer.Update)
 	ipfsPeersGroup.Delete("/:name", ipfs_peer.ValidatePeerExist, ipfs_peer.Delete)
+	//ipfs peer group
+	clusterpeersGroup := ipfsGroup.Group("clusterpeers")
+	clusterpeersGroup.Post("/", ipfs_cluster_peer.Create)
+	clusterpeersGroup.Head("/", ipfs_cluster_peer.Count)
+	clusterpeersGroup.Get("/", ipfs_cluster_peer.List)
+	clusterpeersGroup.Get("/:name", ipfs_cluster_peer.ValidateClusterPeerExist, ipfs_cluster_peer.Get)
+	clusterpeersGroup.Get("/:name/logs", websocket.New(shared.Logger))
+	clusterpeersGroup.Get("/:name/status", websocket.New(shared.Status))
+	clusterpeersGroup.Put("/:name", ipfs_cluster_peer.ValidateClusterPeerExist, ipfs_cluster_peer.Update)
+	clusterpeersGroup.Delete("/:name", ipfs_cluster_peer.ValidateClusterPeerExist, ipfs_cluster_peer.Delete)
 
 }

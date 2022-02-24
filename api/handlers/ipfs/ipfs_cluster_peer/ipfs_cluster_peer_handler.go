@@ -1,10 +1,10 @@
-// Package ipfs_peer handler is the representation layer for the  ipfs peer
-// it communicate  the ipfs_peer_service for business operations for the ipfs peer
-package ipfs_peer
+// Package ipfs_cluster_peer handler is the representation layer for the  ipfs peer
+// it communicate  the ipfs_cluster_peer_service for business operations for the ipfs cluster peer
+package ipfs_cluster_peer
 
 import (
 	"fmt"
-	"github.com/kotalco/api/internal/ipfs/ipfs_peer"
+	"github.com/kotalco/api/internal/ipfs/ipfs_cluster_peer"
 	restErrors "github.com/kotalco/api/pkg/errors"
 	"github.com/kotalco/api/pkg/shared"
 	"net/http"
@@ -15,22 +15,22 @@ import (
 	ipfsv1alpha1 "github.com/kotalco/kotal/apis/ipfs/v1alpha1"
 )
 
-var service = ipfs_peer.IpfsPeerService
+var service = ipfs_cluster_peer.IpfsClusterPeerService
 
-// Get gets a single IPFS peer by name
-// 1-get the node validated from ValidatePeerExist method
+// Get gets a single IPFS cluster peer by name
+// 1-get the node validated from ValidateClusterPeerExist method
 // 2-marshall node to dto and format the response
 func Get(c *fiber.Ctx) error {
-	peer := c.Locals("peer").(*ipfsv1alpha1.Peer)
+	peer := c.Locals("peer").(*ipfsv1alpha1.ClusterPeer)
 
-	return c.Status(http.StatusOK).JSON(shared.NewResponse(new(ipfs_peer.PeerDto).FromIPFSPeer(peer)))
+	return c.Status(http.StatusOK).JSON(shared.NewResponse(new(ipfs_cluster_peer.ClusterPeerDto).FromIPFSClusterPeer(peer)))
 }
 
-// List returns all IPFS peers
+// List returns all IPFS cluster peers
 // 1-get the pagination qs default to 0
 // 2-call service to return peers list
 // 3-make the pagination
-// 3-marshall peers to the dto struct and format the response using NewResponse
+// 3-marshall cluster peers to the dto struct and format the response using NewResponse
 func List(c *fiber.Ctx) error {
 	page, _ := strconv.Atoi(c.Query("page"))
 
@@ -47,16 +47,15 @@ func List(c *fiber.Ctx) error {
 		return peers.Items[j].CreationTimestamp.Before(&peers.Items[i].CreationTimestamp)
 	})
 
-	return c.Status(http.StatusOK).JSON(shared.NewResponse(new(ipfs_peer.PeerListDto).FromIPFSPeer(peers.Items[start:end])))
+	return c.Status(http.StatusOK).JSON(shared.NewResponse(new(ipfs_cluster_peer.ClusterPeerListDto).FromIPFSClusterPeer(peers.Items[start:end])))
 }
 
-// Create creates IPFS peer from spec
+// Create creates IPFS cluster peer from spec
 // 1-Todo validate request body and return validation error
-// 2-call  ipfs peer  service to create ipfs peer
+// 2-call ipfs cluster peer  service to create ipfs peer
 // 2-marshall node to dto and format the response
 func Create(c *fiber.Ctx) error {
-	dto := new(ipfs_peer.PeerDto)
-
+	dto := new(ipfs_cluster_peer.ClusterPeerDto)
 	if err := c.BodyParser(dto); err != nil {
 		badReq := restErrors.NewBadRequestError("invalid request body")
 		return c.Status(badReq.Status).JSON(badReq)
@@ -67,15 +66,15 @@ func Create(c *fiber.Ctx) error {
 		return c.Status(err.Status).JSON(err)
 	}
 
-	return c.Status(http.StatusCreated).JSON(shared.NewResponse(new(ipfs_peer.PeerDto).FromIPFSPeer(peer)))
+	return c.Status(http.StatusCreated).JSON(shared.NewResponse(new(ipfs_cluster_peer.ClusterPeerDto).FromIPFSClusterPeer(peer)))
 }
 
-// Delete deletes IPFS peer by name
-// 1-get node from locals which checked and assigned by ValidatePeerExist
+// Delete deletes IPFS cluster peer by name
+// 1-get node from locals which checked and assigned by ValidateClusterPeerExist
 // 2-call service to delete the node
 // 3-return ok if deleted with no errors
 func Delete(c *fiber.Ctx) error {
-	peer := c.Locals("peer").(*ipfsv1alpha1.Peer)
+	peer := c.Locals("peer").(*ipfsv1alpha1.ClusterPeer)
 
 	err := service.Delete(peer)
 	if err != nil {
@@ -85,30 +84,31 @@ func Delete(c *fiber.Ctx) error {
 	return c.SendStatus(http.StatusNoContent)
 }
 
-// Update updates IPFS peer by name from spec
+// Update updates IPFS cluster peer by name from spec
 // 1-todo validate request body and return validation errors if exits
-// 2-get node from locals which checked and assigned by ValidatePeerExist
-// 3-call ipfs peer  service to update node which returns *ipfsv1alpha1.Peer
+// 2-get node from locals which checked and assigned by ValidateClusterPeerExist
+// 3-call ipfs cluster peer  service to update node which returns *ipfsv1alpha1.ClusterPeer
 // 4-marshall node to node dto and format the response
 func Update(c *fiber.Ctx) error {
-	dto := new(ipfs_peer.PeerDto)
+	dto := new(ipfs_cluster_peer.ClusterPeerDto)
+
 	if err := c.BodyParser(dto); err != nil {
 		badReq := restErrors.NewBadRequestError("invalid request body")
 		return c.Status(badReq.Status).JSON(badReq)
 	}
 
-	peer := c.Locals("peer").(*ipfsv1alpha1.Peer)
+	peer := c.Locals("peer").(*ipfsv1alpha1.ClusterPeer)
 
 	peer, err := service.Update(dto, peer)
 	if err != nil {
 		return c.Status(err.Status).JSON(err)
 	}
 
-	return c.Status(http.StatusOK).JSON(shared.NewResponse(new(ipfs_peer.PeerDto).FromIPFSPeer(peer)))
+	return c.Status(http.StatusOK).JSON(shared.NewResponse(*new(ipfs_cluster_peer.ClusterPeerDto).FromIPFSClusterPeer(peer)))
 }
 
-// Count returns total number of peers
-// 1-call  service to get length of exiting peers items
+// Count returns total number of cluster peers
+// 1-call  service to get length of exiting cluster peers items
 // 2-create X-Total-Count header with the length
 // 3-return
 func Count(c *fiber.Ctx) error {
@@ -123,11 +123,11 @@ func Count(c *fiber.Ctx) error {
 	return c.SendStatus(http.StatusOK)
 }
 
-// ValidatePeerExist validate peer by name exist acts as a validation for all handlers the needs to find ipfs peer by name
+// ValidateClusterPeerExist validate cluster peer by name exist
 // 1-call service to check if node exits
 // 2-return 404 if it's not
 // 3-save the peer to local with the key peer to be used by the other handlers
-func ValidatePeerExist(c *fiber.Ctx) error {
+func ValidateClusterPeerExist(c *fiber.Ctx) error {
 	name := c.Params("name")
 
 	peer, err := service.Get(name)
