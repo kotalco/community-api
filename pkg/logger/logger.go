@@ -93,7 +93,19 @@ func Info(msg string, tags ...zap.Field) {
 
 func Error(location interface{}, err error, tags ...zap.Field) {
 	tags = append(tags, zap.NamedError("error", err))
-	log.log.Error(errorLocation(location), tags...)
+	switch location.(type) {
+	case string:
+		log.log.Error(location.(string), tags...)
+	default:
+		log.log.Error(errorLocation(location), tags...)
+	}
+	log.log.Sync()
+}
+
+func Panic(msg string, err error, tags ...zap.Field) {
+	defer recover()
+	tags = append(tags, zap.NamedError("panic", err))
+	log.log.Error(msg, tags...)
 	log.log.Sync()
 }
 
