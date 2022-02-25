@@ -44,7 +44,7 @@ func (service ipfsClusterPeerService) Get(name string) (*ipfsv1alpha1.ClusterPee
 		if apiErrors.IsNotFound(err) {
 			return nil, restErrors.NewNotFoundError(fmt.Sprintf("cluster peer by name %s doesn't exit", name))
 		}
-		go logger.Error("ERROR_IN_GET_SERVICE", err)
+		go logger.Error(service.Get, err)
 		return nil, restErrors.NewInternalServerError(fmt.Sprintf("can't get cluster peer by name %s", peer.Name))
 	}
 
@@ -119,7 +119,7 @@ func (service ipfsClusterPeerService) Create(dto *ClusterPeerDto) (*ipfsv1alpha1
 		if apiErrors.IsAlreadyExists(err) {
 			return nil, restErrors.NewBadRequestError(fmt.Sprintf("cluster peer by name %s already exits", peer.Name))
 		}
-		go logger.Error("ERROR_IN_ CREATE_IPFS_CLUSTER_PEER", err)
+		go logger.Error(service.Create, err)
 		return nil, restErrors.NewInternalServerError("failed to create cluster peer")
 	}
 
@@ -157,7 +157,7 @@ func (service ipfsClusterPeerService) Update(dto *ClusterPeerDto, peer *ipfsv1al
 	}
 
 	if err := k8s.Client().Update(context.Background(), peer); err != nil {
-		go logger.Error("ERROR_IN_UPDATE_IPFS_CLUSTER_PEER", err)
+		go logger.Error(service.Update, err)
 		return nil, restErrors.NewInternalServerError(fmt.Sprintf("can't update cluster peer by name %s", peer.Name))
 	}
 
@@ -168,7 +168,7 @@ func (service ipfsClusterPeerService) Update(dto *ClusterPeerDto, peer *ipfsv1al
 func (service ipfsClusterPeerService) List() (*ipfsv1alpha1.ClusterPeerList, *restErrors.RestErr) {
 	peers := &ipfsv1alpha1.ClusterPeerList{}
 	if err := k8s.Client().List(context.Background(), peers, client.InNamespace("default")); err != nil {
-		go logger.Error("ERROR_IN_LIST_IPFS_CLUSTER_PEER_SERVICE", err)
+		go logger.Error(service.List, err)
 		return nil, restErrors.NewInternalServerError("failed to get all peers")
 	}
 
@@ -179,7 +179,7 @@ func (service ipfsClusterPeerService) List() (*ipfsv1alpha1.ClusterPeerList, *re
 func (service ipfsClusterPeerService) Count() (*int, *restErrors.RestErr) {
 	peers := &ipfsv1alpha1.ClusterPeerList{}
 	if err := k8s.Client().List(context.Background(), peers, client.InNamespace("default")); err != nil {
-		go logger.Error("ERROR_IN_COUNT_CLUSTER_PEER_SERVICE", err)
+		go logger.Error(service.Count, err)
 		return nil, restErrors.NewInternalServerError("failed to count all cluster perrs")
 	}
 
@@ -191,7 +191,7 @@ func (service ipfsClusterPeerService) Count() (*int, *restErrors.RestErr) {
 // Delete deletes ethereum 2.0 IPFS peer by name
 func (service ipfsClusterPeerService) Delete(peer *ipfsv1alpha1.ClusterPeer) *restErrors.RestErr {
 	if err := k8s.Client().Delete(context.Background(), peer); err != nil {
-		go logger.Error("ERROR_IN_DELETE_CLUSTER_PEER_SERVICE", err)
+		go logger.Error(service.Delete, err)
 		return restErrors.NewInternalServerError(fmt.Sprintf("can't delete cluster peer by name %s", peer.Name))
 	}
 

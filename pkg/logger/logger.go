@@ -5,6 +5,8 @@ import (
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 	"os"
+	"reflect"
+	"runtime"
 	"strings"
 )
 
@@ -17,7 +19,7 @@ var (
 	log logger
 )
 
-type kotalcoLogger interface {
+type Logger interface {
 	Print(v ...interface{})
 	Printf(format string, v ...interface{})
 }
@@ -68,7 +70,7 @@ func getOutput() string {
 	return output
 }
 
-func GetLogger() kotalcoLogger {
+func GetLogger() Logger {
 	return log
 }
 
@@ -89,8 +91,16 @@ func Info(msg string, tags ...zap.Field) {
 	log.log.Sync()
 }
 
-func Error(msg string, err error, tags ...zap.Field) {
+func Error(location interface{}, err error, tags ...zap.Field) {
 	tags = append(tags, zap.NamedError("error", err))
-	log.log.Error(msg, tags...)
+	log.log.Error(errorLocation(location), tags...)
 	log.log.Sync()
+}
+
+func errorLocation(temp interface{}) string {
+	strs := strings.Split(runtime.FuncForPC(reflect.ValueOf(temp).Pointer()).Name(), ".")
+	functionName := strs[len(strs)-1]
+	strs = strings.Split(strs[len(strs)-2], "/")
+	packageName := strs[len(strs)-1]
+	return "ERROR_IN_" + strings.ToUpper(packageName) + "_" + strings.ToUpper(functionName)
 }

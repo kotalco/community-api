@@ -45,12 +45,11 @@ func (service ethereumService) Get(name string) (*ethereumv1alpha1.Node, *errors
 		if apiErrors.IsNotFound(err) {
 			return nil, errors.NewNotFoundError(fmt.Sprintf("node by name %s doesn't exist", name))
 		}
-		go logger.Error("Error Getting ethereum Node", err)
+		go logger.Error(service.Get, err)
 		return nil, errors.NewInternalServerError(fmt.Sprintf("can't get node by name %s", name))
 	}
 
 	return node, nil
-
 }
 
 // Create creates ethereum node from the given spec
@@ -80,7 +79,7 @@ func (service ethereumService) Create(dto *EthereumDto) (*ethereumv1alpha1.Node,
 		if apiErrors.IsAlreadyExists(err) {
 			return nil, errors.NewBadRequestError(fmt.Sprintf("node by name %s already exist", node.Name))
 		}
-		go logger.Error("error creating ethereum node", err)
+		go logger.Error(service.Create, err)
 		return nil, errors.NewInternalServerError("failed to create node")
 	}
 
@@ -205,7 +204,7 @@ func (service ethereumService) Update(dto *EthereumDto, node *ethereumv1alpha1.N
 
 	err := k8s.Client().Update(context.Background(), node)
 	if err != nil {
-		go logger.Error("error updating ethereum node", err)
+		go logger.Error(service.Update, err)
 		return nil, errors.NewInternalServerError(fmt.Sprintf("can't update node by name %s", node.Name))
 	}
 
@@ -218,7 +217,7 @@ func (service ethereumService) List() (*ethereumv1alpha1.NodeList, *errors.RestE
 
 	err := k8s.Client().List(context.Background(), nodes, client.InNamespace("default"))
 	if err != nil {
-		go logger.Error("Error listing ethereum nodes", err)
+		go logger.Error(service.List, err)
 		return nil, errors.NewInternalServerError("failed to get all nodes")
 	}
 
@@ -241,7 +240,7 @@ func (service ethereumService) Delete(node *ethereumv1alpha1.Node) *errors.RestE
 	err := k8s.Client().Delete(context.Background(), node)
 
 	if err != nil {
-		go logger.Error("Error deleting ethereum node", err)
+		go logger.Error(service.Delete, err)
 		return errors.NewInternalServerError(fmt.Sprintf("can't delete node by name %s", node.Name))
 	}
 

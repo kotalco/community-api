@@ -43,7 +43,7 @@ func (service secretService) Get(name string) (*corev1.Secret, *errors.RestErr) 
 		if apiErrors.IsNotFound(err) {
 			return nil, errors.NewNotFoundError(fmt.Sprintf("secret by name %s doesn't exist", name))
 		}
-		go logger.Error("error getting secret", err)
+		go logger.Error(service.Get, err)
 		return nil, errors.NewInternalServerError(fmt.Sprintf("can't get secret by name %s", name))
 	}
 
@@ -70,7 +70,7 @@ func (service secretService) Create(dto *SecretDto) (*corev1.Secret, *errors.Res
 		if apiErrors.IsAlreadyExists(err) {
 			return nil, errors.NewBadRequestError(fmt.Sprintf("secret by name %s already exist", dto.Name))
 		}
-		go logger.Error("error creating secret", err)
+		go logger.Error(service.Create, err)
 		return nil, errors.NewInternalServerError("error creating secret")
 	}
 	return secret, nil
@@ -81,7 +81,7 @@ func (service secretService) List() (*corev1.SecretList, *errors.RestErr) {
 	secrets := &corev1.SecretList{}
 
 	if err := k8s.Client().List(context.Background(), secrets, client.InNamespace("default"), client.HasLabels{"app.kubernetes.io/created-by"}); err != nil {
-		go logger.Error("error listing secrets", err)
+		go logger.Error(service.List, err)
 		return nil, errors.NewInternalServerError("failed to get all secrets")
 	}
 
@@ -91,7 +91,7 @@ func (service secretService) List() (*corev1.SecretList, *errors.RestErr) {
 // Delete a single secret node by name
 func (service secretService) Delete(secret *corev1.Secret) *errors.RestErr {
 	if err := k8s.Client().Delete(context.Background(), secret); err != nil {
-		go logger.Error("ERROR DELETING SECRET", err)
+		go logger.Error(service.Delete, err)
 		return errors.NewInternalServerError(fmt.Sprintf("can't delete secret by name %s", secret.Name))
 	}
 
@@ -102,7 +102,7 @@ func (service secretService) Delete(secret *corev1.Secret) *errors.RestErr {
 func (service secretService) Count() (*int, *errors.RestErr) {
 	secrets := &corev1.SecretList{}
 	if err := k8s.Client().List(context.Background(), secrets, client.InNamespace("default"), client.HasLabels{"kotal.io/key-type"}); err != nil {
-		go logger.Error("ERROR IN SECRET_SERVICE_COUNT COUNT", err)
+		go logger.Error(service.Count, err)
 		return nil, errors.NewInternalServerError("failed to get all secrets")
 	}
 	length := len(secrets.Items)

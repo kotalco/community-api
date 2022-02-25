@@ -46,7 +46,7 @@ func (service beaconNodeService) Get(name string) (*ethereum2v1alpha1.BeaconNode
 		if apiErrors.IsNotFound(err) {
 			return nil, errors.NewNotFoundError(fmt.Sprintf("beacon node by name %s doesn't exist", name))
 		}
-		go logger.Error("ERROR GETTING BEACON_NODE", err)
+		go logger.Error(service.Get, err)
 		return nil, errors.NewInternalServerError(fmt.Sprintf("can't get beacon node by name %s", name))
 	}
 
@@ -87,7 +87,7 @@ func (service beaconNodeService) Create(dto *BeaconNodeDto) (*ethereum2v1alpha1.
 		if apiErrors.IsAlreadyExists(err) {
 			return nil, errors.NewBadRequestError(fmt.Sprintf("beacon node by name %s already exist", dto.Name))
 		}
-		go logger.Error("ERROR CREATING BEACON_NODE", err)
+		go logger.Error(service.Create, err)
 		return nil, errors.NewInternalServerError("failed to create beacon node")
 	}
 
@@ -167,7 +167,7 @@ func (service beaconNodeService) Update(dto *BeaconNodeDto, node *ethereum2v1alp
 	}
 
 	if err := k8s.Client().Update(context.Background(), node); err != nil {
-		go logger.Error("ERROR UPDATING BEACON_NODE", err)
+		go logger.Error(service.Update, err)
 		return nil, errors.NewInternalServerError(fmt.Sprintf("can't update node by name  %s", node.Name))
 	}
 
@@ -179,7 +179,7 @@ func (service beaconNodeService) List() (*ethereum2v1alpha1.BeaconNodeList, *err
 	nodes := &ethereum2v1alpha1.BeaconNodeList{}
 
 	if err := k8s.Client().List(context.Background(), nodes, client.InNamespace("default")); err != nil {
-		go logger.Error("ERROR GETTING BEACON_NODE LIST", err)
+		go logger.Error(service.List, err)
 		return nil, errors.NewInternalServerError("failed to get all beacon nodes")
 	}
 
@@ -203,7 +203,7 @@ func (service beaconNodeService) Delete(node *ethereum2v1alpha1.BeaconNode) *err
 	err := k8s.Client().Delete(context.Background(), node)
 
 	if err != nil {
-		go logger.Error("Error deleting ethereum2 beaconNode", err)
+		go logger.Error(service.Delete, err)
 		return errors.NewInternalServerError(fmt.Sprintf("can't delete node by name %s", node.Name))
 	}
 

@@ -44,7 +44,7 @@ func (service nearService) Get(name string) (*nearv1alpha1.Node, *restErrors.Res
 		if apiErrors.IsNotFound(err) {
 			return nil, restErrors.NewBadRequestError(fmt.Sprintf("node by name %s doesn't exit", name))
 		}
-		go logger.Error("ERROR_IN_GET_NEAR_SERVICE", err)
+		go logger.Error(service.Get, err)
 		return nil, restErrors.NewInternalServerError(fmt.Sprintf("can't get node by name %s", name))
 	}
 
@@ -76,7 +76,7 @@ func (service nearService) Create(dto *NearDto) (*nearv1alpha1.Node, *restErrors
 		if apiErrors.IsAlreadyExists(err) {
 			return nil, restErrors.NewNotFoundError(fmt.Sprintf("node by name %s already exits", node.Name))
 		}
-		go logger.Error("ERROR_IN_CREATE_NEAR_SERVICE", err)
+		go logger.Error(service.Create, err)
 		return nil, restErrors.NewInternalServerError("failed to create node")
 	}
 
@@ -155,7 +155,7 @@ func (service nearService) Update(dto *NearDto, node *nearv1alpha1.Node) (*nearv
 	}
 
 	if err := k8s.Client().Update(context.Background(), node); err != nil {
-		go logger.Error("ERROR_IN_UPDATE_NEAR_SERVICE", err)
+		go logger.Error(service.Update, err)
 		return nil, restErrors.NewInternalServerError(fmt.Sprintf("can't update node by name %s", node.Name))
 	}
 
@@ -166,7 +166,7 @@ func (service nearService) Update(dto *NearDto, node *nearv1alpha1.Node) (*nearv
 func (service nearService) List() (*nearv1alpha1.NodeList, *restErrors.RestErr) {
 	nodes := &nearv1alpha1.NodeList{}
 	if err := k8s.Client().List(context.Background(), nodes, client.InNamespace("default")); err != nil {
-		go logger.Error("ERROR_IN_LIST_NEAR_SERVICE", err)
+		go logger.Error(service.List, err)
 		return nil, restErrors.NewInternalServerError("failed to get all nodes")
 	}
 
@@ -177,7 +177,7 @@ func (service nearService) List() (*nearv1alpha1.NodeList, *restErrors.RestErr) 
 func (service nearService) Count() (*int, *restErrors.RestErr) {
 	nodes := &nearv1alpha1.NodeList{}
 	if err := k8s.Client().List(context.Background(), nodes, client.InNamespace("default")); err != nil {
-		go logger.Error("ERROR_IN_COUNT_NEAR_SERVICE", err)
+		go logger.Error(service.Count, err)
 		return nil, restErrors.NewInternalServerError("failed to count all nodes")
 	}
 
@@ -189,7 +189,7 @@ func (service nearService) Count() (*int, *restErrors.RestErr) {
 // Delete deletes ethereum 2.0 filecoin node by name
 func (service nearService) Delete(node *nearv1alpha1.Node) *restErrors.RestErr {
 	if err := k8s.Client().Delete(context.Background(), node); err != nil {
-		go logger.Error("ERROR_IN_DELETE_NEAR_NODE", err)
+		go logger.Error(service.Delete, err)
 		return restErrors.NewInternalServerError(fmt.Sprintf("can't delete node by name %s", node.Name))
 	}
 

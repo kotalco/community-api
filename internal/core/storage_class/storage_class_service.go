@@ -43,7 +43,7 @@ func (service storageClassService) Get(name string) (*storagev1.StorageClass, *e
 		if apiErrors.IsNotFound(err) {
 			return nil, errors.NewNotFoundError(fmt.Sprintf("storage class by name %s doens't exit", name))
 		}
-		go logger.Error("ERROR_IN_GET_STORAGE_CLASS", err)
+		go logger.Error(service.Get, err)
 		return nil, errors.NewInternalServerError(fmt.Sprintf("can't get storage class by name %s", name))
 	}
 
@@ -67,7 +67,7 @@ func (service storageClassService) List() (*storagev1.StorageClassList, *errors.
 	storageClasses := &storagev1.StorageClassList{}
 
 	if err := k8s.Client().List(context.Background(), storageClasses, client.InNamespace("default")); err != nil {
-		go logger.Error("ERROR_IN_LIST_STORAGE_CLASS", err)
+		go logger.Error(service.List, err)
 		return nil, errors.NewInternalServerError("failed to get storage class list")
 	}
 
