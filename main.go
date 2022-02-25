@@ -25,8 +25,6 @@ func main() {
 	//v1 := api.Group("v1")
 	//
 	//
-	//polkadot := v1.Group("polkadot")
-	//polkadotNodes := polkadot.Group("nodes")
 
 	//// register handlers
 	//app.Get("/", func(c *fiber.Ctx) error {

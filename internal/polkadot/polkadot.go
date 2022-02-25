@@ -1,8 +1,10 @@
-package models
+package polkadot
 
-import polkadotv1alpha1 "github.com/kotalco/kotal/apis/polkadot/v1alpha1"
+import (
+	polkadotv1alpha1 "github.com/kotalco/kotal/apis/polkadot/v1alpha1"
+)
 
-type Node struct {
+type PolkadotDto struct {
 	Name                     string   `json:"name"`
 	Network                  string   `json:"network"`
 	NodePrivateKeySecretName string   `json:"nodePrivateKeySecretName"`
@@ -29,8 +31,10 @@ type Node struct {
 	StorageClass             *string  `json:"storageClass"`
 }
 
-func FromPolkadotNode(node *polkadotv1alpha1.Node) *Node {
-	return &Node{
+type PolkadotListDto []PolkadotDto
+
+func (dto PolkadotDto) FromPolkadotNode(node *polkadotv1alpha1.Node) *PolkadotDto {
+	return &PolkadotDto{
 		Name:                     node.Name,
 		Network:                  node.Spec.Network,
 		NodePrivateKeySecretName: node.Spec.NodePrivateKeySecretName,
@@ -56,4 +60,12 @@ func FromPolkadotNode(node *polkadotv1alpha1.Node) *Node {
 		Storage:                  node.Spec.Storage,
 		StorageClass:             node.Spec.StorageClass,
 	}
+}
+
+func (listDto PolkadotListDto) FromPolkadotNode(nodes []polkadotv1alpha1.Node) PolkadotListDto {
+	result := make(PolkadotListDto, len(nodes))
+	for index, v := range nodes {
+		result[index] = *(PolkadotDto{}.FromPolkadotNode(&v))
+	}
+	return result
 }

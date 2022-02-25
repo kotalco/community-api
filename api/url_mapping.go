@@ -13,6 +13,7 @@ import (
 	"github.com/kotalco/api/api/handlers/ipfs/ipfs_cluster_peer"
 	"github.com/kotalco/api/api/handlers/ipfs/ipfs_peer"
 	"github.com/kotalco/api/api/handlers/near"
+	"github.com/kotalco/api/api/handlers/polkadot"
 	"github.com/kotalco/api/api/handlers/shared"
 )
 
@@ -138,5 +139,17 @@ func MapUrl(app *fiber.App) {
 	nearNodesGroup.Get("/:name/stats", websocket.New(near.Stats))
 	nearNodesGroup.Put("/:name", near.ValidateNodeExist, near.Update)
 	nearNodesGroup.Delete("/:name", near.ValidateNodeExist, near.Delete)
+
+	polkadotGroup := v1.Group("polkadot")
+	polkadotNodesGroup := polkadotGroup.Group("nodes")
+	polkadotNodesGroup.Post("/", polkadot.Create)
+	polkadotNodesGroup.Head("/", polkadot.Count)
+	polkadotNodesGroup.Get("/", polkadot.List)
+	polkadotNodesGroup.Get("/:name", polkadot.ValidateNodeExist, polkadot.Get)
+	polkadotNodesGroup.Get("/:name/logs", websocket.New(shared.Logger))
+	polkadotNodesGroup.Get("/:name/status", websocket.New(shared.Status))
+	polkadotNodesGroup.Get("/:name/stats", websocket.New(polkadot.Stats))
+	polkadotNodesGroup.Put("/:name", polkadot.ValidateNodeExist, polkadot.Update)
+	polkadotNodesGroup.Delete("/:name", polkadot.ValidateNodeExist, polkadot.Delete)
 
 }
