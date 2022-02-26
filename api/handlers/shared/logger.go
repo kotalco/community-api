@@ -3,12 +3,11 @@ package shared
 import (
 	"context"
 	"fmt"
+	"github.com/gofiber/websocket/v2"
 	"github.com/kotalco/api/pkg/k8s"
+	corev1 "k8s.io/api/core/v1"
 	"os"
 	"time"
-
-	"github.com/gofiber/websocket/v2"
-	corev1 "k8s.io/api/core/v1"
 )
 
 // Logger returns a websocket that emits logs from pod

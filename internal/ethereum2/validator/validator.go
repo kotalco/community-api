@@ -29,31 +29,30 @@ type KeystoreDto struct {
 
 type ValidatorListDto []ValidatorDto
 
-func (validatorDto ValidatorDto) FromEthereum2Validator(validator *ethereum2v1alpha1.Validator) *ValidatorDto {
+func (dto ValidatorDto) FromEthereum2Validator(validator *ethereum2v1alpha1.Validator) *ValidatorDto {
 	keystores := []KeystoreDto{}
 	for _, keystore := range validator.Spec.Keystores {
 		keystores = append(keystores, KeystoreDto{
 			SecretName: keystore.SecretName,
 		})
 	}
-	return &ValidatorDto{
-		Name: validator.Name,
-		Time: models.Time{
-			CreatedAt: validator.CreationTimestamp.UTC().Format(shared.JavascriptISOString),
-		},
-		Network:                  validator.Spec.Network,
-		Client:                   string(validator.Spec.Client),
-		Graffiti:                 validator.Spec.Graffiti,
-		BeaconEndpoints:          validator.Spec.BeaconEndpoints,
-		Keystores:                keystores,
-		CPU:                      validator.Spec.CPU,
-		CPULimit:                 validator.Spec.CPULimit,
-		Memory:                   validator.Spec.Memory,
-		MemoryLimit:              validator.Spec.MemoryLimit,
-		Storage:                  validator.Spec.Storage,
-		StorageClass:             validator.Spec.StorageClass,
-		WalletPasswordSecretName: validator.Spec.WalletPasswordSecret,
-	}
+
+	dto.Name = validator.Name
+	dto.Time = models.Time{CreatedAt: validator.CreationTimestamp.UTC().Format(shared.JavascriptISOString)}
+	dto.Network = validator.Spec.Network
+	dto.Client = string(validator.Spec.Client)
+	dto.Graffiti = validator.Spec.Graffiti
+	dto.BeaconEndpoints = validator.Spec.BeaconEndpoints
+	dto.Keystores = keystores
+	dto.CPU = validator.Spec.CPU
+	dto.CPULimit = validator.Spec.CPULimit
+	dto.Memory = validator.Spec.Memory
+	dto.MemoryLimit = validator.Spec.MemoryLimit
+	dto.Storage = validator.Spec.Storage
+	dto.StorageClass = validator.Spec.StorageClass
+	dto.WalletPasswordSecretName = validator.Spec.WalletPasswordSecret
+
+	return &dto
 }
 
 func (validatorListDto ValidatorListDto) FromEthereum2Validator(validators []ethereum2v1alpha1.Validator) ValidatorListDto {

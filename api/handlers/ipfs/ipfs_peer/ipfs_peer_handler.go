@@ -4,15 +4,14 @@ package ipfs_peer
 
 import (
 	"fmt"
+	"github.com/gofiber/fiber/v2"
 	"github.com/kotalco/api/internal/ipfs/ipfs_peer"
 	restErrors "github.com/kotalco/api/pkg/errors"
 	"github.com/kotalco/api/pkg/shared"
+	ipfsv1alpha1 "github.com/kotalco/kotal/apis/ipfs/v1alpha1"
 	"net/http"
 	"sort"
 	"strconv"
-
-	"github.com/gofiber/fiber/v2"
-	ipfsv1alpha1 "github.com/kotalco/kotal/apis/ipfs/v1alpha1"
 )
 
 var service = ipfs_peer.IpfsPeerService

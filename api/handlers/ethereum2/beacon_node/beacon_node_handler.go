@@ -2,15 +2,14 @@ package beacon_node
 
 import (
 	"fmt"
+	"github.com/gofiber/fiber/v2"
 	"github.com/kotalco/api/internal/ethereum2/beacon_node"
 	restErrors "github.com/kotalco/api/pkg/errors"
 	"github.com/kotalco/api/pkg/shared"
+	ethereum2v1alpha1 "github.com/kotalco/kotal/apis/ethereum2/v1alpha1"
 	"net/http"
 	"sort"
 	"strconv"
-
-	"github.com/gofiber/fiber/v2"
-	ethereum2v1alpha1 "github.com/kotalco/kotal/apis/ethereum2/v1alpha1"
 )
 
 var service = beacon_node.BeaconNodeService

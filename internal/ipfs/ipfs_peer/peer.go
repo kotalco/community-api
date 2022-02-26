@@ -29,7 +29,7 @@ type PeerDto struct {
 type PeerListDto []PeerDto
 
 // FromIPFSPeer creates peer model from IPFS peer
-func (peerDto PeerDto) FromIPFSPeer(peer *ipfsv1alpha1.Peer) *PeerDto {
+func (dto PeerDto) FromIPFSPeer(peer *ipfsv1alpha1.Peer) *PeerDto {
 	var profiles, initProfiles []string
 
 	// init profiles
@@ -42,25 +42,23 @@ func (peerDto PeerDto) FromIPFSPeer(peer *ipfsv1alpha1.Peer) *PeerDto {
 		profiles = append(profiles, string(profile))
 	}
 
-	return &PeerDto{
-		Name: peer.Name,
-		Time: models.Time{
-			CreatedAt: peer.CreationTimestamp.UTC().Format(shared.JavascriptISOString),
-		},
-		APIPort:      peer.Spec.APIPort,
-		APIHost:      peer.Spec.APIHost,
-		GatewayPort:  peer.Spec.GatewayPort,
-		GatewayHost:  peer.Spec.GatewayHost,
-		Routing:      string(peer.Spec.Routing),
-		Profiles:     profiles,
-		InitProfiles: initProfiles,
-		CPU:          peer.Spec.CPU,
-		CPULimit:     peer.Spec.CPULimit,
-		Memory:       peer.Spec.Memory,
-		MemoryLimit:  peer.Spec.MemoryLimit,
-		Storage:      peer.Spec.Storage,
-		StorageClass: peer.Spec.StorageClass,
-	}
+	dto.Name = peer.Name
+	dto.Time = models.Time{CreatedAt: peer.CreationTimestamp.UTC().Format(shared.JavascriptISOString)}
+	dto.APIPort = peer.Spec.APIPort
+	dto.APIHost = peer.Spec.APIHost
+	dto.GatewayPort = peer.Spec.GatewayPort
+	dto.GatewayHost = peer.Spec.GatewayHost
+	dto.Routing = string(peer.Spec.Routing)
+	dto.Profiles = profiles
+	dto.InitProfiles = initProfiles
+	dto.CPU = peer.Spec.CPU
+	dto.CPULimit = peer.Spec.CPULimit
+	dto.Memory = peer.Spec.Memory
+	dto.MemoryLimit = peer.Spec.MemoryLimit
+	dto.Storage = peer.Spec.Storage
+	dto.StorageClass = peer.Spec.StorageClass
+
+	return &dto
 }
 
 func (peerListDto PeerListDto) FromIPFSPeer(peers []ipfsv1alpha1.Peer) PeerListDto {

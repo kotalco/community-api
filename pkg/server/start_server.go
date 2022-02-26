@@ -1,9 +1,10 @@
 package server
 
 import (
+	"fmt"
 	"github.com/gofiber/fiber/v2"
 	"github.com/kotalco/api/pkg/configs"
-	"log"
+	"github.com/kotalco/api/pkg/logger"
 	"os"
 	"os/signal"
 )
@@ -22,7 +23,7 @@ func StartServerWithGracefulShutdown(a *fiber.App) {
 		signal.Notify(sigint, os.Interrupt) // Catch OS signals.
 		<-sigint
 		if err := a.Shutdown(); err != nil {
-			log.Printf("Oops... Server is not shutting down! Reason: %v", err)
+			go logger.Info(fmt.Sprintf("Oops... Server is not shutting down! Reason:  %v", err))
 		}
 		close(idleConnsClosed)
 	}()
@@ -32,7 +33,7 @@ func StartServerWithGracefulShutdown(a *fiber.App) {
 		port = configs.EnvironmentConf["KOTAL_API_SERVER_PORT"]
 	}
 	if err := a.Listen(port); err != nil {
-		log.Printf("Oops... Server is not running! Reason: %v", err)
+		go logger.Info(fmt.Sprintf("Oops... Server is not running! Reason: %v", err))
 	}
 	<-idleConnsClosed
 }

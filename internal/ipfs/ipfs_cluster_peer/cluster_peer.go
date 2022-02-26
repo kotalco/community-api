@@ -25,26 +25,24 @@ type ClusterPeerDto struct {
 }
 type ClusterPeerListDto []ClusterPeerDto
 
-func (clusterPeerDto ClusterPeerDto) FromIPFSClusterPeer(peer *ipfsv1alpha1.ClusterPeer) *ClusterPeerDto {
-	return &ClusterPeerDto{
-		Name: peer.Name,
-		Time: models.Time{
-			CreatedAt: peer.CreationTimestamp.UTC().Format(shared.JavascriptISOString),
-		},
-		ID:                   peer.Spec.ID,
-		PrivatekeySecretName: peer.Spec.PrivateKeySecretName,
-		TrustedPeers:         peer.Spec.TrustedPeers,
-		BootstrapPeers:       peer.Spec.BootstrapPeers,
-		Consensus:            string(peer.Spec.Consensus),
-		ClusterSecretName:    peer.Spec.ClusterSecretName,
-		PeerEndpoint:         peer.Spec.PeerEndpoint,
-		CPU:                  peer.Spec.CPU,
-		CPULimit:             peer.Spec.CPULimit,
-		Memory:               peer.Spec.Memory,
-		MemoryLimit:          peer.Spec.MemoryLimit,
-		Storage:              peer.Spec.Storage,
-		StorageClass:         peer.Spec.StorageClass,
-	}
+func (dto ClusterPeerDto) FromIPFSClusterPeer(peer *ipfsv1alpha1.ClusterPeer) *ClusterPeerDto {
+	dto.Name = peer.Name
+	dto.Time = models.Time{CreatedAt: peer.CreationTimestamp.UTC().Format(shared.JavascriptISOString)}
+	dto.ID = peer.Spec.ID
+	dto.PrivatekeySecretName = peer.Spec.PrivateKeySecretName
+	dto.TrustedPeers = peer.Spec.TrustedPeers
+	dto.BootstrapPeers = peer.Spec.BootstrapPeers
+	dto.Consensus = string(peer.Spec.Consensus)
+	dto.ClusterSecretName = peer.Spec.ClusterSecretName
+	dto.PeerEndpoint = peer.Spec.PeerEndpoint
+	dto.CPU = peer.Spec.CPU
+	dto.CPULimit = peer.Spec.CPULimit
+	dto.Memory = peer.Spec.Memory
+	dto.MemoryLimit = peer.Spec.MemoryLimit
+	dto.Storage = peer.Spec.Storage
+	dto.StorageClass = peer.Spec.StorageClass
+
+	return &dto
 }
 
 func (clusterPeerListDto ClusterPeerListDto) FromIPFSClusterPeer(peers []ipfsv1alpha1.ClusterPeer) ClusterPeerListDto {

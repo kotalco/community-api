@@ -4,16 +4,15 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/kotalco/api/pkg/k8s"
-	"math/rand"
-	"os"
-	"time"
-
 	"github.com/gofiber/websocket/v2"
+	"github.com/kotalco/api/pkg/k8s"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/types"
+	"math/rand"
+	"os"
+	"time"
 )
 
 // Status returns a websocket that emits logs from pod

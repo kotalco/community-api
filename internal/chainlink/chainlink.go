@@ -38,36 +38,34 @@ type ChainlinkDto struct {
 
 type ChainlinkListDto []ChainlinkDto
 
-func (node ChainlinkDto) FromChainlinkNode(n *chainlinkv1alpha1.Node) *ChainlinkDto {
-	return &ChainlinkDto{
-		Name: n.Name,
-		Time: models.Time{
-			CreatedAt: n.CreationTimestamp.UTC().Format(shared.JavascriptISOString),
-		},
-		EthereumChainId:            n.Spec.EthereumChainId,
-		LinkContractAddress:        n.Spec.LinkContractAddress,
-		EthereumWSEndpoint:         n.Spec.EthereumWSEndpoint,
-		DatabaseURL:                n.Spec.DatabaseURL,
-		EthereumHTTPEndpoints:      n.Spec.EthereumHTTPEndpoints,
-		KeystorePasswordSecretName: n.Spec.KeystorePasswordSecretName,
-		APICredentials: &apiCredentials{
-			Email:              n.Spec.APICredentials.Email,
-			PasswordSecretName: n.Spec.APICredentials.PasswordSecretName,
-		},
-		CORSDomains:    n.Spec.CORSDomains,
-		CertSecretName: n.Spec.CertSecretName,
-		TLSPort:        n.Spec.TLSPort,
-		P2PPort:        n.Spec.P2PPort,
-		APIPort:        n.Spec.APIPort,
-		SecureCookies:  &n.Spec.SecureCookies,
-		Logging:        string(n.Spec.Logging),
-		CPU:            n.Spec.CPU,
-		CPULimit:       n.Spec.CPULimit,
-		Memory:         n.Spec.Memory,
-		MemoryLimit:    n.Spec.MemoryLimit,
-		Storage:        n.Spec.Storage,
-		StorageClass:   n.Spec.StorageClass,
+func (dto ChainlinkDto) FromChainlinkNode(n *chainlinkv1alpha1.Node) *ChainlinkDto {
+	dto.Name = n.Name
+	dto.Time = models.Time{CreatedAt: n.CreationTimestamp.UTC().Format(shared.JavascriptISOString)}
+	dto.EthereumChainId = n.Spec.EthereumChainId
+	dto.LinkContractAddress = n.Spec.LinkContractAddress
+	dto.EthereumWSEndpoint = n.Spec.EthereumWSEndpoint
+	dto.DatabaseURL = n.Spec.DatabaseURL
+	dto.EthereumHTTPEndpoints = n.Spec.EthereumHTTPEndpoints
+	dto.KeystorePasswordSecretName = n.Spec.KeystorePasswordSecretName
+	dto.APICredentials = &apiCredentials{
+		Email:              n.Spec.APICredentials.Email,
+		PasswordSecretName: n.Spec.APICredentials.PasswordSecretName,
 	}
+	dto.CORSDomains = n.Spec.CORSDomains
+	dto.CertSecretName = n.Spec.CertSecretName
+	dto.TLSPort = n.Spec.TLSPort
+	dto.P2PPort = n.Spec.P2PPort
+	dto.APIPort = n.Spec.APIPort
+	dto.SecureCookies = &n.Spec.SecureCookies
+	dto.Logging = string(n.Spec.Logging)
+	dto.CPU = n.Spec.CPU
+	dto.CPULimit = n.Spec.CPULimit
+	dto.Memory = n.Spec.Memory
+	dto.MemoryLimit = n.Spec.MemoryLimit
+	dto.Storage = n.Spec.Storage
+	dto.StorageClass = n.Spec.StorageClass
+
+	return &dto
 }
 
 func (nodes ChainlinkListDto) FromChainlinkNode(models []chainlinkv1alpha1.Node) ChainlinkListDto {

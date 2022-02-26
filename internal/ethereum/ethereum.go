@@ -46,68 +46,64 @@ type EthereumDto struct {
 }
 type EthereumListDto []EthereumDto
 
-func (node EthereumDto) FromEthereumNode(n *ethereumv1alpha1.Node) *EthereumDto {
-	model := &EthereumDto{
-		Name: n.Name,
-		Time: models.Time{
-			CreatedAt: n.CreationTimestamp.UTC().Format(shared.JavascriptISOString),
-		},
-		Network:                  n.Spec.Network,
-		Client:                   string(n.Spec.Client),
-		Logging:                  string(n.Spec.Logging),
-		NodePrivateKeySecretName: n.Spec.NodePrivateKeySecretName,
-		SyncMode:                 string(n.Spec.SyncMode),
-		P2PPort:                  n.Spec.P2PPort,
-		Miner:                    &n.Spec.Miner,
-		Coinbase:                 string(n.Spec.Coinbase),
-		RPC:                      &n.Spec.RPC,
-		RPCPort:                  n.Spec.RPCPort,
-		WS:                       &n.Spec.WS,
-		WSPort:                   n.Spec.WSPort,
-		GraphQL:                  &n.Spec.GraphQL,
-		GraphQLPort:              n.Spec.GraphQLPort,
-		Hosts:                    n.Spec.Hosts,
-		CORSDomains:              n.Spec.CORSDomains,
-		CPU:                      n.Spec.CPU,
-		CPULimit:                 n.Spec.CPULimit,
-		Memory:                   n.Spec.Memory,
-		MemoryLimit:              n.Spec.MemoryLimit,
-		Storage:                  n.Spec.Storage,
-		StorageClass:             n.Spec.StorageClass,
-	}
+func (dto EthereumDto) FromEthereumNode(node *ethereumv1alpha1.Node) *EthereumDto {
+	dto.Name = node.Name
+	dto.Time = models.Time{CreatedAt: node.CreationTimestamp.UTC().Format(shared.JavascriptISOString)}
+	dto.Network = node.Spec.Network
+	dto.Client = string(node.Spec.Client)
+	dto.Logging = string(node.Spec.Logging)
+	dto.NodePrivateKeySecretName = node.Spec.NodePrivateKeySecretName
+	dto.SyncMode = string(node.Spec.SyncMode)
+	dto.P2PPort = node.Spec.P2PPort
+	dto.Miner = &node.Spec.Miner
+	dto.Coinbase = string(node.Spec.Coinbase)
+	dto.RPC = &node.Spec.RPC
+	dto.RPCPort = node.Spec.RPCPort
+	dto.WS = &node.Spec.WS
+	dto.WSPort = node.Spec.WSPort
+	dto.GraphQL = &node.Spec.GraphQL
+	dto.GraphQLPort = node.Spec.GraphQLPort
+	dto.Hosts = node.Spec.Hosts
+	dto.CORSDomains = node.Spec.CORSDomains
+	dto.CPU = node.Spec.CPU
+	dto.CPULimit = node.Spec.CPULimit
+	dto.Memory = node.Spec.Memory
+	dto.MemoryLimit = node.Spec.MemoryLimit
+	dto.Storage = node.Spec.Storage
+	dto.StorageClass = node.Spec.StorageClass
 
-	if n.Spec.Miner && n.Spec.Import != nil {
-		model.Import = &ImportedAccount{
-			PrivateKeySecretName: n.Spec.Import.PrivateKeySecretName,
-			PasswordSecretName:   n.Spec.Import.PasswordSecretName,
+	if node.Spec.Miner && node.Spec.Import != nil {
+		dto.Import = &ImportedAccount{
+			PrivateKeySecretName: node.Spec.Import.PrivateKeySecretName,
+			PasswordSecretName:   node.Spec.Import.PasswordSecretName,
 		}
 	}
 
 	var rpcAPI []string
-	for _, api := range n.Spec.RPCAPI {
+	for _, api := range node.Spec.RPCAPI {
 		rpcAPI = append(rpcAPI, string(api))
 	}
-	model.RPCAPI = rpcAPI
+	dto.RPCAPI = rpcAPI
 
 	var wsAPI []string
-	for _, api := range n.Spec.WSAPI {
+	for _, api := range node.Spec.WSAPI {
 		wsAPI = append(wsAPI, string(api))
 	}
-	model.WSAPI = wsAPI
+	dto.WSAPI = wsAPI
 
 	staticNodes := []string{}
-	for _, enode := range n.Spec.StaticNodes {
+	for _, enode := range node.Spec.StaticNodes {
 		staticNodes = append(staticNodes, string(enode))
 	}
-	model.StaticNodes = &staticNodes
+	dto.StaticNodes = &staticNodes
 
 	bootnodes := []string{}
-	for _, bootnode := range n.Spec.Bootnodes {
+	for _, bootnode := range node.Spec.Bootnodes {
 		bootnodes = append(bootnodes, string(bootnode))
 	}
-	model.Bootnodes = &bootnodes
+	dto.Bootnodes = &bootnodes
 
-	return model
+	return &dto
 }
 
 func (nodes EthereumListDto) FromEthereumNode(models []ethereumv1alpha1.Node) EthereumListDto {

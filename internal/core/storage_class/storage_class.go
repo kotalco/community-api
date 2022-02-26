@@ -14,13 +14,13 @@ type StorageClassDto struct {
 
 type StorageClassListDto []StorageClassDto
 
-func (storageClass StorageClassDto) FromCoreStorageClass(sc *storagev1.StorageClass) *StorageClassDto {
-	return &StorageClassDto{
-		Name:                 sc.Name,
-		Provisioner:          sc.Provisioner,
-		ReclaimPolicy:        string(*sc.ReclaimPolicy),
-		AllowVolumeExpansion: sc.AllowVolumeExpansion != nil && *sc.AllowVolumeExpansion,
-	}
+func (dto StorageClassDto) FromCoreStorageClass(sc *storagev1.StorageClass) *StorageClassDto {
+	dto.Name = sc.Name
+	dto.Provisioner = sc.Provisioner
+	dto.ReclaimPolicy = string(*sc.ReclaimPolicy)
+	dto.AllowVolumeExpansion = sc.AllowVolumeExpansion != nil && *sc.AllowVolumeExpansion
+
+	return &dto
 }
 
 func (storageClassListDto StorageClassListDto) FromCoreSecret(list []storagev1.StorageClass) StorageClassListDto {

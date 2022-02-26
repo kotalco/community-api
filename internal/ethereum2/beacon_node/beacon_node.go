@@ -31,31 +31,29 @@ type BeaconNodeDto struct {
 }
 type BeaconNodeListDto []BeaconNodeDto
 
-func (node BeaconNodeDto) FromEthereum2BeaconNode(beaconnode *ethereum2v1alpha1.BeaconNode) *BeaconNodeDto {
-	return &BeaconNodeDto{
-		Name: beaconnode.Name,
-		Time: models.Time{
-			CreatedAt: beaconnode.CreationTimestamp.UTC().Format(shared.JavascriptISOString),
-		},
-		Network:       beaconnode.Spec.Network,
-		Client:        string(beaconnode.Spec.Client),
-		Eth1Endpoints: &beaconnode.Spec.Eth1Endpoints,
-		REST:          &beaconnode.Spec.REST,
-		RESTHost:      beaconnode.Spec.RESTHost,
-		RESTPort:      beaconnode.Spec.RESTPort,
-		RPC:           &beaconnode.Spec.RPC,
-		RPCHost:       beaconnode.Spec.RPCHost,
-		RPCPort:       beaconnode.Spec.RPCPort,
-		GRPC:          &beaconnode.Spec.GRPC,
-		GRPCHost:      beaconnode.Spec.GRPCHost,
-		GRPCPort:      beaconnode.Spec.GRPCPort,
-		CPU:           beaconnode.Spec.CPU,
-		CPULimit:      beaconnode.Spec.CPULimit,
-		Memory:        beaconnode.Spec.Memory,
-		MemoryLimit:   beaconnode.Spec.MemoryLimit,
-		Storage:       beaconnode.Spec.Storage,
-		StorageClass:  beaconnode.Spec.StorageClass,
-	}
+func (dto BeaconNodeDto) FromEthereum2BeaconNode(node *ethereum2v1alpha1.BeaconNode) *BeaconNodeDto {
+	dto.Name = node.Name
+	dto.Time = models.Time{CreatedAt: node.CreationTimestamp.UTC().Format(shared.JavascriptISOString)}
+	dto.Network = node.Spec.Network
+	dto.Client = string(node.Spec.Client)
+	dto.Eth1Endpoints = &node.Spec.Eth1Endpoints
+	dto.REST = &node.Spec.REST
+	dto.RESTHost = node.Spec.RESTHost
+	dto.RESTPort = node.Spec.RESTPort
+	dto.RPC = &node.Spec.RPC
+	dto.RPCHost = node.Spec.RPCHost
+	dto.RPCPort = node.Spec.RPCPort
+	dto.GRPC = &node.Spec.GRPC
+	dto.GRPCHost = node.Spec.GRPCHost
+	dto.GRPCPort = node.Spec.GRPCPort
+	dto.CPU = node.Spec.CPU
+	dto.CPULimit = node.Spec.CPULimit
+	dto.Memory = node.Spec.Memory
+	dto.MemoryLimit = node.Spec.MemoryLimit
+	dto.Storage = node.Spec.Storage
+	dto.StorageClass = node.Spec.StorageClass
+
+	return &dto
 }
 
 func (nodes BeaconNodeListDto) FromEthereum2BeaconNode(beaconnodeList []ethereum2v1alpha1.BeaconNode) BeaconNodeListDto {

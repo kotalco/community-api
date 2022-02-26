@@ -4,22 +4,21 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/websocket/v2"
 	"github.com/kotalco/api/internal/polkadot"
 	restErrors "github.com/kotalco/api/pkg/errors"
 	"github.com/kotalco/api/pkg/k8s"
 	"github.com/kotalco/api/pkg/shared"
+	polkadotv1alpha1 "github.com/kotalco/kotal/apis/polkadot/v1alpha1"
+	"github.com/ybbus/jsonrpc/v2"
+	"k8s.io/apimachinery/pkg/api/errors"
+	"k8s.io/apimachinery/pkg/types"
 	"net/http"
 	"os"
 	"sort"
 	"strconv"
 	"time"
-
-	"github.com/gofiber/fiber/v2"
-	"github.com/gofiber/websocket/v2"
-	polkadotv1alpha1 "github.com/kotalco/kotal/apis/polkadot/v1alpha1"
-	"github.com/ybbus/jsonrpc/v2"
-	"k8s.io/apimachinery/pkg/api/errors"
-	"k8s.io/apimachinery/pkg/types"
 )
 
 var service = polkadot.PolkadotService

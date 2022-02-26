@@ -36,32 +36,30 @@ type NearListDto []NearDto
 
 // FromNEARNode creates node model from NEAR node
 func (dto NearDto) FromNEARNode(node *nearv1alpha1.Node) *NearDto {
-	return &NearDto{
-		Name: node.Name,
-		Time: models.Time{
-			CreatedAt: node.CreationTimestamp.UTC().Format(shared.JavascriptISOString),
-		},
-		Network:                  string(node.Spec.Network),
-		Archive:                  node.Spec.Archive,
-		NodePrivateKeySecretName: node.Spec.NodePrivateKeySecretName,
-		ValidatorSecretName:      node.Spec.ValidatorSecretName,
-		MinPeers:                 node.Spec.MinPeers,
-		P2PPort:                  node.Spec.P2PPort,
-		P2PHost:                  node.Spec.P2PHost,
-		RPC:                      &node.Spec.RPC,
-		RPCPort:                  node.Spec.RPCPort,
-		RPCHost:                  node.Spec.RPCHost,
-		PrometheusPort:           node.Spec.PrometheusPort,
-		PrometheusHost:           node.Spec.PrometheusHost,
-		TelemetryURL:             node.Spec.TelemetryURL,
-		Bootnodes:                &node.Spec.Bootnodes,
-		CPU:                      node.Spec.CPU,
-		CPULimit:                 node.Spec.CPULimit,
-		Memory:                   node.Spec.Memory,
-		MemoryLimit:              node.Spec.MemoryLimit,
-		Storage:                  node.Spec.Storage,
-		StorageClass:             node.Spec.StorageClass,
-	}
+	dto.Name = node.Name
+	dto.Time = models.Time{CreatedAt: node.CreationTimestamp.UTC().Format(shared.JavascriptISOString)}
+	dto.Network = string(node.Spec.Network)
+	dto.Archive = node.Spec.Archive
+	dto.NodePrivateKeySecretName = node.Spec.NodePrivateKeySecretName
+	dto.ValidatorSecretName = node.Spec.ValidatorSecretName
+	dto.MinPeers = node.Spec.MinPeers
+	dto.P2PPort = node.Spec.P2PPort
+	dto.P2PHost = node.Spec.P2PHost
+	dto.RPC = &node.Spec.RPC
+	dto.RPCPort = node.Spec.RPCPort
+	dto.RPCHost = node.Spec.RPCHost
+	dto.PrometheusPort = node.Spec.PrometheusPort
+	dto.PrometheusHost = node.Spec.PrometheusHost
+	dto.TelemetryURL = node.Spec.TelemetryURL
+	dto.Bootnodes = &node.Spec.Bootnodes
+	dto.CPU = node.Spec.CPU
+	dto.CPULimit = node.Spec.CPULimit
+	dto.Memory = node.Spec.Memory
+	dto.MemoryLimit = node.Spec.MemoryLimit
+	dto.Storage = node.Spec.Storage
+	dto.StorageClass = node.Spec.StorageClass
+
+	return &dto
 }
 
 func (listDto NearListDto) FromNEARNode(nodes []nearv1alpha1.Node) NearListDto {

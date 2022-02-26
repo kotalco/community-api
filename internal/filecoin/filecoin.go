@@ -32,30 +32,29 @@ type FilecoinDto struct {
 type FilecoinListDto []FilecoinDto
 
 // FromFilecoinNode creates node dto from Filecoin node
-func (filecoinDto FilecoinDto) FromFilecoinNode(node *filecoinv1alpha1.Node) *FilecoinDto {
-	return &FilecoinDto{
-		Name: node.Name,
-		Time: models.Time{
-			CreatedAt: node.CreationTimestamp.UTC().Format(shared.JavascriptISOString),
-		},
-		Network:            string(node.Spec.Network),
-		API:                &node.Spec.API,
-		APIPort:            node.Spec.APIPort,
-		APIHost:            node.Spec.APIHost,
-		APIRequestTimeout:  node.Spec.APIRequestTimeout,
-		DisableMetadataLog: &node.Spec.DisableMetadataLog,
-		P2PPort:            node.Spec.P2PPort,
-		P2PHost:            node.Spec.P2PHost,
-		IPFSPeerEndpoint:   node.Spec.IPFSPeerEndpoint,
-		IPFSOnlineMode:     &node.Spec.IPFSOnlineMode,
-		IPFSForRetrieval:   &node.Spec.IPFSForRetrieval,
-		CPU:                node.Spec.CPU,
-		CPULimit:           node.Spec.CPULimit,
-		Memory:             node.Spec.Memory,
-		MemoryLimit:        node.Spec.MemoryLimit,
-		Storage:            node.Spec.Storage,
-		StorageClass:       node.Spec.StorageClass,
-	}
+func (dto FilecoinDto) FromFilecoinNode(node *filecoinv1alpha1.Node) *FilecoinDto {
+
+	dto.Name = node.Name
+	dto.Time = models.Time{CreatedAt: node.CreationTimestamp.UTC().Format(shared.JavascriptISOString)}
+	dto.Network = string(node.Spec.Network)
+	dto.API = &node.Spec.API
+	dto.APIPort = node.Spec.APIPort
+	dto.APIHost = node.Spec.APIHost
+	dto.APIRequestTimeout = node.Spec.APIRequestTimeout
+	dto.DisableMetadataLog = &node.Spec.DisableMetadataLog
+	dto.P2PPort = node.Spec.P2PPort
+	dto.P2PHost = node.Spec.P2PHost
+	dto.IPFSPeerEndpoint = node.Spec.IPFSPeerEndpoint
+	dto.IPFSOnlineMode = &node.Spec.IPFSOnlineMode
+	dto.IPFSForRetrieval = &node.Spec.IPFSForRetrieval
+	dto.CPU = node.Spec.CPU
+	dto.CPULimit = node.Spec.CPULimit
+	dto.Memory = node.Spec.Memory
+	dto.MemoryLimit = node.Spec.MemoryLimit
+	dto.Storage = node.Spec.Storage
+	dto.StorageClass = node.Spec.StorageClass
+
+	return &dto
 }
 
 // FromFilecoinNode creates node dto from Filecoin node list

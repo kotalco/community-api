@@ -34,32 +34,32 @@ type PolkadotDto struct {
 type PolkadotListDto []PolkadotDto
 
 func (dto PolkadotDto) FromPolkadotNode(node *polkadotv1alpha1.Node) *PolkadotDto {
-	return &PolkadotDto{
-		Name:                     node.Name,
-		Network:                  node.Spec.Network,
-		NodePrivateKeySecretName: node.Spec.NodePrivateKeySecretName,
-		Validator:                &node.Spec.Validator,
-		SyncMode:                 string(node.Spec.SyncMode),
-		P2PPort:                  node.Spec.P2PPort,
-		Pruning:                  node.Spec.Pruning,
-		RetainedBlocks:           node.Spec.RetainedBlocks,
-		Logging:                  string(node.Spec.Logging),
-		Telemetry:                &node.Spec.Telemetry,
-		TelemetryURL:             node.Spec.TelemetryURL,
-		Prometheus:               &node.Spec.Prometheus,
-		PrometheusPort:           node.Spec.PrometheusPort,
-		RPC:                      &node.Spec.RPC,
-		RPCPort:                  node.Spec.RPCPort,
-		WS:                       &node.Spec.WS,
-		WSPort:                   node.Spec.WSPort,
-		CORSDomains:              node.Spec.CORSDomains,
-		CPU:                      node.Spec.CPU,
-		CPULimit:                 node.Spec.CPULimit,
-		Memory:                   node.Spec.Memory,
-		MemoryLimit:              node.Spec.MemoryLimit,
-		Storage:                  node.Spec.Storage,
-		StorageClass:             node.Spec.StorageClass,
-	}
+	dto.Name = node.Name
+	dto.Network = node.Spec.Network
+	dto.NodePrivateKeySecretName = node.Spec.NodePrivateKeySecretName
+	dto.Validator = &node.Spec.Validator
+	dto.SyncMode = string(node.Spec.SyncMode)
+	dto.P2PPort = node.Spec.P2PPort
+	dto.Pruning = node.Spec.Pruning
+	dto.RetainedBlocks = node.Spec.RetainedBlocks
+	dto.Logging = string(node.Spec.Logging)
+	dto.Telemetry = &node.Spec.Telemetry
+	dto.TelemetryURL = node.Spec.TelemetryURL
+	dto.Prometheus = &node.Spec.Prometheus
+	dto.PrometheusPort = node.Spec.PrometheusPort
+	dto.RPC = &node.Spec.RPC
+	dto.RPCPort = node.Spec.RPCPort
+	dto.WS = &node.Spec.WS
+	dto.WSPort = node.Spec.WSPort
+	dto.CORSDomains = node.Spec.CORSDomains
+	dto.CPU = node.Spec.CPU
+	dto.CPULimit = node.Spec.CPULimit
+	dto.Memory = node.Spec.Memory
+	dto.MemoryLimit = node.Spec.MemoryLimit
+	dto.Storage = node.Spec.Storage
+	dto.StorageClass = node.Spec.StorageClass
+
+	return &dto
 }
 
 func (listDto PolkadotListDto) FromPolkadotNode(nodes []polkadotv1alpha1.Node) PolkadotListDto {
