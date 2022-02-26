@@ -50,7 +50,7 @@ func init() {
 }
 
 func getLevel() zapcore.Level {
-	switch strings.ToLower(strings.TrimSpace(os.Getenv(envLogLevel))) {
+	switch strings.ToLower(os.Getenv(envLogLevel)) {
 	case "debug":
 		return zap.DebugLevel
 	case "info":
@@ -63,7 +63,7 @@ func getLevel() zapcore.Level {
 }
 
 func getOutput() string {
-	output := strings.TrimSpace(os.Getenv(envLogOutput))
+	output := os.Getenv(envLogOutput)
 	if output == "" {
 		return "stdout"
 	}
@@ -103,7 +103,6 @@ func Error(location interface{}, err error, tags ...zap.Field) {
 }
 
 func Panic(msg string, err error, tags ...zap.Field) {
-	defer recover()
 	tags = append(tags, zap.NamedError("panic", err))
 	log.log.Error(msg, tags...)
 	log.log.Sync()
