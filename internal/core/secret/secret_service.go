@@ -27,6 +27,7 @@ type secretServiceInterface interface {
 
 var (
 	SecretService secretServiceInterface
+	k8Client      = k8s.K8ClientService
 )
 
 func init() { SecretService = &secretService{} }
@@ -39,7 +40,7 @@ func (service secretService) Get(name string) (*corev1.Secret, *errors.RestErr) 
 		Namespace: "default",
 	}
 
-	if err := k8s.Client().Get(context.Background(), key, secret); err != nil {
+	if err := k8Client.Get(context.Background(), key, secret); err != nil {
 		if apiErrors.IsNotFound(err) {
 			return nil, errors.NewNotFoundError(fmt.Sprintf("secret by name %s doesn't exist", name))
 		}
@@ -66,7 +67,7 @@ func (service secretService) Create(dto *SecretDto) (*corev1.Secret, *errors.Res
 		Immutable:  &t,
 	}
 
-	if err := k8s.Client().Create(context.Background(), secret); err != nil {
+	if err := k8Client.Create(context.Background(), secret); err != nil {
 		if apiErrors.IsAlreadyExists(err) {
 			return nil, errors.NewBadRequestError(fmt.Sprintf("secret by name %s already exist", dto.Name))
 		}
@@ -80,7 +81,7 @@ func (service secretService) Create(dto *SecretDto) (*corev1.Secret, *errors.Res
 func (service secretService) List() (*corev1.SecretList, *errors.RestErr) {
 	secrets := &corev1.SecretList{}
 
-	if err := k8s.Client().List(context.Background(), secrets, client.InNamespace("default"), client.HasLabels{"app.kubernetes.io/created-by"}); err != nil {
+	if err := k8Client.List(context.Background(), secrets, client.InNamespace("default"), client.HasLabels{"app.kubernetes.io/created-by"}); err != nil {
 		go logger.Error(service.List, err)
 		return nil, errors.NewInternalServerError("failed to get all secrets")
 	}
@@ -90,7 +91,7 @@ func (service secretService) List() (*corev1.SecretList, *errors.RestErr) {
 
 // Delete a single secret node by name
 func (service secretService) Delete(secret *corev1.Secret) *errors.RestErr {
-	if err := k8s.Client().Delete(context.Background(), secret); err != nil {
+	if err := k8Client.Delete(context.Background(), secret); err != nil {
 		go logger.Error(service.Delete, err)
 		return errors.NewInternalServerError(fmt.Sprintf("can't delete secret by name %s", secret.Name))
 	}
@@ -101,7 +102,7 @@ func (service secretService) Delete(secret *corev1.Secret) *errors.RestErr {
 // Delete a list of secrets
 func (service secretService) Count() (*int, *errors.RestErr) {
 	secrets := &corev1.SecretList{}
-	if err := k8s.Client().List(context.Background(), secrets, client.InNamespace("default"), client.HasLabels{"kotal.io/key-type"}); err != nil {
+	if err := k8Client.List(context.Background(), secrets, client.InNamespace("default"), client.HasLabels{"kotal.io/key-type"}); err != nil {
 		go logger.Error(service.Count, err)
 		return nil, errors.NewInternalServerError("failed to get all secrets")
 	}

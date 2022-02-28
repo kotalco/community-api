@@ -30,6 +30,7 @@ type chainlinkServiceInterface interface {
 
 var (
 	ChainlinkService chainlinkServiceInterface
+	k8Client         = k8s.K8ClientService
 )
 
 func init() { ChainlinkService = &chainlinkService{} }
@@ -41,7 +42,7 @@ func (service chainlinkService) Get(name string) (*chainlinkv1alpha1.Node, *erro
 		Name:      name,
 		Namespace: "default",
 	}
-	if err := k8s.Client().Get(context.Background(), key, node); err != nil {
+	if err := k8Client.Get(context.Background(), key, node); err != nil {
 		if apiErrors.IsNotFound(err) {
 			return nil, errors.NewNotFoundError(fmt.Sprintf("node by name %s doesn't exist", name))
 		}
@@ -77,7 +78,7 @@ func (service chainlinkService) Create(dto *ChainlinkDto) (*chainlinkv1alpha1.No
 		node.Default()
 	}
 
-	err := k8s.Client().Create(context.Background(), node)
+	err := k8Client.Create(context.Background(), node)
 	if err != nil {
 		if apiErrors.IsAlreadyExists(err) {
 			return nil, errors.NewBadRequestError(fmt.Sprintf("node by name %s already exist", node.Name))
@@ -161,7 +162,7 @@ func (service chainlinkService) Update(dto *ChainlinkDto, node *chainlinkv1alpha
 		node.Default()
 	}
 
-	err := k8s.Client().Update(context.Background(), node)
+	err := k8Client.Update(context.Background(), node)
 	if err != nil {
 		go logger.Error(service.Update, err)
 		return nil, errors.NewInternalServerError(fmt.Sprintf("can't update node by name %s", node.Name))
@@ -173,7 +174,7 @@ func (service chainlinkService) Update(dto *ChainlinkDto, node *chainlinkv1alpha
 // List returns all chainlink nodes
 func (service chainlinkService) List() (*chainlinkv1alpha1.NodeList, *errors.RestErr) {
 	nodes := &chainlinkv1alpha1.NodeList{}
-	err := k8s.Client().List(context.Background(), nodes, client.InNamespace("default"))
+	err := k8Client.List(context.Background(), nodes, client.InNamespace("default"))
 	if err != nil {
 		go logger.Error(service.List, err)
 		return nil, errors.NewInternalServerError("failed to get all nodes")
@@ -185,7 +186,7 @@ func (service chainlinkService) List() (*chainlinkv1alpha1.NodeList, *errors.Res
 // Count returns all nodes length
 func (service chainlinkService) Count() (*int, *errors.RestErr) {
 	nodes := &chainlinkv1alpha1.NodeList{}
-	err := k8s.Client().List(context.Background(), nodes, client.InNamespace("default"))
+	err := k8Client.List(context.Background(), nodes, client.InNamespace("default"))
 	if err != nil {
 		go logger.Error(service.Count, err)
 		return nil, errors.NewInternalServerError("failed to get all nodes")
@@ -197,7 +198,7 @@ func (service chainlinkService) Count() (*int, *errors.RestErr) {
 
 // Delete a single chainlink node by name
 func (service chainlinkService) Delete(node *chainlinkv1alpha1.Node) *errors.RestErr {
-	err := k8s.Client().Delete(context.Background(), node)
+	err := k8Client.Delete(context.Background(), node)
 
 	if err != nil {
 		go logger.Error(service.Delete, err)

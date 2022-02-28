@@ -28,6 +28,7 @@ type validatorServiceInterface interface {
 
 var (
 	ValidatorService validatorServiceInterface
+	k8Client         = k8s.K8ClientService
 )
 
 func init() { ValidatorService = &validatorService{} }

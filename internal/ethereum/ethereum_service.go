@@ -30,6 +30,7 @@ type ethereumServiceInterface interface {
 
 var (
 	EthereumService ethereumServiceInterface
+	k8Client        = k8s.K8ClientService
 )
 
 func init() { EthereumService = &ethereumService{} }
@@ -41,7 +42,7 @@ func (service ethereumService) Get(name string) (*ethereumv1alpha1.Node, *errors
 		Name:      name,
 		Namespace: "default",
 	}
-	if err := k8s.Client().Get(context.Background(), key, node); err != nil {
+	if err := k8Client.Get(context.Background(), key, node); err != nil {
 		if apiErrors.IsNotFound(err) {
 			return nil, errors.NewNotFoundError(fmt.Sprintf("node by name %s doesn't exist", name))
 		}
@@ -74,7 +75,7 @@ func (service ethereumService) Create(dto *EthereumDto) (*ethereumv1alpha1.Node,
 		node.Default()
 	}
 
-	err := k8s.Client().Create(context.Background(), node)
+	err := k8Client.Create(context.Background(), node)
 	if err != nil {
 		if apiErrors.IsAlreadyExists(err) {
 			return nil, errors.NewBadRequestError(fmt.Sprintf("node by name %s already exist", node.Name))
@@ -202,7 +203,7 @@ func (service ethereumService) Update(dto *EthereumDto, node *ethereumv1alpha1.N
 		node.Default()
 	}
 
-	err := k8s.Client().Update(context.Background(), node)
+	err := k8Client.Update(context.Background(), node)
 	if err != nil {
 		go logger.Error(service.Update, err)
 		return nil, errors.NewInternalServerError(fmt.Sprintf("can't update node by name %s", node.Name))
@@ -215,7 +216,7 @@ func (service ethereumService) Update(dto *EthereumDto, node *ethereumv1alpha1.N
 func (service ethereumService) List() (*ethereumv1alpha1.NodeList, *errors.RestErr) {
 	nodes := &ethereumv1alpha1.NodeList{}
 
-	err := k8s.Client().List(context.Background(), nodes, client.InNamespace("default"))
+	err := k8Client.List(context.Background(), nodes, client.InNamespace("default"))
 	if err != nil {
 		go logger.Error(service.List, err)
 		return nil, errors.NewInternalServerError("failed to get all nodes")
@@ -237,7 +238,7 @@ func (service ethereumService) Count() (*int, *errors.RestErr) {
 
 // Delete a single ethereum node by name
 func (service ethereumService) Delete(node *ethereumv1alpha1.Node) *errors.RestErr {
-	err := k8s.Client().Delete(context.Background(), node)
+	err := k8Client.Delete(context.Background(), node)
 
 	if err != nil {
 		go logger.Error(service.Delete, err)

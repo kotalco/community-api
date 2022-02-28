@@ -28,6 +28,7 @@ type polkadotServiceInterface interface {
 
 var (
 	PolkadotService polkadotServiceInterface
+	k8Client        = k8s.K8ClientService
 )
 
 func init() { PolkadotService = &polkadtoService{} }
@@ -40,7 +41,7 @@ func (service polkadtoService) Get(name string) (*polkadotv1alpha1.Node, *restEr
 		Namespace: "default",
 	}
 
-	if err := k8s.Client().Get(context.Background(), key, node); err != nil {
+	if err := k8Client.Get(context.Background(), key, node); err != nil {
 		if apiErrors.IsNotFound(err) {
 			return nil, restErrors.NewNotFoundError(fmt.Sprintf("node by name %s doesn't exits", name))
 		}
@@ -68,7 +69,7 @@ func (service polkadtoService) Create(dto *PolkadotDto) (*polkadotv1alpha1.Node,
 		node.Default()
 	}
 
-	if err := k8s.Client().Create(context.Background(), node); err != nil {
+	if err := k8Client.Create(context.Background(), node); err != nil {
 		if apiErrors.IsAlreadyExists(err) {
 			return nil, restErrors.NewBadRequestError(fmt.Sprintf("node by name %s is already exits", node.Name))
 		}
@@ -169,7 +170,7 @@ func (service polkadtoService) Update(dto *PolkadotDto, node *polkadotv1alpha1.N
 		node.Default()
 	}
 
-	if err := k8s.Client().Update(context.Background(), node); err != nil {
+	if err := k8Client.Update(context.Background(), node); err != nil {
 		go logger.Error(service.Update, err)
 		return nil, restErrors.NewInternalServerError(fmt.Sprintf("can't updagte node by name %s", node.Name))
 	}
@@ -180,7 +181,7 @@ func (service polkadtoService) Update(dto *PolkadotDto, node *polkadotv1alpha1.N
 // List returns all filecoin nodes
 func (service polkadtoService) List() (*polkadotv1alpha1.NodeList, *restErrors.RestErr) {
 	nodes := &polkadotv1alpha1.NodeList{}
-	if err := k8s.Client().List(context.Background(), nodes, client.InNamespace("default")); err != nil {
+	if err := k8Client.List(context.Background(), nodes, client.InNamespace("default")); err != nil {
 		go logger.Error(service.List, err)
 		return nil, restErrors.NewInternalServerError("failed to get all nodes")
 	}
@@ -191,7 +192,7 @@ func (service polkadtoService) List() (*polkadotv1alpha1.NodeList, *restErrors.R
 // Count returns total number of filecoin nodes
 func (service polkadtoService) Count() (*int, *restErrors.RestErr) {
 	nodes := &polkadotv1alpha1.NodeList{}
-	if err := k8s.Client().List(context.Background(), nodes, client.InNamespace("default")); err != nil {
+	if err := k8Client.List(context.Background(), nodes, client.InNamespace("default")); err != nil {
 		go logger.Error(service.Count, err)
 		return nil, restErrors.NewInternalServerError("failed to count all nodes")
 	}
@@ -203,7 +204,7 @@ func (service polkadtoService) Count() (*int, *restErrors.RestErr) {
 
 // Delete deletes ethereum 2.0 filecoin node by name
 func (service polkadtoService) Delete(node *polkadotv1alpha1.Node) *restErrors.RestErr {
-	if err := k8s.Client().Delete(context.Background(), node); err != nil {
+	if err := k8Client.Delete(context.Background(), node); err != nil {
 		go logger.Error(service.Delete, err)
 		return restErrors.NewInternalServerError(fmt.Sprintf("can't delte node by name %s", node.Name))
 	}

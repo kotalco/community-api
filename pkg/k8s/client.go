@@ -1,12 +1,8 @@
 package k8s
 
 import (
-	"go/build"
-	"log"
-	"os"
-	"path/filepath"
-	"sync"
-
+	"context"
+	"github.com/kotalco/api/pkg/configs"
 	chainlinkv1alpha1 "github.com/kotalco/kotal/apis/chainlink/v1alpha1"
 	ethereumv1alpha1 "github.com/kotalco/kotal/apis/ethereum/v1alpha1"
 	ethereum2v1alpha1 "github.com/kotalco/kotal/apis/ethereum2/v1alpha1"
@@ -15,92 +11,32 @@ import (
 	nearv1alpha1 "github.com/kotalco/kotal/apis/near/v1alpha1"
 	polkadotv1alpha1 "github.com/kotalco/kotal/apis/polkadot/v1alpha1"
 	"k8s.io/apimachinery/pkg/runtime"
-	"k8s.io/client-go/kubernetes"
+	"k8s.io/apimachinery/pkg/types"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
-	"k8s.io/client-go/rest"
-	"k8s.io/client-go/tools/clientcmd"
-	"k8s.io/client-go/util/homedir"
-	metrics "k8s.io/metrics/pkg/client/clientset/versioned"
 	"sigs.k8s.io/controller-runtime/pkg/client"
-	"sigs.k8s.io/controller-runtime/pkg/envtest"
+	"sync"
 )
 
-var ControllerRuntimeClient client.Client
-var KubernetesClientset *kubernetes.Clientset
-var metricsClientset *metrics.Clientset
+var controllerRuntimeClient client.Client
 
 var clientOnce sync.Once
-var clientsetOnce sync.Once
-var metricsClientsetOnce sync.Once
 
-// Client create k8s client once
 func Client() client.Client {
 	var err error
 	clientOnce.Do(func() {
-		ControllerRuntimeClient, err = NewRuntimeClient()
+		controllerRuntimeClient, err = NewRuntimeClient()
 		if err != nil {
 			// TODO: Don't panic
 			panic(err)
 		}
 	})
-	return ControllerRuntimeClient
-}
-
-// Clientset create k8s client once
-func Clientset() *kubernetes.Clientset {
-	var err error
-	clientsetOnce.Do(func() {
-		KubernetesClientset, err = NewClientset()
-		if err != nil {
-			// TODO: Don't panic
-			panic(err)
-		}
-	})
-	return KubernetesClientset
-}
-
-// MetricsClientset create k8s metrics client once
-func MetricsClientset() *metrics.Clientset {
-	var err error
-	metricsClientsetOnce.Do(func() {
-		metricsClientset, err = NewMetricsClientset()
-		if err != nil {
-			// TODO: Don't panic
-			panic(err)
-		}
-	})
-	return metricsClientset
-}
-
-// Config returns REST config based on the environment
-func Config() (*rest.Config, error) {
-
-	// if we're in k8s cluster, create in cluster config using service account
-	// otherwise, create out of cluster config using kubeconfig at $HOME/.kube/config
-	if os.Getenv("MOCK") == "true" {
-		log.Println("creating k8s client using test environment ...")
-		testEnv := envtest.Environment{
-			CRDDirectoryPaths: []string{
-				filepath.Join(build.Default.GOPATH, "pkg", "mod", "github.com", "kotalco", "kotal@v0.0.0-20220117145334-7bdbeb90323c", "config", "crd", "bases"),
-			},
-			ErrorIfCRDPathMissing: true,
-		}
-		return testEnv.Start()
-	} else if os.Getenv("KUBERNETES_SERVICE_HOST") != "" {
-		log.Println("creating k8s client using in-cluster config ...")
-		return rest.InClusterConfig()
-	} else {
-		log.Println("creating k8s client using out-of-cluster config ...")
-		kubeconfig := filepath.Join(homedir.HomeDir(), ".kube", "config")
-		return clientcmd.BuildConfigFromFlags("", kubeconfig)
-	}
-
+	return controllerRuntimeClient
 }
 
 // NewRuntimeClient creates new controller-runtime k8s client
 func NewRuntimeClient() (client.Client, error) {
 
-	config, err := Config()
+	config, err := configs.KubeConfig()
 	if err != nil {
 		return nil, err
 	}
@@ -120,22 +56,58 @@ func NewRuntimeClient() (client.Client, error) {
 	return client.New(config, opts)
 }
 
-// NewClientset returns client-go clientset
-func NewClientset() (*kubernetes.Clientset, error) {
-	config, err := Config()
-	if err != nil {
-		return nil, err
-	}
+type k8ClientService struct{}
+type ObjectKey = types.NamespacedName
 
-	return kubernetes.NewForConfig(config)
+type k8ClientServiceInterface interface {
+	client.Reader
+	client.Writer
 }
 
-// NewMetricsClientset returns metrics client
-func NewMetricsClientset() (*metrics.Clientset, error) {
-	config, err := Config()
-	if err != nil {
-		return nil, err
-	}
+var (
+	K8ClientService k8ClientServiceInterface
+)
 
-	return metrics.NewForConfig(config)
+func init() { K8ClientService = &k8ClientService{} }
+
+// Get retrieves an obj for the given object key from the Kubernetes Cluster.
+// obj must be a struct pointer so that obj can be updated with the response
+// returned by the Server.
+func (k8Client k8ClientService) Get(ctx context.Context, key client.ObjectKey, obj client.Object) error {
+	return Client().Get(ctx, key, obj)
+}
+
+// List retrieves list of objects for a given namespace and list options. On a
+// successful call, Items field in the list will be populated with the
+// result returned from the server.
+func (k8Client k8ClientService) List(ctx context.Context, list client.ObjectList, opts ...client.ListOption) error {
+	return Client().List(ctx, list, opts...)
+
+}
+
+// Create saves the object obj in the Kubernetes cluster.
+func (k8Client k8ClientService) Create(ctx context.Context, obj client.Object, opts ...client.CreateOption) error {
+	return Client().Create(ctx, obj, opts...)
+}
+
+// Delete deletes the given obj from Kubernetes cluster.
+func (k8Client k8ClientService) Delete(ctx context.Context, obj client.Object, opts ...client.DeleteOption) error {
+	return Client().Delete(ctx, obj, opts...)
+}
+
+// Update updates the given obj in the Kubernetes cluster. obj must be a
+// struct pointer so that obj can be updated with the content returned by the Server.
+func (k8Client k8ClientService) Update(ctx context.Context, obj client.Object, opts ...client.UpdateOption) error {
+	return Client().Update(ctx, obj, opts...)
+}
+
+// Patch patches the given obj in the Kubernetes cluster. obj must be a
+// struct pointer so that obj can be updated with the content returned by the Server.
+func (k8Client k8ClientService) Patch(ctx context.Context, obj client.Object, patch client.Patch, opts ...client.PatchOption) error {
+	return Client().Patch(ctx, obj, patch, opts...)
+}
+
+// DeleteAllOf deletes all objects of the given type matching the given options.
+func (k8Client k8ClientService) DeleteAllOf(ctx context.Context, obj client.Object, opts ...client.DeleteAllOfOption) error {
+	return Client().DeleteAllOf(ctx, obj, opts...)
 }

@@ -28,6 +28,7 @@ type filecoinServiceInterface interface {
 
 var (
 	FilecoinService filecoinServiceInterface
+	k8Client        = k8s.K8ClientService
 )
 
 func init() { FilecoinService = &filecoinService{} }
@@ -40,7 +41,7 @@ func (service filecoinService) Get(name string) (*filecoinv1alpha1.Node, *restEr
 		Namespace: "default",
 	}
 
-	if err := k8s.Client().Get(context.Background(), key, node); err != nil {
+	if err := k8Client.Get(context.Background(), key, node); err != nil {
 		if apiErrors.IsNotFound(err) {
 			return nil, restErrors.NewNotFoundError(fmt.Sprintf("node by name %s doesn't exit", name))
 		}
@@ -70,7 +71,7 @@ func (service filecoinService) Create(dto *FilecoinDto) (*filecoinv1alpha1.Node,
 		node.Default()
 	}
 
-	if err := k8s.Client().Create(context.Background(), node); err != nil {
+	if err := k8Client.Create(context.Background(), node); err != nil {
 		if apiErrors.IsAlreadyExists(err) {
 			return nil, restErrors.NewBadRequestError(fmt.Sprintf("node by name %s already exits", dto))
 		}
@@ -143,7 +144,7 @@ func (service filecoinService) Update(dto *FilecoinDto, node *filecoinv1alpha1.N
 		node.Default()
 	}
 
-	if err := k8s.Client().Update(context.Background(), node); err != nil {
+	if err := k8Client.Update(context.Background(), node); err != nil {
 		go logger.Error(service.Update, err)
 		return nil, restErrors.NewInternalServerError(fmt.Sprintf("can't update node by name %s", node.Name))
 	}
@@ -154,7 +155,7 @@ func (service filecoinService) Update(dto *FilecoinDto, node *filecoinv1alpha1.N
 // List returns all filecoin nodes
 func (service filecoinService) List() (*filecoinv1alpha1.NodeList, *restErrors.RestErr) {
 	nodes := &filecoinv1alpha1.NodeList{}
-	if err := k8s.Client().List(context.Background(), nodes, client.InNamespace("default")); err != nil {
+	if err := k8Client.List(context.Background(), nodes, client.InNamespace("default")); err != nil {
 		go logger.Error(service.List, err)
 		return nil, restErrors.NewInternalServerError("failed to get all nodes")
 	}
@@ -165,7 +166,7 @@ func (service filecoinService) List() (*filecoinv1alpha1.NodeList, *restErrors.R
 func (service filecoinService) Count() (*int, *restErrors.RestErr) {
 
 	nodes := &filecoinv1alpha1.NodeList{}
-	if err := k8s.Client().List(context.Background(), nodes, client.InNamespace("default")); err != nil {
+	if err := k8Client.List(context.Background(), nodes, client.InNamespace("default")); err != nil {
 		go logger.Error(service.Count, err)
 		return nil, restErrors.NewInternalServerError("failed to count filecoin nodes")
 	}
@@ -176,7 +177,7 @@ func (service filecoinService) Count() (*int, *restErrors.RestErr) {
 
 // Delete deletes ethereum 2.0 filecoin node by name
 func (service filecoinService) Delete(node *filecoinv1alpha1.Node) *restErrors.RestErr {
-	if err := k8s.Client().Delete(context.Background(), node); err != nil {
+	if err := k8Client.Delete(context.Background(), node); err != nil {
 		go logger.Error(service.Delete, err)
 		return restErrors.NewInternalServerError(fmt.Sprintf("can't delte node by name %s", node.Name))
 	}

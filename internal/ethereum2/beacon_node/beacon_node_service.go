@@ -30,6 +30,7 @@ type beaconNodeServiceInterface interface {
 
 var (
 	BeaconNodeService beaconNodeServiceInterface
+	k8Client          = k8s.K8ClientService
 )
 
 func init() { BeaconNodeService = &beaconNodeService{} }
@@ -42,7 +43,7 @@ func (service beaconNodeService) Get(name string) (*ethereum2v1alpha1.BeaconNode
 		Namespace: "default",
 	}
 
-	if err := k8s.Client().Get(context.Background(), key, node); err != nil {
+	if err := k8Client.Get(context.Background(), key, node); err != nil {
 		if apiErrors.IsNotFound(err) {
 			return nil, errors.NewNotFoundError(fmt.Sprintf("beacon node by name %s doesn't exist", name))
 		}
@@ -83,7 +84,7 @@ func (service beaconNodeService) Create(dto *BeaconNodeDto) (*ethereum2v1alpha1.
 		beaconnode.Default()
 	}
 
-	if err := k8s.Client().Create(context.Background(), beaconnode); err != nil {
+	if err := k8Client.Create(context.Background(), beaconnode); err != nil {
 		if apiErrors.IsAlreadyExists(err) {
 			return nil, errors.NewBadRequestError(fmt.Sprintf("beacon node by name %s already exist", dto.Name))
 		}
@@ -166,7 +167,7 @@ func (service beaconNodeService) Update(dto *BeaconNodeDto, node *ethereum2v1alp
 		node.Default()
 	}
 
-	if err := k8s.Client().Update(context.Background(), node); err != nil {
+	if err := k8Client.Update(context.Background(), node); err != nil {
 		go logger.Error(service.Update, err)
 		return nil, errors.NewInternalServerError(fmt.Sprintf("can't update node by name  %s", node.Name))
 	}
@@ -178,7 +179,7 @@ func (service beaconNodeService) Update(dto *BeaconNodeDto, node *ethereum2v1alp
 func (service beaconNodeService) List() (*ethereum2v1alpha1.BeaconNodeList, *errors.RestErr) {
 	nodes := &ethereum2v1alpha1.BeaconNodeList{}
 
-	if err := k8s.Client().List(context.Background(), nodes, client.InNamespace("default")); err != nil {
+	if err := k8Client.List(context.Background(), nodes, client.InNamespace("default")); err != nil {
 		go logger.Error(service.List, err)
 		return nil, errors.NewInternalServerError("failed to get all beacon nodes")
 	}
@@ -200,7 +201,7 @@ func (service beaconNodeService) Count() (*int, *errors.RestErr) {
 
 // Delete deletes ethereum 2.0 beacon node by name
 func (service beaconNodeService) Delete(node *ethereum2v1alpha1.BeaconNode) *errors.RestErr {
-	err := k8s.Client().Delete(context.Background(), node)
+	err := k8Client.Delete(context.Background(), node)
 
 	if err != nil {
 		go logger.Error(service.Delete, err)
