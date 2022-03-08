@@ -7,15 +7,20 @@ import (
 type RestErr struct {
 	Message     string            `json:"message"`
 	Status      int               `json:"status"`
-	Error       string            `json:"error"`
+	ErrorMsg      string            `json:"error"`
 	Validations map[string]string `json:"validations,omitempty"`
+}
+
+//Error used to mimic build in error pkg so this can be replaceable  for go error pkg
+func (err RestErr)Error() string  {
+	return err.Message
 }
 
 func NewValidationError(validations map[string]string) *RestErr {
 	return &RestErr{
 		Message:     "Invalid Body Request",
 		Status:      http.StatusBadRequest,
-		Error:       "Bad Request",
+		ErrorMsg:       "Bad Request",
 		Validations: validations,
 	}
 }
@@ -23,24 +28,21 @@ func NewBadRequestError(message string) *RestErr {
 	return &RestErr{
 		Message:     message,
 		Status:      http.StatusBadRequest,
-		Error:       "Bad Request",
-		Validations: make(map[string]string),
+		ErrorMsg:       "Bad Request",
 	}
 }
 func NewNotFoundError(message string) *RestErr {
 	return &RestErr{
 		Message:     message,
 		Status:      http.StatusNotFound,
-		Error:       "Not Found",
-		Validations: make(map[string]string),
+		ErrorMsg:       "Not Found",
 	}
 }
 func NewInternalServerError(message string) *RestErr {
 	return &RestErr{
 		Message:     message,
 		Status:      http.StatusInternalServerError,
-		Error:       "Internal Server Error",
-		Validations: make(map[string]string),
+		ErrorMsg:       "Internal Server Error",
 	}
 }
 
@@ -48,7 +50,32 @@ func NewUnAuthorizedError(message string) *RestErr {
 	return &RestErr{
 		Message:     message,
 		Status:      http.StatusUnauthorized,
-		Error:       "UnAuthorized",
-		Validations: make(map[string]string),
+		ErrorMsg:       "UnAuthorized",
+	}
+}
+
+func NewForbiddenError(message string) *RestErr {
+	return &RestErr{
+		Message: message,
+		Status:  http.StatusForbidden,
+		ErrorMsg:   "Forbidden",
+	}
+}
+
+func NewTooManyRequestsError(message string) *RestErr {
+	return &RestErr{
+		Message: message,
+		Status:  http.StatusTooManyRequests,
+		ErrorMsg:   "Too Many Requests",
+	}
+}
+
+
+
+func NewConflictError(message string) *RestErr {
+	return &RestErr{
+		Message: message,
+		Status:  http.StatusConflict,
+		ErrorMsg:   "Conflict",
 	}
 }
