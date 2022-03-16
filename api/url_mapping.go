@@ -21,11 +21,16 @@ import (
 // Used in the main.go
 // helps to keep all the endpoints' definition in one place
 // the only place to interact with handlers and middlewares
-func MapUrl(app *fiber.App) {
+func MapUrl(app *fiber.App,  middlewares ...interface{}) {
 	// routing groups
 	api := app.Group("api")
 	v1 := api.Group("v1")
-
+	for i := 0; i < len(middlewares); i++ {
+		switch middlewares[i].(type) {
+		case fiber.Handler:
+			v1.Use(middlewares[i])
+		}
+	}
 	// chainlink group
 	chainlinkGroup := v1.Group("chainlink")
 	chainlinkNodes := chainlinkGroup.Group("nodes")
