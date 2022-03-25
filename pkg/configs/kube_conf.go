@@ -2,12 +2,13 @@ package configs
 
 import (
 	"go/build"
-	"k8s.io/client-go/rest"
-	"k8s.io/client-go/tools/clientcmd"
-	"k8s.io/client-go/util/homedir"
 	"log"
 	"os"
 	"path/filepath"
+
+	"k8s.io/client-go/rest"
+	"k8s.io/client-go/tools/clientcmd"
+	"k8s.io/client-go/util/homedir"
 	"sigs.k8s.io/controller-runtime/pkg/envtest"
 )
 
@@ -20,7 +21,7 @@ func KubeConfig() (*rest.Config, error) {
 		log.Println("creating k8s client using test environment ...")
 		testEnv := envtest.Environment{
 			CRDDirectoryPaths: []string{
-				filepath.Join(build.Default.GOPATH, "pkg", "mod", "github.com", "kotalco", "kotal@v0.0.0-20220117145334-7bdbeb90323c", "config", "crd", "bases"),
+				filepath.Join(build.Default.GOPATH, "pkg", "mod", "github.com", "kotalco", "kotal@v0.0.0-20220212203531-a88fa0a8809f", "config", "crd", "bases"),
 			},
 			ErrorIfCRDPathMissing: true,
 		}
