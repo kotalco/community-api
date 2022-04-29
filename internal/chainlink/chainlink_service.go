@@ -11,7 +11,6 @@ import (
 	chainlinkv1alpha1 "github.com/kotalco/kotal/apis/chainlink/v1alpha1"
 	sharedAPI "github.com/kotalco/kotal/apis/shared"
 	apiErrors "k8s.io/apimachinery/pkg/api/errors"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"os"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -20,11 +19,11 @@ import (
 type chainlinkService struct{}
 
 type chainlinkServiceInterface interface {
-	Get(name string) (*chainlinkv1alpha1.Node, *errors.RestErr)
+	Get(types.NamespacedName) (*chainlinkv1alpha1.Node, *errors.RestErr)
 	Create(*ChainlinkDto) (*chainlinkv1alpha1.Node, *errors.RestErr)
 	Update(*ChainlinkDto, *chainlinkv1alpha1.Node) (*chainlinkv1alpha1.Node, *errors.RestErr)
-	List() (*chainlinkv1alpha1.NodeList, *errors.RestErr)
-	Count() (*int, *errors.RestErr)
+	List(namespace string) (*chainlinkv1alpha1.NodeList, *errors.RestErr)
+	Count(namespace string) (*int, *errors.RestErr)
 	Delete(node *chainlinkv1alpha1.Node) *errors.RestErr
 }
 
@@ -36,18 +35,14 @@ var (
 func init() { ChainlinkService = &chainlinkService{} }
 
 // Get returns a single chainlink node by name
-func (service chainlinkService) Get(name string) (*chainlinkv1alpha1.Node, *errors.RestErr) {
+func (service chainlinkService) Get(namespacedName types.NamespacedName) (*chainlinkv1alpha1.Node, *errors.RestErr) {
 	node := &chainlinkv1alpha1.Node{}
-	key := types.NamespacedName{
-		Name:      name,
-		Namespace: "default",
-	}
-	if err := k8Client.Get(context.Background(), key, node); err != nil {
+	if err := k8Client.Get(context.Background(), namespacedName, node); err != nil {
 		if apiErrors.IsNotFound(err) {
-			return nil, errors.NewNotFoundError(fmt.Sprintf("node by name %s doesn't exist", name))
+			return nil, errors.NewNotFoundError(fmt.Sprintf("node by name %s doesn't exist", namespacedName.Name))
 		}
 		go logger.Error(service.Get, err)
-		return nil, errors.NewInternalServerError(fmt.Sprintf("can't get node by name %s", name))
+		return nil, errors.NewInternalServerError(fmt.Sprintf("can't get node by name %s", namespacedName.Name))
 	}
 
 	return node, nil
@@ -57,10 +52,7 @@ func (service chainlinkService) Get(name string) (*chainlinkv1alpha1.Node, *erro
 // Create creates chainlink node from the given spec
 func (service chainlinkService) Create(dto *ChainlinkDto) (*chainlinkv1alpha1.Node, *errors.RestErr) {
 	node := &chainlinkv1alpha1.Node{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      dto.Name,
-			Namespace: "default",
-		},
+		ObjectMeta: dto.ObjectMetaFromNamespaceDto(),
 		Spec: chainlinkv1alpha1.NodeSpec{
 			EthereumChainId:            dto.EthereumChainId,
 			LinkContractAddress:        dto.LinkContractAddress,
@@ -172,9 +164,9 @@ func (service chainlinkService) Update(dto *ChainlinkDto, node *chainlinkv1alpha
 }
 
 // List returns all chainlink nodes
-func (service chainlinkService) List() (*chainlinkv1alpha1.NodeList, *errors.RestErr) {
+func (service chainlinkService) List(namespace string) (*chainlinkv1alpha1.NodeList, *errors.RestErr) {
 	nodes := &chainlinkv1alpha1.NodeList{}
-	err := k8Client.List(context.Background(), nodes, client.InNamespace("default"))
+	err := k8Client.List(context.Background(), nodes, client.InNamespace(namespace))
 	if err != nil {
 		go logger.Error(service.List, err)
 		return nil, errors.NewInternalServerError("failed to get all nodes")
@@ -184,9 +176,9 @@ func (service chainlinkService) List() (*chainlinkv1alpha1.NodeList, *errors.Res
 }
 
 // Count returns all nodes length
-func (service chainlinkService) Count() (*int, *errors.RestErr) {
+func (service chainlinkService) Count(namespace string) (*int, *errors.RestErr) {
 	nodes := &chainlinkv1alpha1.NodeList{}
-	err := k8Client.List(context.Background(), nodes, client.InNamespace("default"))
+	err := k8Client.List(context.Background(), nodes, client.InNamespace(namespace))
 	if err != nil {
 		go logger.Error(service.Count, err)
 		return nil, errors.NewInternalServerError("failed to get all nodes")

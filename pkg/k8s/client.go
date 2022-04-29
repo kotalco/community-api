@@ -10,6 +10,8 @@ import (
 	ipfsv1alpha1 "github.com/kotalco/kotal/apis/ipfs/v1alpha1"
 	nearv1alpha1 "github.com/kotalco/kotal/apis/near/v1alpha1"
 	polkadotv1alpha1 "github.com/kotalco/kotal/apis/polkadot/v1alpha1"
+	corev1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
@@ -74,6 +76,7 @@ func init() { K8ClientService = &k8ClientService{} }
 // obj must be a struct pointer so that obj can be updated with the response
 // returned by the Server.
 func (k8Client k8ClientService) Get(ctx context.Context, key client.ObjectKey, obj client.Object) error {
+	Client().Scheme()
 	return Client().Get(ctx, key, obj)
 }
 
@@ -110,4 +113,17 @@ func (k8Client k8ClientService) Patch(ctx context.Context, obj client.Object, pa
 // DeleteAllOf deletes all objects of the given type matching the given options.
 func (k8Client k8ClientService) DeleteAllOf(ctx context.Context, obj client.Object, opts ...client.DeleteAllOfOption) error {
 	return Client().DeleteAllOf(ctx, obj, opts...)
+}
+
+func (k8Client k8ClientService)CreateWorkSpace(name string) error {
+	nsName := &corev1.Namespace{
+		ObjectMeta: metav1.ObjectMeta{
+			Name: name,
+		},
+	}
+	_, err := Clientset().CoreV1().Namespaces().Create(context.Background(), nsName, metav1.CreateOptions{})
+	if err != nil {
+		return err
+	}
+	return nil
 }

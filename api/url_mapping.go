@@ -15,6 +15,7 @@ import (
 	"github.com/kotalco/api/api/handlers/near"
 	"github.com/kotalco/api/api/handlers/polkadot"
 	"github.com/kotalco/api/api/handlers/shared"
+	"github.com/kotalco/api/pkg/middleware"
 )
 
 // MapUrl abstracted function to map and register all the url for the application
@@ -29,14 +30,16 @@ func MapUrl(app *fiber.App) {
 	// chainlink group
 	chainlinkGroup := v1.Group("chainlink")
 	chainlinkNodes := chainlinkGroup.Group("nodes")
-	chainlinkNodes.Post("/", chainlink.Create)
-	chainlinkNodes.Head("/", chainlink.Count)
-	chainlinkNodes.Get("/", chainlink.List)
-	chainlinkNodes.Get("/:name", chainlink.ValidateNodeExist, chainlink.Get)
-	chainlinkNodes.Get("/:name/logs", websocket.New(shared.Logger))
+
+	chainlinkNodes.Post("/",chainlink.Create)
+	chainlinkNodes.Head("/", middleware.Namespace,chainlink.Count)
+	chainlinkNodes.Get("/",middleware.Namespace, chainlink.List)
+	chainlinkNodes.Get("/:name", middleware.Namespace,chainlink.ValidateNodeExist, chainlink.Get)
+	chainlinkNodes.Get("/:name/logs",websocket.New(shared.Logger))
 	chainlinkNodes.Get("/:name/status", websocket.New(shared.Status))
-	chainlinkNodes.Put("/:name", chainlink.ValidateNodeExist, chainlink.Update)
-	chainlinkNodes.Delete("/:name", chainlink.ValidateNodeExist, chainlink.Delete)
+	chainlinkNodes.Put("/:name", middleware.Namespace,chainlink.ValidateNodeExist, chainlink.Update)
+	chainlinkNodes.Delete("/:name",middleware.Namespace, chainlink.ValidateNodeExist, chainlink.Delete)
+
 
 	//ethereum group
 	ethereumGroup := v1.Group("ethereum")
