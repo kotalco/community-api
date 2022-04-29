@@ -115,7 +115,7 @@ func (k8Client k8ClientService) DeleteAllOf(ctx context.Context, obj client.Obje
 	return Client().DeleteAllOf(ctx, obj, opts...)
 }
 
-func (k8Client k8ClientService)CreateWorkSpace(name string) error {
+func (k8Client k8ClientService) CreateWorkSpace(name string) error {
 	nsName := &corev1.Namespace{
 		ObjectMeta: metav1.ObjectMeta{
 			Name: name,

@@ -6,12 +6,12 @@ import (
 )
 
 func Namespace(c *fiber.Ctx) error {
-	namespace:=c.Query("namespace","default")
+	namespace := c.Query("namespace", "default")
 
 	name := c.Params("name")
 
-	namespacedName:=types.NamespacedName{
-		Name: name,
+	namespacedName := types.NamespacedName{
+		Name:      name,
 		Namespace: namespace,
 	}
 	c.Locals("namespacedName", namespacedName)
@@ -19,4 +19,3 @@ func Namespace(c *fiber.Ctx) error {
 	c.Next()
 	return nil
 }
-

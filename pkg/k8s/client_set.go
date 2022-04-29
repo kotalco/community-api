@@ -45,7 +45,7 @@ var (
 
 func init() { K8ClientSetService = &k8ClientSetService{} }
 
-func (k8ClientSets *k8ClientSetService)CreateWorkspace(name string)error  {
+func (k8ClientSets *k8ClientSetService) CreateWorkspace(name string) error {
 	nsName := &corev1.Namespace{
 		ObjectMeta: metav1.ObjectMeta{
 			Name: name,
@@ -58,15 +58,15 @@ func (k8ClientSets *k8ClientSetService)CreateWorkspace(name string)error  {
 	return nil
 }
 
-func (k8ClientSets *k8ClientSetService)GetWorkspace(name string)(*corev1.Namespace,error)  {
+func (k8ClientSets *k8ClientSetService) GetWorkspace(name string) (*corev1.Namespace, error) {
 	workspace, err := Clientset().CoreV1().Namespaces().Get(context.Background(), name, metav1.GetOptions{})
 	if err != nil {
-		return nil,err
+		return nil, err
 	}
-	return workspace,nil
+	return workspace, nil
 }
 
-func (k8ClientSets *k8ClientSetService)UpdateWorkspace(name string)error  {
+func (k8ClientSets *k8ClientSetService) UpdateWorkspace(name string) error {
 	nsName := &corev1.Namespace{
 		ObjectMeta: metav1.ObjectMeta{
 			Name: name,

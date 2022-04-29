@@ -22,26 +22,25 @@ import (
 // Used in the main.go
 // helps to keep all the endpoints' definition in one place
 // the only place to interact with handlers and middlewares
-func MapUrl(app *fiber.App,  handlers ...fiber.Handler) {
+func MapUrl(app *fiber.App, handlers ...fiber.Handler) {
 	// routing groups
 	api := app.Group("api")
 	v1 := api.Group("v1")
 	for i := 0; i < len(handlers); i++ {
-			v1.Use(handlers[i])
+		v1.Use(handlers[i])
 	}
 	// chainlink group
 	chainlinkGroup := v1.Group("chainlink")
 	chainlinkNodes := chainlinkGroup.Group("nodes")
 
-	chainlinkNodes.Post("/",chainlink.Create)
-	chainlinkNodes.Head("/", middleware.Namespace,chainlink.Count)
-	chainlinkNodes.Get("/",middleware.Namespace, chainlink.List)
-	chainlinkNodes.Get("/:name", middleware.Namespace,chainlink.ValidateNodeExist, chainlink.Get)
-	chainlinkNodes.Get("/:name/logs",websocket.New(shared.Logger))
+	chainlinkNodes.Post("/", chainlink.Create)
+	chainlinkNodes.Head("/", middleware.Namespace, chainlink.Count)
+	chainlinkNodes.Get("/", middleware.Namespace, chainlink.List)
+	chainlinkNodes.Get("/:name", middleware.Namespace, chainlink.ValidateNodeExist, chainlink.Get)
+	chainlinkNodes.Get("/:name/logs", websocket.New(shared.Logger))
 	chainlinkNodes.Get("/:name/status", websocket.New(shared.Status))
-	chainlinkNodes.Put("/:name", middleware.Namespace,chainlink.ValidateNodeExist, chainlink.Update)
-	chainlinkNodes.Delete("/:name",middleware.Namespace, chainlink.ValidateNodeExist, chainlink.Delete)
-
+	chainlinkNodes.Put("/:name", middleware.Namespace, chainlink.ValidateNodeExist, chainlink.Update)
+	chainlinkNodes.Delete("/:name", middleware.Namespace, chainlink.ValidateNodeExist, chainlink.Delete)
 
 	//ethereum group
 	ethereumGroup := v1.Group("ethereum")
