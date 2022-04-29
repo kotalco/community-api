@@ -13,7 +13,7 @@ type apiCredentials struct {
 
 type ChainlinkDto struct {
 	models.Time
-	Name                       string          `json:"name"`
+	models.NamespaceDto
 	EthereumChainId            uint            `json:"ethereumChainId"`
 	LinkContractAddress        string          `json:"linkContractAddress"`
 	EthereumWSEndpoint         string          `json:"ethereumWsEndpoint"`
