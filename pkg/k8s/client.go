@@ -76,7 +76,6 @@ func init() { K8ClientService = &k8ClientService{} }
 // obj must be a struct pointer so that obj can be updated with the response
 // returned by the Server.
 func (k8Client k8ClientService) Get(ctx context.Context, key client.ObjectKey, obj client.Object) error {
-	Client().Scheme()
 	return Client().Get(ctx, key, obj)
 }
 
