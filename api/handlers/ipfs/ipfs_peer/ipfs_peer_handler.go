@@ -9,9 +9,16 @@ import (
 	restErrors "github.com/kotalco/api/pkg/errors"
 	"github.com/kotalco/api/pkg/shared"
 	ipfsv1alpha1 "github.com/kotalco/kotal/apis/ipfs/v1alpha1"
+	"k8s.io/apimachinery/pkg/types"
 	"net/http"
 	"sort"
 	"strconv"
+)
+
+const (
+	NODE_NAME_KEYWORD = "name"
+	NAMESPACE_KEYWORD = "namespace"
+	DEFAULT_NAMESPACE = "default"
 )
 
 var service = ipfs_peer.IpfsPeerService
@@ -33,7 +40,7 @@ func Get(c *fiber.Ctx) error {
 func List(c *fiber.Ctx) error {
 	page, _ := strconv.Atoi(c.Query("page"))
 
-	peers, err := service.List()
+	peers, err := service.List(c.Query(NAMESPACE_KEYWORD, DEFAULT_NAMESPACE))
 	if err != nil {
 		return c.Status(err.Status).JSON(err)
 	}
@@ -111,7 +118,7 @@ func Update(c *fiber.Ctx) error {
 // 2-create X-Total-Count header with the length
 // 3-return
 func Count(c *fiber.Ctx) error {
-	length, err := service.Count()
+	length, err := service.Count(c.Query(NAMESPACE_KEYWORD, DEFAULT_NAMESPACE))
 	if err != nil {
 		return c.Status(err.Status).JSON(err)
 	}
@@ -127,9 +134,12 @@ func Count(c *fiber.Ctx) error {
 // 2-return 404 if it's not
 // 3-save the peer to local with the key peer to be used by the other handlers
 func ValidatePeerExist(c *fiber.Ctx) error {
-	name := c.Params("name")
+	nameSpacedName := types.NamespacedName{
+		Name:      c.Params(NODE_NAME_KEYWORD),
+		Namespace: c.Query(NAMESPACE_KEYWORD, DEFAULT_NAMESPACE),
+	}
 
-	peer, err := service.Get(name)
+	peer, err := service.Get(nameSpacedName)
 	if err != nil {
 		return c.Status(err.Status).JSON(err)
 	}

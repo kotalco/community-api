@@ -9,7 +9,6 @@ import (
 	polkadotv1alpha1 "github.com/kotalco/kotal/apis/polkadot/v1alpha1"
 	sharedAPI "github.com/kotalco/kotal/apis/shared"
 	apiErrors "k8s.io/apimachinery/pkg/api/errors"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"os"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -18,12 +17,12 @@ import (
 type polkadtoService struct{}
 
 type polkadotServiceInterface interface {
-	Get(name string) (*polkadotv1alpha1.Node, *restErrors.RestErr)
+	Get(types.NamespacedName) (*polkadotv1alpha1.Node, *restErrors.RestErr)
 	Create(dto *PolkadotDto) (*polkadotv1alpha1.Node, *restErrors.RestErr)
 	Update(*PolkadotDto, *polkadotv1alpha1.Node) (*polkadotv1alpha1.Node, *restErrors.RestErr)
-	List() (*polkadotv1alpha1.NodeList, *restErrors.RestErr)
+	List(namespace string) (*polkadotv1alpha1.NodeList, *restErrors.RestErr)
 	Delete(node *polkadotv1alpha1.Node) *restErrors.RestErr
-	Count() (*int, *restErrors.RestErr)
+	Count(namespace string) (*int, *restErrors.RestErr)
 }
 
 var (
@@ -34,19 +33,15 @@ var (
 func init() { PolkadotService = &polkadtoService{} }
 
 // Get gets a single filecoin node by name
-func (service polkadtoService) Get(name string) (*polkadotv1alpha1.Node, *restErrors.RestErr) {
+func (service polkadtoService) Get(namespacedName types.NamespacedName) (*polkadotv1alpha1.Node, *restErrors.RestErr) {
 	node := &polkadotv1alpha1.Node{}
-	key := types.NamespacedName{
-		Name:      name,
-		Namespace: "default",
-	}
 
-	if err := k8Client.Get(context.Background(), key, node); err != nil {
+	if err := k8Client.Get(context.Background(), namespacedName, node); err != nil {
 		if apiErrors.IsNotFound(err) {
-			return nil, restErrors.NewNotFoundError(fmt.Sprintf("node by name %s doesn't exits", name))
+			return nil, restErrors.NewNotFoundError(fmt.Sprintf("node by name %s doesn't exits", namespacedName.Name))
 		}
 		go logger.Error(service.Get, err)
-		return nil, restErrors.NewInternalServerError(fmt.Sprintf("can't get node by name %s", name))
+		return nil, restErrors.NewInternalServerError(fmt.Sprintf("can't get node by name %s", namespacedName.Name))
 	}
 
 	return node, nil
@@ -55,10 +50,7 @@ func (service polkadtoService) Get(name string) (*polkadotv1alpha1.Node, *restEr
 // Create creates filecoin node from spec
 func (service polkadtoService) Create(dto *PolkadotDto) (*polkadotv1alpha1.Node, *restErrors.RestErr) {
 	node := &polkadotv1alpha1.Node{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      dto.Name,
-			Namespace: "default",
-		},
+		ObjectMeta: dto.ObjectMetaFromNamespaceDto(),
 		Spec: polkadotv1alpha1.NodeSpec{
 			Network: dto.Network,
 			RPC:     true,
@@ -179,9 +171,9 @@ func (service polkadtoService) Update(dto *PolkadotDto, node *polkadotv1alpha1.N
 }
 
 // List returns all filecoin nodes
-func (service polkadtoService) List() (*polkadotv1alpha1.NodeList, *restErrors.RestErr) {
+func (service polkadtoService) List(namespace string) (*polkadotv1alpha1.NodeList, *restErrors.RestErr) {
 	nodes := &polkadotv1alpha1.NodeList{}
-	if err := k8Client.List(context.Background(), nodes, client.InNamespace("default")); err != nil {
+	if err := k8Client.List(context.Background(), nodes, client.InNamespace(namespace)); err != nil {
 		go logger.Error(service.List, err)
 		return nil, restErrors.NewInternalServerError("failed to get all nodes")
 	}
@@ -190,9 +182,9 @@ func (service polkadtoService) List() (*polkadotv1alpha1.NodeList, *restErrors.R
 }
 
 // Count returns total number of filecoin nodes
-func (service polkadtoService) Count() (*int, *restErrors.RestErr) {
+func (service polkadtoService) Count(namespace string) (*int, *restErrors.RestErr) {
 	nodes := &polkadotv1alpha1.NodeList{}
-	if err := k8Client.List(context.Background(), nodes, client.InNamespace("default")); err != nil {
+	if err := k8Client.List(context.Background(), nodes, client.InNamespace(namespace)); err != nil {
 		go logger.Error(service.Count, err)
 		return nil, restErrors.NewInternalServerError("failed to count all nodes")
 	}

@@ -1,12 +1,13 @@
 package storage_class
 
 import (
+	"github.com/kotalco/api/internal/models"
 	storagev1 "k8s.io/api/storage/v1"
 )
 
 // StorageClass is Kubernetes storage class
 type StorageClassDto struct {
-	Name                 string `json:"name"`
+	models.NamespaceDto
 	Provisioner          string `json:"provisioner"`
 	ReclaimPolicy        string `json:"reclaimPolicy"`
 	AllowVolumeExpansion bool   `json:"allowVolumeExpansion"`

@@ -8,7 +8,7 @@ import (
 
 type ValidatorDto struct {
 	models.Time
-	Name                     string        `json:"name"`
+	models.NamespaceDto
 	Network                  string        `json:"network"`
 	Client                   string        `json:"client"`
 	Graffiti                 string        `json:"graffiti"`

@@ -8,7 +8,7 @@ import (
 
 type BeaconNodeDto struct {
 	models.Time
-	Name    string `json:"name"`
+	models.NamespaceDto
 	Network string `json:"network"`
 	Client  string `json:"client"`
 	// todo: required only for prysm and network is not mainnet

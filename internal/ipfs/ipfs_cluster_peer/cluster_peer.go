@@ -8,7 +8,7 @@ import (
 
 type ClusterPeerDto struct {
 	models.Time
-	Name                 string   `json:"name"`
+	models.NamespaceDto
 	ID                   string   `json:"id"`
 	PrivatekeySecretName string   `json:"privatekeySecretName"`
 	TrustedPeers         []string `json:"trustedPeers"`

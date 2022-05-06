@@ -11,7 +11,6 @@ import (
 	ethereum2v1alpha1 "github.com/kotalco/kotal/apis/ethereum2/v1alpha1"
 	sharedAPIs "github.com/kotalco/kotal/apis/shared"
 	apiErrors "k8s.io/apimachinery/pkg/api/errors"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"os"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -20,12 +19,12 @@ import (
 type beaconNodeService struct{}
 
 type beaconNodeServiceInterface interface {
-	Get(name string) (*ethereum2v1alpha1.BeaconNode, *errors.RestErr)
+	Get(types.NamespacedName) (*ethereum2v1alpha1.BeaconNode, *errors.RestErr)
 	Create(dto *BeaconNodeDto) (*ethereum2v1alpha1.BeaconNode, *errors.RestErr)
 	Update(*BeaconNodeDto, *ethereum2v1alpha1.BeaconNode) (*ethereum2v1alpha1.BeaconNode, *errors.RestErr)
-	List() (*ethereum2v1alpha1.BeaconNodeList, *errors.RestErr)
+	List(namespace string) (*ethereum2v1alpha1.BeaconNodeList, *errors.RestErr)
 	Delete(node *ethereum2v1alpha1.BeaconNode) *errors.RestErr
-	Count() (*int, *errors.RestErr)
+	Count(namespace string) (*int, *errors.RestErr)
 }
 
 var (
@@ -36,19 +35,15 @@ var (
 func init() { BeaconNodeService = &beaconNodeService{} }
 
 // Get gets a single ethereum 2.0 beacon node by name
-func (service beaconNodeService) Get(name string) (*ethereum2v1alpha1.BeaconNode, *errors.RestErr) {
+func (service beaconNodeService) Get(namespacedNamed types.NamespacedName) (*ethereum2v1alpha1.BeaconNode, *errors.RestErr) {
 	node := &ethereum2v1alpha1.BeaconNode{}
-	key := types.NamespacedName{
-		Name:      name,
-		Namespace: "default",
-	}
 
-	if err := k8Client.Get(context.Background(), key, node); err != nil {
+	if err := k8Client.Get(context.Background(), namespacedNamed, node); err != nil {
 		if apiErrors.IsNotFound(err) {
-			return nil, errors.NewNotFoundError(fmt.Sprintf("beacon node by name %s doesn't exist", name))
+			return nil, errors.NewNotFoundError(fmt.Sprintf("beacon node by name %s doesn't exist", namespacedNamed.Name))
 		}
 		go logger.Error(service.Get, err)
-		return nil, errors.NewInternalServerError(fmt.Sprintf("can't get beacon node by name %s", name))
+		return nil, errors.NewInternalServerError(fmt.Sprintf("can't get beacon node by name %s", namespacedNamed.Name))
 	}
 
 	return node, nil
@@ -65,10 +60,7 @@ func (service beaconNodeService) Create(dto *BeaconNodeDto) (*ethereum2v1alpha1.
 	client := ethereum2v1alpha1.Ethereum2Client(dto.Client)
 
 	beaconnode := &ethereum2v1alpha1.BeaconNode{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      dto.Name,
-			Namespace: "default",
-		},
+		ObjectMeta: dto.ObjectMetaFromNamespaceDto(),
 		Spec: ethereum2v1alpha1.BeaconNodeSpec{
 			Network:       dto.Network,
 			Client:        client,
@@ -176,10 +168,10 @@ func (service beaconNodeService) Update(dto *BeaconNodeDto, node *ethereum2v1alp
 }
 
 // List returns all ethereum 2.0 beacon nodes
-func (service beaconNodeService) List() (*ethereum2v1alpha1.BeaconNodeList, *errors.RestErr) {
+func (service beaconNodeService) List(namespace string) (*ethereum2v1alpha1.BeaconNodeList, *errors.RestErr) {
 	nodes := &ethereum2v1alpha1.BeaconNodeList{}
 
-	if err := k8Client.List(context.Background(), nodes, client.InNamespace("default")); err != nil {
+	if err := k8Client.List(context.Background(), nodes, client.InNamespace(namespace)); err != nil {
 		go logger.Error(service.List, err)
 		return nil, errors.NewInternalServerError("failed to get all beacon nodes")
 	}
@@ -188,8 +180,8 @@ func (service beaconNodeService) List() (*ethereum2v1alpha1.BeaconNodeList, *err
 }
 
 // Count returns total number of beacon nodes
-func (service beaconNodeService) Count() (*int, *errors.RestErr) {
-	nodes, err := service.List()
+func (service beaconNodeService) Count(namespace string) (*int, *errors.RestErr) {
+	nodes, err := service.List(namespace)
 	if err != nil {
 		return nil, err
 	}

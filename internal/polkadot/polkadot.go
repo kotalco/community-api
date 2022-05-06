@@ -1,11 +1,12 @@
 package polkadot
 
 import (
+	"github.com/kotalco/api/internal/models"
 	polkadotv1alpha1 "github.com/kotalco/kotal/apis/polkadot/v1alpha1"
 )
 
 type PolkadotDto struct {
-	Name                     string   `json:"name"`
+	models.NamespaceDto
 	Network                  string   `json:"network"`
 	NodePrivateKeySecretName string   `json:"nodePrivateKeySecretName"`
 	Validator                *bool    `json:"validator"`

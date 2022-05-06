@@ -9,7 +9,7 @@ import (
 // Node is Filecoin node
 type FilecoinDto struct {
 	models.Time
-	Name               string  `json:"name"`
+	models.NamespaceDto
 	Network            string  `json:"network"`
 	API                *bool   `json:"api"`
 	APIPort            uint    `json:"apiPort"`

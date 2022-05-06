@@ -9,7 +9,7 @@ import (
 // NearDto is NEAR node
 type NearDto struct {
 	models.Time
-	Name                     string    `json:"name"`
+	models.NamespaceDto
 	Network                  string    `json:"network"`
 	Archive                  bool      `json:"archive"`
 	NodePrivateKeySecretName string    `json:"nodePrivateKeySecretName"`

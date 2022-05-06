@@ -15,7 +15,7 @@ type ImportedAccount struct {
 // Node is Ethereum node
 type EthereumDto struct {
 	models.Time
-	Name                     string           `json:"name"`
+	models.NamespaceDto
 	Network                  string           `json:"network"`
 	Client                   string           `json:"client"`
 	Logging                  string           `json:"logging"`

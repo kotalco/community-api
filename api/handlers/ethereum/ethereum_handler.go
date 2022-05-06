@@ -12,6 +12,7 @@ import (
 	"github.com/kotalco/api/pkg/shared"
 	ethereumv1alpha1 "github.com/kotalco/kotal/apis/ethereum/v1alpha1"
 	"github.com/ybbus/jsonrpc/v2"
+	"k8s.io/apimachinery/pkg/types"
 	"math/big"
 	"net/http"
 	"os"
@@ -19,6 +20,12 @@ import (
 	"strconv"
 	"strings"
 	"time"
+)
+
+const (
+	NODE_NAME_KEYWORD = "name"
+	NAMESPACE_KEYWORD = "namespace"
+	DEFAULT_NAMESPACE = "default"
 )
 
 var service = ethereum.EthereumService
@@ -81,7 +88,8 @@ func Update(c *fiber.Ctx) error {
 func List(c *fiber.Ctx) error {
 	page, _ := strconv.Atoi(c.Query("page"))
 
-	nodes, err := service.List()
+	nodes, err := service.List(c.Query(NAMESPACE_KEYWORD, DEFAULT_NAMESPACE))
+
 	if err != nil {
 		return c.Status(err.Status).JSON(err)
 	}
@@ -117,7 +125,7 @@ func Delete(c *fiber.Ctx) error {
 // 2-create X-Total-Count header with the length
 // 3-return
 func Count(c *fiber.Ctx) error {
-	length, err := service.Count()
+	length, err := service.Count(c.Query(NAMESPACE_KEYWORD, DEFAULT_NAMESPACE))
 	if err != nil {
 		return c.Status(err.Status).JSON(err)
 	}
@@ -169,11 +177,14 @@ func Stats(c *websocket.Conn) {
 		}
 	}
 
-	name := c.Params("name")
+	nameSpacedName := types.NamespacedName{
+		Namespace: c.Query(NAMESPACE_KEYWORD, DEFAULT_NAMESPACE),
+		Name:      c.Params(NODE_NAME_KEYWORD),
+	}
 
 	for {
 
-		node, err := service.Get(name)
+		node, err := service.Get(nameSpacedName)
 
 		if err != nil {
 			c.WriteJSON(err)
@@ -224,9 +235,12 @@ func Stats(c *websocket.Conn) {
 // 2-return 404 if it's not
 // 3-save the node to local with the key node to be used by the other handlers
 func ValidateNodeExist(c *fiber.Ctx) error {
-	name := c.Params("name")
+	nameSpacedName := types.NamespacedName{
+		Name:      c.Params(NODE_NAME_KEYWORD),
+		Namespace: c.Query(NAMESPACE_KEYWORD, DEFAULT_NAMESPACE),
+	}
 
-	node, err := service.Get(name)
+	node, err := service.Get(nameSpacedName)
 	if err != nil {
 		return c.Status(err.Status).JSON(err)
 	}

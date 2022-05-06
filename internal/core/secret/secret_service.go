@@ -18,11 +18,11 @@ import (
 type secretService struct{}
 
 type secretServiceInterface interface {
-	Get(name string) (*corev1.Secret, *errors.RestErr)
+	Get(name types.NamespacedName) (*corev1.Secret, *errors.RestErr)
 	Create(*SecretDto) (*corev1.Secret, *errors.RestErr)
-	List() (*corev1.SecretList, *errors.RestErr)
+	List(namespace string) (*corev1.SecretList, *errors.RestErr)
 	Delete(secret *corev1.Secret) *errors.RestErr
-	Count() (*int, *errors.RestErr)
+	Count(namespace string) (*int, *errors.RestErr)
 }
 
 var (
@@ -33,19 +33,15 @@ var (
 func init() { SecretService = &secretService{} }
 
 // Get returns a single secret  by name
-func (service secretService) Get(name string) (*corev1.Secret, *errors.RestErr) {
+func (service secretService) Get(namespacedName types.NamespacedName) (*corev1.Secret, *errors.RestErr) {
 	secret := &corev1.Secret{}
-	key := types.NamespacedName{
-		Name:      name,
-		Namespace: "default",
-	}
 
-	if err := k8Client.Get(context.Background(), key, secret); err != nil {
+	if err := k8Client.Get(context.Background(), namespacedName, secret); err != nil {
 		if apiErrors.IsNotFound(err) {
-			return nil, errors.NewNotFoundError(fmt.Sprintf("secret by name %s doesn't exist", name))
+			return nil, errors.NewNotFoundError(fmt.Sprintf("secret by name %s doesn't exist", namespacedName.Name))
 		}
 		go logger.Error(service.Get, err)
-		return nil, errors.NewInternalServerError(fmt.Sprintf("can't get secret by name %s", name))
+		return nil, errors.NewInternalServerError(fmt.Sprintf("can't get secret by name %s", namespacedName.Name))
 	}
 
 	return secret, nil
@@ -57,7 +53,7 @@ func (service secretService) Create(dto *SecretDto) (*corev1.Secret, *errors.Res
 	secret := &corev1.Secret{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      dto.Name,
-			Namespace: "default",
+			Namespace: dto.Namespace,
 			Labels: map[string]string{
 				"kotal.io/key-type":            dto.Type,
 				"app.kubernetes.io/created-by": "kotal-api",
@@ -78,10 +74,10 @@ func (service secretService) Create(dto *SecretDto) (*corev1.Secret, *errors.Res
 }
 
 // List returns all secrets
-func (service secretService) List() (*corev1.SecretList, *errors.RestErr) {
+func (service secretService) List(namespace string) (*corev1.SecretList, *errors.RestErr) {
 	secrets := &corev1.SecretList{}
 
-	if err := k8Client.List(context.Background(), secrets, client.InNamespace("default"), client.HasLabels{"app.kubernetes.io/created-by"}); err != nil {
+	if err := k8Client.List(context.Background(), secrets, client.InNamespace(namespace), client.HasLabels{"app.kubernetes.io/created-by"}); err != nil {
 		go logger.Error(service.List, err)
 		return nil, errors.NewInternalServerError("failed to get all secrets")
 	}
@@ -100,9 +96,9 @@ func (service secretService) Delete(secret *corev1.Secret) *errors.RestErr {
 }
 
 // Delete a list of secrets
-func (service secretService) Count() (*int, *errors.RestErr) {
+func (service secretService) Count(namespace string) (*int, *errors.RestErr) {
 	secrets := &corev1.SecretList{}
-	if err := k8Client.List(context.Background(), secrets, client.InNamespace("default"), client.HasLabels{"kotal.io/key-type"}); err != nil {
+	if err := k8Client.List(context.Background(), secrets, client.InNamespace(namespace), client.HasLabels{"kotal.io/key-type"}); err != nil {
 		go logger.Error(service.Count, err)
 		return nil, errors.NewInternalServerError("failed to get all secrets")
 	}

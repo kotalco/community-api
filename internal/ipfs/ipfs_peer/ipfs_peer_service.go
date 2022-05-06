@@ -9,7 +9,6 @@ import (
 	ipfsv1alpha1 "github.com/kotalco/kotal/apis/ipfs/v1alpha1"
 	sharedAPIs "github.com/kotalco/kotal/apis/shared"
 	apiErrors "k8s.io/apimachinery/pkg/api/errors"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"os"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -18,12 +17,12 @@ import (
 type ipfsPeerService struct{}
 
 type ipfsPeerServiceInterface interface {
-	Get(name string) (*ipfsv1alpha1.Peer, *restErrors.RestErr)
+	Get(name types.NamespacedName) (*ipfsv1alpha1.Peer, *restErrors.RestErr)
 	Create(dto *PeerDto) (*ipfsv1alpha1.Peer, *restErrors.RestErr)
 	Update(*PeerDto, *ipfsv1alpha1.Peer) (*ipfsv1alpha1.Peer, *restErrors.RestErr)
-	List() (*ipfsv1alpha1.PeerList, *restErrors.RestErr)
+	List(namespace string) (*ipfsv1alpha1.PeerList, *restErrors.RestErr)
 	Delete(node *ipfsv1alpha1.Peer) *restErrors.RestErr
-	Count() (*int, *restErrors.RestErr)
+	Count(namespace string) (*int, *restErrors.RestErr)
 }
 
 var (
@@ -34,16 +33,12 @@ var (
 func init() { IpfsPeerService = &ipfsPeerService{} }
 
 // Get gets a single IPFS peer by name
-func (service ipfsPeerService) Get(name string) (*ipfsv1alpha1.Peer, *restErrors.RestErr) {
+func (service ipfsPeerService) Get(namespacedName types.NamespacedName) (*ipfsv1alpha1.Peer, *restErrors.RestErr) {
 	peer := &ipfsv1alpha1.Peer{}
-	key := types.NamespacedName{
-		Name:      name,
-		Namespace: "default",
-	}
 
-	if err := k8Client.Get(context.Background(), key, peer); err != nil {
+	if err := k8Client.Get(context.Background(), namespacedName, peer); err != nil {
 		if apiErrors.IsNotFound(err) {
-			return nil, restErrors.NewBadRequestError(fmt.Sprintf("peer by name %s doesn't exit", name))
+			return nil, restErrors.NewBadRequestError(fmt.Sprintf("peer by name %s doesn't exit", namespacedName.Name))
 		}
 		go logger.Error(service.Get, err)
 		return nil, restErrors.NewInternalServerError(fmt.Sprintf("can't get peer by name %s", peer.Name))
@@ -60,10 +55,7 @@ func (service ipfsPeerService) Create(dto *PeerDto) (*ipfsv1alpha1.Peer, *restEr
 	}
 
 	peer := &ipfsv1alpha1.Peer{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      dto.Name,
-			Namespace: "default",
-		},
+		ObjectMeta: dto.ObjectMetaFromNamespaceDto(),
 		Spec: ipfsv1alpha1.PeerSpec{
 			InitProfiles: initProfiles,
 			Resources: sharedAPIs.Resources{
@@ -146,9 +138,9 @@ func (service ipfsPeerService) Update(dto *PeerDto, peer *ipfsv1alpha1.Peer) (*i
 }
 
 // List returns all IPFS peers
-func (service ipfsPeerService) List() (*ipfsv1alpha1.PeerList, *restErrors.RestErr) {
+func (service ipfsPeerService) List(namespace string) (*ipfsv1alpha1.PeerList, *restErrors.RestErr) {
 	peers := &ipfsv1alpha1.PeerList{}
-	if err := k8Client.List(context.Background(), peers, client.InNamespace("default")); err != nil {
+	if err := k8Client.List(context.Background(), peers, client.InNamespace(namespace)); err != nil {
 		go logger.Error(service.List, err)
 		return nil, restErrors.NewInternalServerError("failed to get all peers")
 	}
@@ -157,10 +149,10 @@ func (service ipfsPeerService) List() (*ipfsv1alpha1.PeerList, *restErrors.RestE
 }
 
 // Count returns total number of IPFS peers
-func (service ipfsPeerService) Count() (*int, *restErrors.RestErr) {
+func (service ipfsPeerService) Count(namespace string) (*int, *restErrors.RestErr) {
 	peers := &ipfsv1alpha1.PeerList{}
 
-	if err := k8Client.List(context.Background(), peers, client.InNamespace("default")); err != nil {
+	if err := k8Client.List(context.Background(), peers, client.InNamespace(namespace)); err != nil {
 		go logger.Error(service.Count, err)
 		return nil, restErrors.NewInternalServerError("failed to count all peers")
 	}

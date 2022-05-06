@@ -10,7 +10,7 @@ import (
 // TODO: update with SwarmKeySecret and Resources
 type PeerDto struct {
 	models.Time
-	Name         string   `json:"name"`
+	models.NamespaceDto
 	InitProfiles []string `json:"initProfiles"`
 	APIPort      uint     `json:"apiPort"`
 	APIHost      string   `json:"apiHost"`

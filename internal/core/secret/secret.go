@@ -8,7 +8,7 @@ import (
 
 type SecretDto struct {
 	models.Time
-	Name string            `json:"name"`
+	models.NamespaceDto
 	Type string            `json:"type"`
 	Data map[string]string `json:"data,omitempty"`
 }

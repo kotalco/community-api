@@ -9,7 +9,6 @@ import (
 	filecoinv1alpha1 "github.com/kotalco/kotal/apis/filecoin/v1alpha1"
 	sharedAPIs "github.com/kotalco/kotal/apis/shared"
 	apiErrors "k8s.io/apimachinery/pkg/api/errors"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"os"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -18,12 +17,12 @@ import (
 type filecoinService struct{}
 
 type filecoinServiceInterface interface {
-	Get(name string) (*filecoinv1alpha1.Node, *restErrors.RestErr)
+	Get(types.NamespacedName) (*filecoinv1alpha1.Node, *restErrors.RestErr)
 	Create(dto *FilecoinDto) (*filecoinv1alpha1.Node, *restErrors.RestErr)
 	Update(*FilecoinDto, *filecoinv1alpha1.Node) (*filecoinv1alpha1.Node, *restErrors.RestErr)
-	List() (*filecoinv1alpha1.NodeList, *restErrors.RestErr)
+	List(namespace string) (*filecoinv1alpha1.NodeList, *restErrors.RestErr)
 	Delete(node *filecoinv1alpha1.Node) *restErrors.RestErr
-	Count() (*int, *restErrors.RestErr)
+	Count(namespace string) (*int, *restErrors.RestErr)
 }
 
 var (
@@ -34,19 +33,15 @@ var (
 func init() { FilecoinService = &filecoinService{} }
 
 // Get gets a single filecoin node by name
-func (service filecoinService) Get(name string) (*filecoinv1alpha1.Node, *restErrors.RestErr) {
+func (service filecoinService) Get(namespacedName types.NamespacedName) (*filecoinv1alpha1.Node, *restErrors.RestErr) {
 	node := &filecoinv1alpha1.Node{}
-	key := types.NamespacedName{
-		Name:      name,
-		Namespace: "default",
-	}
 
-	if err := k8Client.Get(context.Background(), key, node); err != nil {
+	if err := k8Client.Get(context.Background(), namespacedName, node); err != nil {
 		if apiErrors.IsNotFound(err) {
-			return nil, restErrors.NewNotFoundError(fmt.Sprintf("node by name %s doesn't exit", name))
+			return nil, restErrors.NewNotFoundError(fmt.Sprintf("node by name %s doesn't exit", namespacedName.Name))
 		}
 		go logger.Error(service.Get, err)
-		return nil, restErrors.NewInternalServerError(fmt.Sprintf("can't get node by name %s", name))
+		return nil, restErrors.NewInternalServerError(fmt.Sprintf("can't get node by name %s", namespacedName.Name))
 	}
 
 	return node, nil
@@ -55,10 +50,7 @@ func (service filecoinService) Get(name string) (*filecoinv1alpha1.Node, *restEr
 // Create creates filecoin node from spec
 func (service filecoinService) Create(dto *FilecoinDto) (*filecoinv1alpha1.Node, *restErrors.RestErr) {
 	node := &filecoinv1alpha1.Node{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      dto.Name,
-			Namespace: "default",
-		},
+		ObjectMeta: dto.ObjectMetaFromNamespaceDto(),
 		Spec: filecoinv1alpha1.NodeSpec{
 			Network: filecoinv1alpha1.FilecoinNetwork(dto.Network),
 			Resources: sharedAPIs.Resources{
@@ -153,9 +145,9 @@ func (service filecoinService) Update(dto *FilecoinDto, node *filecoinv1alpha1.N
 }
 
 // List returns all filecoin nodes
-func (service filecoinService) List() (*filecoinv1alpha1.NodeList, *restErrors.RestErr) {
+func (service filecoinService) List(namespace string) (*filecoinv1alpha1.NodeList, *restErrors.RestErr) {
 	nodes := &filecoinv1alpha1.NodeList{}
-	if err := k8Client.List(context.Background(), nodes, client.InNamespace("default")); err != nil {
+	if err := k8Client.List(context.Background(), nodes, client.InNamespace(namespace)); err != nil {
 		go logger.Error(service.List, err)
 		return nil, restErrors.NewInternalServerError("failed to get all nodes")
 	}
@@ -163,10 +155,10 @@ func (service filecoinService) List() (*filecoinv1alpha1.NodeList, *restErrors.R
 }
 
 // Count returns total number of filecoin nodes
-func (service filecoinService) Count() (*int, *restErrors.RestErr) {
+func (service filecoinService) Count(namespace string) (*int, *restErrors.RestErr) {
 
 	nodes := &filecoinv1alpha1.NodeList{}
-	if err := k8Client.List(context.Background(), nodes, client.InNamespace("default")); err != nil {
+	if err := k8Client.List(context.Background(), nodes, client.InNamespace(namespace)); err != nil {
 		go logger.Error(service.Count, err)
 		return nil, restErrors.NewInternalServerError("failed to count filecoin nodes")
 	}
