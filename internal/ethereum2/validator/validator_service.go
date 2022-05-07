@@ -27,7 +27,7 @@ type validatorServiceInterface interface {
 
 var (
 	ValidatorService validatorServiceInterface
-	k8Client         = k8s.K8ClientService
+	k8sClient        = k8s.K8sClientService
 )
 
 func init() { ValidatorService = &validatorService{} }
@@ -37,7 +37,7 @@ func (service validatorService) Get(namespacedName types.NamespacedName) (*ether
 
 	validator := &ethereum2v1alpha1.Validator{}
 
-	if err := k8Client.Get(context.Background(), namespacedName, validator); err != nil {
+	if err := k8sClient.Get(context.Background(), namespacedName, validator); err != nil {
 		if apiErrors.IsNotFound(err) {
 			return nil, errors.NewNotFoundError(fmt.Sprintf("validator by name %s doesn't exit", namespacedName.Name))
 		}
@@ -82,7 +82,7 @@ func (service validatorService) Create(dto *ValidatorDto) (*ethereum2v1alpha1.Va
 		validator.Default()
 	}
 
-	if err := k8Client.Create(context.Background(), validator); err != nil {
+	if err := k8sClient.Create(context.Background(), validator); err != nil {
 		if apiErrors.IsAlreadyExists(err) {
 			return nil, errors.NewNotFoundError(fmt.Sprintf("validator by name %s already exits", validator.Name))
 		}
@@ -137,7 +137,7 @@ func (service validatorService) Update(dto *ValidatorDto, validator *ethereum2v1
 		validator.Default()
 	}
 
-	if err := k8Client.Update(context.Background(), validator); err != nil {
+	if err := k8sClient.Update(context.Background(), validator); err != nil {
 		go logger.Error(service.Update, err)
 		return nil, errors.NewInternalServerError(fmt.Sprintf("can't update validator by name %s", validator.Name))
 	}
@@ -149,7 +149,7 @@ func (service validatorService) Update(dto *ValidatorDto, validator *ethereum2v1
 func (service validatorService) List(namespace string) (*ethereum2v1alpha1.ValidatorList, *errors.RestErr) {
 	validators := &ethereum2v1alpha1.ValidatorList{}
 
-	if err := k8Client.List(context.Background(), validators, client.InNamespace(namespace)); err != nil {
+	if err := k8sClient.List(context.Background(), validators, client.InNamespace(namespace)); err != nil {
 		go logger.Error(service.List, err)
 		return nil, errors.NewInternalServerError("failed to get all validators")
 	}
@@ -161,7 +161,7 @@ func (service validatorService) List(namespace string) (*ethereum2v1alpha1.Valid
 func (service validatorService) Count(namespace string) (*int, *errors.RestErr) {
 	validators := &ethereum2v1alpha1.ValidatorList{}
 
-	if err := k8Client.List(context.Background(), validators, client.InNamespace(namespace)); err != nil {
+	if err := k8sClient.List(context.Background(), validators, client.InNamespace(namespace)); err != nil {
 		go logger.Error(service.Count, err)
 		return nil, errors.NewInternalServerError("error counting validators")
 	}
@@ -173,7 +173,7 @@ func (service validatorService) Count(namespace string) (*int, *errors.RestErr) 
 
 // Delete deletes ethereum 2.0 beacon node by name
 func (service validatorService) Delete(validator *ethereum2v1alpha1.Validator) *errors.RestErr {
-	if err := k8Client.Delete(context.Background(), validator); err != nil {
+	if err := k8sClient.Delete(context.Background(), validator); err != nil {
 		go logger.Error(service.Delete, err)
 		return errors.NewBadRequestError(fmt.Sprintf("can't delete validator by name %s", validator.Name))
 	}
