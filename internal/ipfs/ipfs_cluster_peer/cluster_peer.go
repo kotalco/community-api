@@ -2,13 +2,14 @@ package ipfs_cluster_peer
 
 import (
 	"github.com/kotalco/api/internal/models"
+	"github.com/kotalco/api/pkg/k8s"
 	"github.com/kotalco/api/pkg/shared"
 	ipfsv1alpha1 "github.com/kotalco/kotal/apis/ipfs/v1alpha1"
 )
 
 type ClusterPeerDto struct {
 	models.Time
-	models.NamespaceDto
+	k8s.MetaDataDto
 	ID                   string   `json:"id"`
 	PrivatekeySecretName string   `json:"privatekeySecretName"`
 	TrustedPeers         []string `json:"trustedPeers"`

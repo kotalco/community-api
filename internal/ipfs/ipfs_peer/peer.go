@@ -2,6 +2,7 @@ package ipfs_peer
 
 import (
 	"github.com/kotalco/api/internal/models"
+	"github.com/kotalco/api/pkg/k8s"
 	"github.com/kotalco/api/pkg/shared"
 	ipfsv1alpha1 "github.com/kotalco/kotal/apis/ipfs/v1alpha1"
 )
@@ -10,7 +11,7 @@ import (
 // TODO: update with SwarmKeySecret and Resources
 type PeerDto struct {
 	models.Time
-	models.NamespaceDto
+	k8s.MetaDataDto
 	InitProfiles []string `json:"initProfiles"`
 	APIPort      uint     `json:"apiPort"`
 	APIHost      string   `json:"apiHost"`

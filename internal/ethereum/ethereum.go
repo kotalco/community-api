@@ -2,6 +2,7 @@ package ethereum
 
 import (
 	"github.com/kotalco/api/internal/models"
+	"github.com/kotalco/api/pkg/k8s"
 	"github.com/kotalco/api/pkg/shared"
 	ethereumv1alpha1 "github.com/kotalco/kotal/apis/ethereum/v1alpha1"
 )
@@ -15,7 +16,7 @@ type ImportedAccount struct {
 // Node is Ethereum node
 type EthereumDto struct {
 	models.Time
-	models.NamespaceDto
+	k8s.MetaDataDto
 	Network                  string           `json:"network"`
 	Client                   string           `json:"client"`
 	Logging                  string           `json:"logging"`

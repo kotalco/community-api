@@ -2,13 +2,14 @@ package secret
 
 import (
 	"github.com/kotalco/api/internal/models"
+	"github.com/kotalco/api/pkg/k8s"
 	"github.com/kotalco/api/pkg/shared"
 	corev1 "k8s.io/api/core/v1"
 )
 
 type SecretDto struct {
 	models.Time
-	models.NamespaceDto
+	k8s.MetaDataDto
 	Type string            `json:"type"`
 	Data map[string]string `json:"data,omitempty"`
 }

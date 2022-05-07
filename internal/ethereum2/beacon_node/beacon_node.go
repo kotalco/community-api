@@ -2,13 +2,14 @@ package beacon_node
 
 import (
 	"github.com/kotalco/api/internal/models"
+	"github.com/kotalco/api/pkg/k8s"
 	"github.com/kotalco/api/pkg/shared"
 	ethereum2v1alpha1 "github.com/kotalco/kotal/apis/ethereum2/v1alpha1"
 )
 
 type BeaconNodeDto struct {
 	models.Time
-	models.NamespaceDto
+	k8s.MetaDataDto
 	Network string `json:"network"`
 	Client  string `json:"client"`
 	// todo: required only for prysm and network is not mainnet

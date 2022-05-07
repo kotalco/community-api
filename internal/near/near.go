@@ -2,6 +2,7 @@ package near
 
 import (
 	"github.com/kotalco/api/internal/models"
+	"github.com/kotalco/api/pkg/k8s"
 	"github.com/kotalco/api/pkg/shared"
 	nearv1alpha1 "github.com/kotalco/kotal/apis/near/v1alpha1"
 )
@@ -9,7 +10,7 @@ import (
 // NearDto is NEAR node
 type NearDto struct {
 	models.Time
-	models.NamespaceDto
+	k8s.MetaDataDto
 	Network                  string    `json:"network"`
 	Archive                  bool      `json:"archive"`
 	NodePrivateKeySecretName string    `json:"nodePrivateKeySecretName"`

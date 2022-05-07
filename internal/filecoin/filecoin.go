@@ -2,6 +2,7 @@ package filecoin
 
 import (
 	"github.com/kotalco/api/internal/models"
+	"github.com/kotalco/api/pkg/k8s"
 	"github.com/kotalco/api/pkg/shared"
 	filecoinv1alpha1 "github.com/kotalco/kotal/apis/filecoin/v1alpha1"
 )
@@ -9,7 +10,7 @@ import (
 // Node is Filecoin node
 type FilecoinDto struct {
 	models.Time
-	models.NamespaceDto
+	k8s.MetaDataDto
 	Network            string  `json:"network"`
 	API                *bool   `json:"api"`
 	APIPort            uint    `json:"apiPort"`
