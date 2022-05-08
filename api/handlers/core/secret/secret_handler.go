@@ -16,9 +16,9 @@ import (
 )
 
 const (
-	NODE_NAME_KEYWORD = "name"
-	NAMESPACE_KEYWORD = "namespace"
-	DEFAULT_NAMESPACE = "default"
+	nameKeyword      = "name"
+	namespaceKeyword = "namespace"
+	defaultNamespace = "default"
 )
 
 var service = secret.SecretService
@@ -41,7 +41,7 @@ func List(c *fiber.Ctx) error {
 	secretType := c.Query("type")
 	page, _ := strconv.Atoi(c.Query("page")) // default page to 0
 
-	secrets, err := service.List(c.Query(NAMESPACE_KEYWORD, DEFAULT_NAMESPACE))
+	secrets, err := service.List(c.Query(namespaceKeyword, defaultNamespace))
 	if err != nil {
 		return c.Status(err.Status).JSON(err)
 	}
@@ -107,7 +107,7 @@ func Update(c *fiber.Ctx) error {
 // 1-call secrets service to count secrets items
 // 2-set the X-Total-Count header with default to 0
 func Count(c *fiber.Ctx) error {
-	length, err := service.Count(c.Query(NAMESPACE_KEYWORD, DEFAULT_NAMESPACE))
+	length, err := service.Count(c.Query(namespaceKeyword, defaultNamespace))
 	if err != nil {
 		return c.Status(err.Status).JSON(err)
 	}
@@ -124,8 +124,8 @@ func Count(c *fiber.Ctx) error {
 // 3-save the secret to local with the key secret to be used by the other handlers
 func ValidateSecretExist(c *fiber.Ctx) error {
 	nameSpacedName := types.NamespacedName{
-		Name:      c.Params(NODE_NAME_KEYWORD),
-		Namespace: c.Query(NAMESPACE_KEYWORD, DEFAULT_NAMESPACE),
+		Name:      c.Params(nameKeyword),
+		Namespace: c.Query(namespaceKeyword, defaultNamespace),
 	}
 
 	secretModel, err := service.Get(nameSpacedName)

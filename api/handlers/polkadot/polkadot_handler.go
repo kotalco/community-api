@@ -22,9 +22,9 @@ import (
 )
 
 const (
-	NODE_NAME_KEYWORD = "name"
-	NAMESPACE_KEYWORD = "namespace"
-	DEFAULT_NAMESPACE = "default"
+	nameKeyword      = "name"
+	namespaceKeyword = "namespace"
+	defaultNamespace = "default"
 )
 
 var service = polkadot.PolkadotService
@@ -40,7 +40,7 @@ func Get(c *fiber.Ctx) error {
 func List(c *fiber.Ctx) error {
 	page, _ := strconv.Atoi(c.Query("page"))
 
-	nodes, err := service.List(c.Query(NAMESPACE_KEYWORD, DEFAULT_NAMESPACE))
+	nodes, err := service.List(c.Query(namespaceKeyword, defaultNamespace))
 	if err != nil {
 		return c.Status(err.Status).JSON(err)
 	}
@@ -105,7 +105,7 @@ func Update(c *fiber.Ctx) error {
 
 // Count returns total number of nodes
 func Count(c *fiber.Ctx) error {
-	length, err := service.Count(c.Query(NAMESPACE_KEYWORD, DEFAULT_NAMESPACE))
+	length, err := service.Count(c.Query(namespaceKeyword, defaultNamespace))
 	if err != nil {
 		return c.Status(err.Status).JSON(err)
 	}
@@ -225,8 +225,8 @@ func Stats(c *websocket.Conn) {
 // ValidateNodeExist validates Polkadot node by name exist
 func ValidateNodeExist(c *fiber.Ctx) error {
 	nameSpacedName := types.NamespacedName{
-		Name:      c.Params(NODE_NAME_KEYWORD),
-		Namespace: c.Query(NAMESPACE_KEYWORD, DEFAULT_NAMESPACE),
+		Name:      c.Params(nameKeyword),
+		Namespace: c.Query(namespaceKeyword, defaultNamespace),
 	}
 
 	node, err := service.Get(nameSpacedName)
