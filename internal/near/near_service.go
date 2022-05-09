@@ -9,7 +9,6 @@ import (
 	nearv1alpha1 "github.com/kotalco/kotal/apis/near/v1alpha1"
 	sharedAPIs "github.com/kotalco/kotal/apis/shared"
 	apiErrors "k8s.io/apimachinery/pkg/api/errors"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"os"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -18,35 +17,31 @@ import (
 type nearService struct{}
 
 type nearServiceInterface interface {
-	Get(name string) (*nearv1alpha1.Node, *restErrors.RestErr)
+	Get(types.NamespacedName) (*nearv1alpha1.Node, *restErrors.RestErr)
 	Create(dto *NearDto) (*nearv1alpha1.Node, *restErrors.RestErr)
 	Update(*NearDto, *nearv1alpha1.Node) (*nearv1alpha1.Node, *restErrors.RestErr)
-	List() (*nearv1alpha1.NodeList, *restErrors.RestErr)
+	List(namespace string) (*nearv1alpha1.NodeList, *restErrors.RestErr)
 	Delete(node *nearv1alpha1.Node) *restErrors.RestErr
-	Count() (*int, *restErrors.RestErr)
+	Count(namespace string) (*int, *restErrors.RestErr)
 }
 
 var (
 	NearService nearServiceInterface
-	k8Client    = k8s.K8ClientService
+	k8sClient   = k8s.K8sClientService
 )
 
 func init() { NearService = &nearService{} }
 
 // Get gets a single filecoin node by name
-func (service nearService) Get(name string) (*nearv1alpha1.Node, *restErrors.RestErr) {
+func (service nearService) Get(namespacedName types.NamespacedName) (*nearv1alpha1.Node, *restErrors.RestErr) {
 	node := &nearv1alpha1.Node{}
-	key := types.NamespacedName{
-		Name:      name,
-		Namespace: "default",
-	}
 
-	if err := k8Client.Get(context.Background(), key, node); err != nil {
+	if err := k8sClient.Get(context.Background(), namespacedName, node); err != nil {
 		if apiErrors.IsNotFound(err) {
-			return nil, restErrors.NewBadRequestError(fmt.Sprintf("node by name %s doesn't exit", name))
+			return nil, restErrors.NewBadRequestError(fmt.Sprintf("node by name %s doesn't exit", namespacedName))
 		}
 		go logger.Error(service.Get, err)
-		return nil, restErrors.NewInternalServerError(fmt.Sprintf("can't get node by name %s", name))
+		return nil, restErrors.NewInternalServerError(fmt.Sprintf("can't get node by name %s", namespacedName))
 	}
 
 	return node, nil
@@ -55,10 +50,7 @@ func (service nearService) Get(name string) (*nearv1alpha1.Node, *restErrors.Res
 // Create creates filecoin node from spec
 func (service nearService) Create(dto *NearDto) (*nearv1alpha1.Node, *restErrors.RestErr) {
 	node := &nearv1alpha1.Node{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      dto.Name,
-			Namespace: "default",
-		},
+		ObjectMeta: dto.ObjectMetaFromMetadataDto(),
 		Spec: nearv1alpha1.NodeSpec{
 			Network: dto.Network,
 			Archive: dto.Archive,
@@ -73,7 +65,7 @@ func (service nearService) Create(dto *NearDto) (*nearv1alpha1.Node, *restErrors
 		node.Default()
 	}
 
-	if err := k8Client.Create(context.Background(), node); err != nil {
+	if err := k8sClient.Create(context.Background(), node); err != nil {
 		if apiErrors.IsAlreadyExists(err) {
 			return nil, restErrors.NewNotFoundError(fmt.Sprintf("node by name %s already exits", node.Name))
 		}
@@ -155,7 +147,7 @@ func (service nearService) Update(dto *NearDto, node *nearv1alpha1.Node) (*nearv
 		node.Default()
 	}
 
-	if err := k8Client.Update(context.Background(), node); err != nil {
+	if err := k8sClient.Update(context.Background(), node); err != nil {
 		go logger.Error(service.Update, err)
 		return nil, restErrors.NewInternalServerError(fmt.Sprintf("can't update node by name %s", node.Name))
 	}
@@ -164,9 +156,9 @@ func (service nearService) Update(dto *NearDto, node *nearv1alpha1.Node) (*nearv
 }
 
 // List returns all filecoin nodes
-func (service nearService) List() (*nearv1alpha1.NodeList, *restErrors.RestErr) {
+func (service nearService) List(namespace string) (*nearv1alpha1.NodeList, *restErrors.RestErr) {
 	nodes := &nearv1alpha1.NodeList{}
-	if err := k8Client.List(context.Background(), nodes, client.InNamespace("default")); err != nil {
+	if err := k8sClient.List(context.Background(), nodes, client.InNamespace(namespace)); err != nil {
 		go logger.Error(service.List, err)
 		return nil, restErrors.NewInternalServerError("failed to get all nodes")
 	}
@@ -175,9 +167,9 @@ func (service nearService) List() (*nearv1alpha1.NodeList, *restErrors.RestErr) 
 }
 
 // Count returns total number of filecoin nodes
-func (service nearService) Count() (*int, *restErrors.RestErr) {
+func (service nearService) Count(namespace string) (*int, *restErrors.RestErr) {
 	nodes := &nearv1alpha1.NodeList{}
-	if err := k8Client.List(context.Background(), nodes, client.InNamespace("default")); err != nil {
+	if err := k8sClient.List(context.Background(), nodes, client.InNamespace(namespace)); err != nil {
 		go logger.Error(service.Count, err)
 		return nil, restErrors.NewInternalServerError("failed to count all nodes")
 	}
@@ -189,7 +181,7 @@ func (service nearService) Count() (*int, *restErrors.RestErr) {
 
 // Delete deletes ethereum 2.0 filecoin node by name
 func (service nearService) Delete(node *nearv1alpha1.Node) *restErrors.RestErr {
-	if err := k8Client.Delete(context.Background(), node); err != nil {
+	if err := k8sClient.Delete(context.Background(), node); err != nil {
 		go logger.Error(service.Delete, err)
 		return restErrors.NewInternalServerError(fmt.Sprintf("can't delete node by name %s", node.Name))
 	}

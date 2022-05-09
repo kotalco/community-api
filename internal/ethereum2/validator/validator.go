@@ -2,13 +2,14 @@ package validator
 
 import (
 	"github.com/kotalco/api/internal/models"
+	"github.com/kotalco/api/pkg/k8s"
 	"github.com/kotalco/api/pkg/shared"
 	ethereum2v1alpha1 "github.com/kotalco/kotal/apis/ethereum2/v1alpha1"
 )
 
 type ValidatorDto struct {
 	models.Time
-	Name                     string        `json:"name"`
+	k8s.MetaDataDto
 	Network                  string        `json:"network"`
 	Client                   string        `json:"client"`
 	Graffiti                 string        `json:"graffiti"`

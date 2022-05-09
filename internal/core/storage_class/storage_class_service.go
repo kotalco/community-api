@@ -27,7 +27,7 @@ type storageClassServiceInterface interface {
 
 var (
 	StorageClassService storageClassServiceInterface
-	k8Client            = k8s.K8ClientService
+	k8sClient           = k8s.K8sClientService
 )
 
 func init() { StorageClassService = &storageClassService{} }
@@ -40,7 +40,7 @@ func (service storageClassService) Get(name string) (*storagev1.StorageClass, *e
 		Namespace: "default",
 	}
 
-	if err := k8Client.Get(context.Background(), key, storageClass); err != nil {
+	if err := k8sClient.Get(context.Background(), key, storageClass); err != nil {
 		if apiErrors.IsNotFound(err) {
 			return nil, errors.NewNotFoundError(fmt.Sprintf("storage class by name %s doens't exit", name))
 		}
@@ -67,7 +67,7 @@ func (service storageClassService) Update(dto *StorageClassDto, storageClass *st
 func (service storageClassService) List() (*storagev1.StorageClassList, *errors.RestErr) {
 	storageClasses := &storagev1.StorageClassList{}
 
-	if err := k8Client.List(context.Background(), storageClasses, client.InNamespace("default")); err != nil {
+	if err := k8sClient.List(context.Background(), storageClasses, client.InNamespace("default")); err != nil {
 		go logger.Error(service.List, err)
 		return nil, errors.NewInternalServerError("failed to get storage class list")
 	}

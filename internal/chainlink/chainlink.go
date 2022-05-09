@@ -2,6 +2,7 @@ package chainlink
 
 import (
 	"github.com/kotalco/api/internal/models"
+	"github.com/kotalco/api/pkg/k8s"
 	"github.com/kotalco/api/pkg/shared"
 	chainlinkv1alpha1 "github.com/kotalco/kotal/apis/chainlink/v1alpha1"
 )
@@ -13,7 +14,7 @@ type apiCredentials struct {
 
 type ChainlinkDto struct {
 	models.Time
-	Name                       string          `json:"name"`
+	k8s.MetaDataDto
 	EthereumChainId            uint            `json:"ethereumChainId"`
 	LinkContractAddress        string          `json:"linkContractAddress"`
 	EthereumWSEndpoint         string          `json:"ethereumWsEndpoint"`

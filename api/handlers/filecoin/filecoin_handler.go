@@ -7,9 +7,16 @@ import (
 	restErrors "github.com/kotalco/api/pkg/errors"
 	"github.com/kotalco/api/pkg/shared"
 	filecoinv1alpha1 "github.com/kotalco/kotal/apis/filecoin/v1alpha1"
+	"k8s.io/apimachinery/pkg/types"
 	"net/http"
 	"sort"
 	"strconv"
+)
+
+const (
+	nameKeyword      = "name"
+	namespaceKeyword = "namespace"
+	defaultNamespace = "default"
 )
 
 var service = filecoin.FilecoinService
@@ -31,7 +38,7 @@ func Get(c *fiber.Ctx) error {
 func List(c *fiber.Ctx) error {
 	page, _ := strconv.Atoi(c.Query("page"))
 
-	nodes, err := service.List()
+	nodes, err := service.List(c.Query(namespaceKeyword, defaultNamespace))
 	if err != nil {
 		return c.Status(err.Status).JSON(err)
 	}
@@ -109,7 +116,7 @@ func Update(c *fiber.Ctx) error {
 // 2-create X-Total-Count header with the length
 // 3-return
 func Count(c *fiber.Ctx) error {
-	length, err := service.Count()
+	length, err := service.Count(c.Query(namespaceKeyword, defaultNamespace))
 	if err != nil {
 		return c.Status(err.Status).JSON(err)
 	}
@@ -125,9 +132,12 @@ func Count(c *fiber.Ctx) error {
 // 2-return Not found if it's not
 // 3-save the node to local with the key node to be used by the other handlers
 func ValidateNodeExist(c *fiber.Ctx) error {
-	name := c.Params("name")
+	nameSpacedName := types.NamespacedName{
+		Name:      c.Params(nameKeyword),
+		Namespace: c.Query(namespaceKeyword, defaultNamespace),
+	}
 
-	node, err := service.Get(name)
+	node, err := service.Get(nameSpacedName)
 	if err != nil {
 		return c.Status(err.Status).JSON(err)
 	}

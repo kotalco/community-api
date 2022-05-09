@@ -56,58 +56,58 @@ func NewRuntimeClient() (client.Client, error) {
 	return client.New(config, opts)
 }
 
-type k8ClientService struct{}
+type k8sClientService struct{}
 type ObjectKey = types.NamespacedName
 
-type k8ClientServiceInterface interface {
+type k8sClientServiceInterface interface {
 	client.Reader
 	client.Writer
 }
 
 var (
-	K8ClientService k8ClientServiceInterface
+	K8sClientService k8sClientServiceInterface
 )
 
-func init() { K8ClientService = &k8ClientService{} }
+func init() { K8sClientService = &k8sClientService{} }
 
 // Get retrieves an obj for the given object key from the Kubernetes Cluster.
 // obj must be a struct pointer so that obj can be updated with the response
 // returned by the Server.
-func (k8Client k8ClientService) Get(ctx context.Context, key client.ObjectKey, obj client.Object) error {
+func (k8sClient k8sClientService) Get(ctx context.Context, key client.ObjectKey, obj client.Object) error {
 	return Client().Get(ctx, key, obj)
 }
 
 // List retrieves list of objects for a given namespace and list options. On a
 // successful call, Items field in the list will be populated with the
 // result returned from the server.
-func (k8Client k8ClientService) List(ctx context.Context, list client.ObjectList, opts ...client.ListOption) error {
+func (k8sClient k8sClientService) List(ctx context.Context, list client.ObjectList, opts ...client.ListOption) error {
 	return Client().List(ctx, list, opts...)
 
 }
 
 // Create saves the object obj in the Kubernetes cluster.
-func (k8Client k8ClientService) Create(ctx context.Context, obj client.Object, opts ...client.CreateOption) error {
+func (k8sClient k8sClientService) Create(ctx context.Context, obj client.Object, opts ...client.CreateOption) error {
 	return Client().Create(ctx, obj, opts...)
 }
 
 // Delete deletes the given obj from Kubernetes cluster.
-func (k8Client k8ClientService) Delete(ctx context.Context, obj client.Object, opts ...client.DeleteOption) error {
+func (k8sClient k8sClientService) Delete(ctx context.Context, obj client.Object, opts ...client.DeleteOption) error {
 	return Client().Delete(ctx, obj, opts...)
 }
 
 // Update updates the given obj in the Kubernetes cluster. obj must be a
 // struct pointer so that obj can be updated with the content returned by the Server.
-func (k8Client k8ClientService) Update(ctx context.Context, obj client.Object, opts ...client.UpdateOption) error {
+func (k8sClient k8sClientService) Update(ctx context.Context, obj client.Object, opts ...client.UpdateOption) error {
 	return Client().Update(ctx, obj, opts...)
 }
 
 // Patch patches the given obj in the Kubernetes cluster. obj must be a
 // struct pointer so that obj can be updated with the content returned by the Server.
-func (k8Client k8ClientService) Patch(ctx context.Context, obj client.Object, patch client.Patch, opts ...client.PatchOption) error {
+func (k8sClient k8sClientService) Patch(ctx context.Context, obj client.Object, patch client.Patch, opts ...client.PatchOption) error {
 	return Client().Patch(ctx, obj, patch, opts...)
 }
 
 // DeleteAllOf deletes all objects of the given type matching the given options.
-func (k8Client k8ClientService) DeleteAllOf(ctx context.Context, obj client.Object, opts ...client.DeleteAllOfOption) error {
+func (k8sClient k8sClientService) DeleteAllOf(ctx context.Context, obj client.Object, opts ...client.DeleteAllOfOption) error {
 	return Client().DeleteAllOf(ctx, obj, opts...)
 }

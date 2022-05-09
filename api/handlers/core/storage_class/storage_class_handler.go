@@ -11,6 +11,10 @@ import (
 	"strconv"
 )
 
+const (
+	nameKeyword = "name"
+)
+
 var service = storage_class.StorageClassService
 
 // Get gets a single k8s storage class
@@ -69,8 +73,7 @@ func Update(c *fiber.Ctx) error {
 // 2-return not found if it's not
 // 3-save the storage class to local with the key storage_class to be used by the other handlers
 func ValidateStorageClassExist(c *fiber.Ctx) error {
-	name := c.Params("name")
-	storageClass, err := service.Get(name)
+	storageClass, err := service.Get(c.Params(nameKeyword))
 	if err != nil {
 		return c.Status(err.Status).JSON(err)
 	}

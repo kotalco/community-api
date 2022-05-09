@@ -31,7 +31,7 @@ func Logger(c *websocket.Conn) {
 		Follow: true,
 	}
 
-	podLogRequest := k8s.Clientset().CoreV1().Pods("default").GetLogs(fmt.Sprintf("%s-0", c.Params("name")), &podLogOptions)
+	podLogRequest := k8s.Clientset().CoreV1().Pods(c.Query("namespace", "default")).GetLogs(fmt.Sprintf("%s-0", c.Params("name")), &podLogOptions)
 
 	stream, err := podLogRequest.Stream(context.TODO())
 	if err != nil {

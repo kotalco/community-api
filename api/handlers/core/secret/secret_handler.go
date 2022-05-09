@@ -9,9 +9,16 @@ import (
 	restErrors "github.com/kotalco/api/pkg/errors"
 	"github.com/kotalco/api/pkg/shared"
 	corev1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/types"
 	"net/http"
 	"sort"
 	"strconv"
+)
+
+const (
+	nameKeyword      = "name"
+	namespaceKeyword = "namespace"
+	defaultNamespace = "default"
 )
 
 var service = secret.SecretService
@@ -34,7 +41,7 @@ func List(c *fiber.Ctx) error {
 	secretType := c.Query("type")
 	page, _ := strconv.Atoi(c.Query("page")) // default page to 0
 
-	secrets, err := service.List()
+	secrets, err := service.List(c.Query(namespaceKeyword, defaultNamespace))
 	if err != nil {
 		return c.Status(err.Status).JSON(err)
 	}
@@ -100,7 +107,7 @@ func Update(c *fiber.Ctx) error {
 // 1-call secrets service to count secrets items
 // 2-set the X-Total-Count header with default to 0
 func Count(c *fiber.Ctx) error {
-	length, err := service.Count()
+	length, err := service.Count(c.Query(namespaceKeyword, defaultNamespace))
 	if err != nil {
 		return c.Status(err.Status).JSON(err)
 	}
@@ -116,8 +123,12 @@ func Count(c *fiber.Ctx) error {
 // 2-return 404 if it's not
 // 3-save the secret to local with the key secret to be used by the other handlers
 func ValidateSecretExist(c *fiber.Ctx) error {
-	name := c.Params("name")
-	secretModel, err := service.Get(name)
+	nameSpacedName := types.NamespacedName{
+		Name:      c.Params(nameKeyword),
+		Namespace: c.Query(namespaceKeyword, defaultNamespace),
+	}
+
+	secretModel, err := service.Get(nameSpacedName)
 	if err != nil {
 		return c.Status(err.Status).JSON(err)
 	}

@@ -21,6 +21,12 @@ import (
 	"time"
 )
 
+const (
+	nameKeyword      = "name"
+	namespaceKeyword = "namespace"
+	defaultNamespace = "default"
+)
+
 var service = polkadot.PolkadotService
 
 // Get gets a single Polkadot node by name
@@ -34,7 +40,7 @@ func Get(c *fiber.Ctx) error {
 func List(c *fiber.Ctx) error {
 	page, _ := strconv.Atoi(c.Query("page"))
 
-	nodes, err := service.List()
+	nodes, err := service.List(c.Query(namespaceKeyword, defaultNamespace))
 	if err != nil {
 		return c.Status(err.Status).JSON(err)
 	}
@@ -99,7 +105,7 @@ func Update(c *fiber.Ctx) error {
 
 // Count returns total number of nodes
 func Count(c *fiber.Ctx) error {
-	length, err := service.Count()
+	length, err := service.Count(c.Query(namespaceKeyword, defaultNamespace))
 	if err != nil {
 		return c.Status(err.Status).JSON(err)
 	}
@@ -218,9 +224,12 @@ func Stats(c *websocket.Conn) {
 
 // ValidateNodeExist validates Polkadot node by name exist
 func ValidateNodeExist(c *fiber.Ctx) error {
-	name := c.Params("name")
+	nameSpacedName := types.NamespacedName{
+		Name:      c.Params(nameKeyword),
+		Namespace: c.Query(namespaceKeyword, defaultNamespace),
+	}
 
-	node, err := service.Get(name)
+	node, err := service.Get(nameSpacedName)
 	if err != nil {
 		return c.Status(err.Status).JSON(err)
 	}
