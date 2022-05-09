@@ -6,6 +6,7 @@ import (
 
 // StorageClass is Kubernetes storage class
 type StorageClassDto struct {
+	Name                 string `json:"name"`
 	Provisioner          string `json:"provisioner"`
 	ReclaimPolicy        string `json:"reclaimPolicy"`
 	AllowVolumeExpansion bool   `json:"allowVolumeExpansion"`
@@ -14,6 +15,7 @@ type StorageClassDto struct {
 type StorageClassListDto []StorageClassDto
 
 func (dto StorageClassDto) FromCoreStorageClass(sc *storagev1.StorageClass) *StorageClassDto {
+	dto.Name = sc.Name
 	dto.Provisioner = sc.Provisioner
 	dto.ReclaimPolicy = string(*sc.ReclaimPolicy)
 	dto.AllowVolumeExpansion = sc.AllowVolumeExpansion != nil && *sc.AllowVolumeExpansion
