@@ -52,7 +52,7 @@ func (service chainlinkService) Get(namespacedName types.NamespacedName) (*chain
 // Create creates chainlink node from the given spec
 func (service chainlinkService) Create(dto *ChainlinkDto) (*chainlinkv1alpha1.Node, *errors.RestErr) {
 	node := &chainlinkv1alpha1.Node{
-		ObjectMeta: dto.ObjectMetaFromNamespaceDto(),
+		ObjectMeta: dto.ObjectMetaFromMetadataDto(),
 		Spec: chainlinkv1alpha1.NodeSpec{
 			EthereumChainId:            dto.EthereumChainId,
 			LinkContractAddress:        dto.LinkContractAddress,

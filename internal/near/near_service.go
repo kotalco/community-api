@@ -50,7 +50,7 @@ func (service nearService) Get(namespacedName types.NamespacedName) (*nearv1alph
 // Create creates filecoin node from spec
 func (service nearService) Create(dto *NearDto) (*nearv1alpha1.Node, *restErrors.RestErr) {
 	node := &nearv1alpha1.Node{
-		ObjectMeta: dto.ObjectMetaFromNamespaceDto(),
+		ObjectMeta: dto.ObjectMetaFromMetadataDto(),
 		Spec: nearv1alpha1.NodeSpec{
 			Network: dto.Network,
 			Archive: dto.Archive,

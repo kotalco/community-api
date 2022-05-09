@@ -52,7 +52,7 @@ func (service ethereumService) Get(namespacedName types.NamespacedName) (*ethere
 // Create creates ethereum node from the given spec
 func (service ethereumService) Create(dto *EthereumDto) (*ethereumv1alpha1.Node, *errors.RestErr) {
 	node := &ethereumv1alpha1.Node{
-		ObjectMeta: dto.ObjectMetaFromNamespaceDto(),
+		ObjectMeta: dto.ObjectMetaFromMetadataDto(),
 		Spec: ethereumv1alpha1.NodeSpec{
 			Network:                  dto.Network,
 			Client:                   ethereumv1alpha1.EthereumClient(dto.Client),

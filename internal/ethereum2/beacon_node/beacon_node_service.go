@@ -60,7 +60,7 @@ func (service beaconNodeService) Create(dto *BeaconNodeDto) (*ethereum2v1alpha1.
 	client := ethereum2v1alpha1.Ethereum2Client(dto.Client)
 
 	beaconnode := &ethereum2v1alpha1.BeaconNode{
-		ObjectMeta: dto.ObjectMetaFromNamespaceDto(),
+		ObjectMeta: dto.ObjectMetaFromMetadataDto(),
 		Spec: ethereum2v1alpha1.BeaconNodeSpec{
 			Network:       dto.Network,
 			Client:        client,

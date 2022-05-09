@@ -57,7 +57,7 @@ func (service validatorService) Create(dto *ValidatorDto) (*ethereum2v1alpha1.Va
 	}
 
 	validator := &ethereum2v1alpha1.Validator{
-		ObjectMeta: dto.ObjectMetaFromNamespaceDto(),
+		ObjectMeta: dto.ObjectMetaFromMetadataDto(),
 		Spec: ethereum2v1alpha1.ValidatorSpec{
 			Network:   dto.Network,
 			Client:    ethereum2v1alpha1.Ethereum2Client(dto.Client),

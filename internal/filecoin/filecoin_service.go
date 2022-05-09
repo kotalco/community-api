@@ -50,7 +50,7 @@ func (service filecoinService) Get(namespacedName types.NamespacedName) (*fileco
 // Create creates filecoin node from spec
 func (service filecoinService) Create(dto *FilecoinDto) (*filecoinv1alpha1.Node, *restErrors.RestErr) {
 	node := &filecoinv1alpha1.Node{
-		ObjectMeta: dto.ObjectMetaFromNamespaceDto(),
+		ObjectMeta: dto.ObjectMetaFromMetadataDto(),
 		Spec: filecoinv1alpha1.NodeSpec{
 			Network: filecoinv1alpha1.FilecoinNetwork(dto.Network),
 			Resources: sharedAPIs.Resources{

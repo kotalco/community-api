@@ -51,7 +51,7 @@ func (service ipfsClusterPeerService) Get(namespacedName types.NamespacedName) (
 func (service ipfsClusterPeerService) Create(dto *ClusterPeerDto) (*ipfsv1alpha1.ClusterPeer, *restErrors.RestErr) {
 
 	peer := &ipfsv1alpha1.ClusterPeer{
-		ObjectMeta: dto.ObjectMetaFromNamespaceDto(),
+		ObjectMeta: dto.ObjectMetaFromMetadataDto(),
 		Spec: ipfsv1alpha1.ClusterPeerSpec{
 			Resources: sharedAPIs.Resources{
 				StorageClass: dto.StorageClass,

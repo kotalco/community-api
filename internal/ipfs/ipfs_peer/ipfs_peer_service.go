@@ -55,7 +55,7 @@ func (service ipfsPeerService) Create(dto *PeerDto) (*ipfsv1alpha1.Peer, *restEr
 	}
 
 	peer := &ipfsv1alpha1.Peer{
-		ObjectMeta: dto.ObjectMetaFromNamespaceDto(),
+		ObjectMeta: dto.ObjectMetaFromMetadataDto(),
 		Spec: ipfsv1alpha1.PeerSpec{
 			InitProfiles: initProfiles,
 			Resources: sharedAPIs.Resources{
