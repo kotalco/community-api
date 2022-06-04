@@ -18,18 +18,20 @@ import (
 	"sync"
 )
 
+var clientLock = &sync.Mutex{}
 var controllerRuntimeClient client.Client
-
-var clientOnce sync.Once
 
 func Client() client.Client {
 	var err error
-	clientOnce.Do(func() {
+	clientLock.Lock()
+	defer clientLock.Unlock()
+	if controllerRuntimeClient == nil {
 		controllerRuntimeClient, err = NewRuntimeClient()
 		if err != nil {
 			logger.Panic("K8S_CLIENT", err)
 		}
-	})
+	}
+
 	return controllerRuntimeClient
 }
 
