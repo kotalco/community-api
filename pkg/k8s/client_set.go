@@ -2,23 +2,26 @@ package k8s
 
 import (
 	"github.com/kotalco/api/pkg/configs"
+	"github.com/kotalco/api/pkg/logger"
 	"k8s.io/client-go/kubernetes"
 	"sync"
 )
 
+var clientSetLock = &sync.Mutex{}
 var KubernetesClientset *kubernetes.Clientset
-var clientsetOnce sync.Once
 
 // Clientset create k8s client once
 func Clientset() *kubernetes.Clientset {
 	var err error
-	clientsetOnce.Do(func() {
+	clientSetLock.Lock()
+	defer clientSetLock.Unlock()
+	if KubernetesClientset == nil {
 		KubernetesClientset, err = NewClientset()
 		if err != nil {
-			// TODO: Don't panic
-			panic(err)
+			logger.Panic("K8S_CLIENT_SET", err)
 		}
-	})
+	}
+
 	return KubernetesClientset
 }
 

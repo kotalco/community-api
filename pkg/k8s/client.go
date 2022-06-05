@@ -3,6 +3,7 @@ package k8s
 import (
 	"context"
 	"github.com/kotalco/api/pkg/configs"
+	"github.com/kotalco/api/pkg/logger"
 	chainlinkv1alpha1 "github.com/kotalco/kotal/apis/chainlink/v1alpha1"
 	ethereumv1alpha1 "github.com/kotalco/kotal/apis/ethereum/v1alpha1"
 	ethereum2v1alpha1 "github.com/kotalco/kotal/apis/ethereum2/v1alpha1"
@@ -17,19 +18,20 @@ import (
 	"sync"
 )
 
+var clientLock = &sync.Mutex{}
 var controllerRuntimeClient client.Client
-
-var clientOnce sync.Once
 
 func Client() client.Client {
 	var err error
-	clientOnce.Do(func() {
+	clientLock.Lock()
+	defer clientLock.Unlock()
+	if controllerRuntimeClient == nil {
 		controllerRuntimeClient, err = NewRuntimeClient()
 		if err != nil {
-			// TODO: Don't panic
-			panic(err)
+			logger.Panic("K8S_CLIENT", err)
 		}
-	})
+	}
+
 	return controllerRuntimeClient
 }
 
