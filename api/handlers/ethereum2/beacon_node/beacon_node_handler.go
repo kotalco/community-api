@@ -19,7 +19,7 @@ const (
 	defaultNamespace = "default"
 )
 
-var service = beacon_node.BeaconNodeService
+var service = beacon_node.NewBeaconNodeService()
 
 // Get gets a single ethereum 2.0 beacon node by name
 // 1-get the node validated from ValidateNodeExist method

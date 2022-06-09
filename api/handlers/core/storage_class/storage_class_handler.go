@@ -15,7 +15,7 @@ const (
 	nameKeyword = "name"
 )
 
-var service = storage_class.StorageClassService
+var service = storage_class.NewStorageClassService()
 
 // Get gets a single k8s storage class
 // 1-get the node validated from ValidateStorageClassExist method

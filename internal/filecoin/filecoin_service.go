@@ -16,7 +16,7 @@ import (
 
 type filecoinService struct{}
 
-type filecoinServiceInterface interface {
+type IService interface {
 	Get(types.NamespacedName) (*filecoinv1alpha1.Node, *restErrors.RestErr)
 	Create(dto *FilecoinDto) (*filecoinv1alpha1.Node, *restErrors.RestErr)
 	Update(*FilecoinDto, *filecoinv1alpha1.Node) (*filecoinv1alpha1.Node, *restErrors.RestErr)
@@ -26,11 +26,12 @@ type filecoinServiceInterface interface {
 }
 
 var (
-	FilecoinService filecoinServiceInterface
-	k8sClient       = k8s.K8sClientService
+	k8sClient = k8s.NewClientService()
 )
 
-func init() { FilecoinService = &filecoinService{} }
+func NewFilecoinService() IService {
+	return filecoinService{}
+}
 
 // Get gets a single filecoin node by name
 func (service filecoinService) Get(namespacedName types.NamespacedName) (*filecoinv1alpha1.Node, *restErrors.RestErr) {

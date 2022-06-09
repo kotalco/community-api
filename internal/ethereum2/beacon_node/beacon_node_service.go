@@ -18,7 +18,7 @@ import (
 
 type beaconNodeService struct{}
 
-type beaconNodeServiceInterface interface {
+type IService interface {
 	Get(types.NamespacedName) (*ethereum2v1alpha1.BeaconNode, *errors.RestErr)
 	Create(dto *BeaconNodeDto) (*ethereum2v1alpha1.BeaconNode, *errors.RestErr)
 	Update(*BeaconNodeDto, *ethereum2v1alpha1.BeaconNode) (*ethereum2v1alpha1.BeaconNode, *errors.RestErr)
@@ -28,11 +28,12 @@ type beaconNodeServiceInterface interface {
 }
 
 var (
-	BeaconNodeService beaconNodeServiceInterface
-	k8sClient         = k8s.K8sClientService
+	k8sClient = k8s.NewClientService()
 )
 
-func init() { BeaconNodeService = &beaconNodeService{} }
+func NewBeaconNodeService() IService {
+	return beaconNodeService{}
+}
 
 // Get gets a single ethereum 2.0 beacon node by name
 func (service beaconNodeService) Get(namespacedNamed types.NamespacedName) (*ethereum2v1alpha1.BeaconNode, *errors.RestErr) {

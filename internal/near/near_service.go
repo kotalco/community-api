@@ -16,7 +16,7 @@ import (
 
 type nearService struct{}
 
-type nearServiceInterface interface {
+type IService interface {
 	Get(types.NamespacedName) (*nearv1alpha1.Node, *restErrors.RestErr)
 	Create(dto *NearDto) (*nearv1alpha1.Node, *restErrors.RestErr)
 	Update(*NearDto, *nearv1alpha1.Node) (*nearv1alpha1.Node, *restErrors.RestErr)
@@ -26,11 +26,12 @@ type nearServiceInterface interface {
 }
 
 var (
-	NearService nearServiceInterface
-	k8sClient   = k8s.K8sClientService
+	k8sClient = k8s.NewClientService()
 )
 
-func init() { NearService = &nearService{} }
+func NewNearService() IService {
+	return nearService{}
+}
 
 // Get gets a single filecoin node by name
 func (service nearService) Get(namespacedName types.NamespacedName) (*nearv1alpha1.Node, *restErrors.RestErr) {

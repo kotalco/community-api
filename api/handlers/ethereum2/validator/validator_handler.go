@@ -19,7 +19,7 @@ const (
 	defaultNamespace = "default"
 )
 
-var service = validator.ValidatorService
+var service = validator.NewValidatorService()
 
 // Get gets a single Ethereum 2.0 validator client by name
 // 1-get the node validated from ValidateNodeExist method

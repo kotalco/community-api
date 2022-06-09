@@ -16,7 +16,7 @@ import (
 
 type ipfsPeerService struct{}
 
-type ipfsPeerServiceInterface interface {
+type IService interface {
 	Get(name types.NamespacedName) (*ipfsv1alpha1.Peer, *restErrors.RestErr)
 	Create(dto *PeerDto) (*ipfsv1alpha1.Peer, *restErrors.RestErr)
 	Update(*PeerDto, *ipfsv1alpha1.Peer) (*ipfsv1alpha1.Peer, *restErrors.RestErr)
@@ -26,11 +26,12 @@ type ipfsPeerServiceInterface interface {
 }
 
 var (
-	IpfsPeerService ipfsPeerServiceInterface
-	k8sClient       = k8s.K8sClientService
+	k8sClient = k8s.NewClientService()
 )
 
-func init() { IpfsPeerService = &ipfsPeerService{} }
+func NewIpfsPeerService() IService {
+	return ipfsPeerService{}
+}
 
 // Get gets a single IPFS peer by name
 func (service ipfsPeerService) Get(namespacedName types.NamespacedName) (*ipfsv1alpha1.Peer, *restErrors.RestErr) {

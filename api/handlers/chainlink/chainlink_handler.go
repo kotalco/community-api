@@ -21,7 +21,7 @@ const (
 	defaultNamespace = "default"
 )
 
-var service = chainlink.ChainlinkService
+var service = chainlink.NewChainLinkService()
 
 // Get returns a single chainlink node by name
 // 1-get the node validated from ValidateNodeExist method

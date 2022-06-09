@@ -28,7 +28,7 @@ const (
 	defaultNamespace = "default"
 )
 
-var service = ethereum.EthereumService
+var service = ethereum.NewEthereumService()
 
 // Get returns a single ethereum node by name
 // 1-get the node validated from ValidateNodeExist method

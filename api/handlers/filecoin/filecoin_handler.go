@@ -19,7 +19,7 @@ const (
 	defaultNamespace = "default"
 )
 
-var service = filecoin.FilecoinService
+var service = filecoin.NewFilecoinService()
 
 // Get gets a single Filecoin node by name
 // 1-get the node validated from ValidateNodeExist method

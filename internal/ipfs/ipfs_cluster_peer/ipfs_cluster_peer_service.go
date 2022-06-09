@@ -16,7 +16,7 @@ import (
 
 type ipfsClusterPeerService struct{}
 
-type ipfsClusterPeerServiceInterface interface {
+type IService interface {
 	Get(name types.NamespacedName) (*ipfsv1alpha1.ClusterPeer, *restErrors.RestErr)
 	Create(dto *ClusterPeerDto) (*ipfsv1alpha1.ClusterPeer, *restErrors.RestErr)
 	Update(*ClusterPeerDto, *ipfsv1alpha1.ClusterPeer) (*ipfsv1alpha1.ClusterPeer, *restErrors.RestErr)
@@ -26,11 +26,12 @@ type ipfsClusterPeerServiceInterface interface {
 }
 
 var (
-	IpfsClusterPeerService ipfsClusterPeerServiceInterface
-	k8sClient              = k8s.K8sClientService
+	k8sClient = k8s.NewClientService()
 )
 
-func init() { IpfsClusterPeerService = &ipfsClusterPeerService{} }
+func NewIpfsClusterPeerService() IService {
+	return ipfsClusterPeerService{}
+}
 
 // Get gets a single IPFS peer by name
 func (service ipfsClusterPeerService) Get(namespacedName types.NamespacedName) (*ipfsv1alpha1.ClusterPeer, *restErrors.RestErr) {

@@ -21,7 +21,7 @@ const (
 	defaultNamespace = "default"
 )
 
-var service = secret.SecretService
+var service = secret.NewSecretService()
 
 // Get gets a single  secret by name
 // 1-get the node validated from ValidateSecretExist method
