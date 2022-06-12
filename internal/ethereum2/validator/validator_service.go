@@ -16,7 +16,7 @@ import (
 
 type validatorService struct{}
 
-type validatorServiceInterface interface {
+type IService interface {
 	Get(types.NamespacedName) (*ethereum2v1alpha1.Validator, *errors.RestErr)
 	Create(dto *ValidatorDto) (*ethereum2v1alpha1.Validator, *errors.RestErr)
 	Update(*ValidatorDto, *ethereum2v1alpha1.Validator) (*ethereum2v1alpha1.Validator, *errors.RestErr)
@@ -26,11 +26,12 @@ type validatorServiceInterface interface {
 }
 
 var (
-	ValidatorService validatorServiceInterface
-	k8sClient        = k8s.K8sClientService
+	k8sClient = k8s.NewClientService()
 )
 
-func init() { ValidatorService = &validatorService{} }
+func NewValidatorService() IService {
+	return validatorService{}
+}
 
 // Get gets a single ethereum 2.0 beacon node by name
 func (service validatorService) Get(namespacedName types.NamespacedName) (*ethereum2v1alpha1.Validator, *errors.RestErr) {

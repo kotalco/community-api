@@ -21,7 +21,7 @@ const (
 	defaultNamespace = "default"
 )
 
-var service = ipfs_cluster_peer.IpfsClusterPeerService
+var service = ipfs_cluster_peer.NewIpfsClusterPeerService()
 
 // Get gets a single IPFS cluster peer by name
 // 1-get the node validated from ValidateClusterPeerExist method

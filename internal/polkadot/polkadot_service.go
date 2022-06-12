@@ -16,7 +16,7 @@ import (
 
 type polkadtoService struct{}
 
-type polkadotServiceInterface interface {
+type IService interface {
 	Get(types.NamespacedName) (*polkadotv1alpha1.Node, *restErrors.RestErr)
 	Create(dto *PolkadotDto) (*polkadotv1alpha1.Node, *restErrors.RestErr)
 	Update(*PolkadotDto, *polkadotv1alpha1.Node) (*polkadotv1alpha1.Node, *restErrors.RestErr)
@@ -26,11 +26,12 @@ type polkadotServiceInterface interface {
 }
 
 var (
-	PolkadotService polkadotServiceInterface
-	k8sClient       = k8s.K8sClientService
+	k8sClient = k8s.NewClientService()
 )
 
-func init() { PolkadotService = &polkadtoService{} }
+func NewPolkadotService() IService {
+	return polkadtoService{}
+}
 
 // Get gets a single filecoin node by name
 func (service polkadtoService) Get(namespacedName types.NamespacedName) (*polkadotv1alpha1.Node, *restErrors.RestErr) {

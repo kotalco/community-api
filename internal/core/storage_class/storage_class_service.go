@@ -16,7 +16,7 @@ import (
 
 type storageClassService struct{}
 
-type storageClassServiceInterface interface {
+type IService interface {
 	Get(name string) (*storagev1.StorageClass, *errors.RestErr)
 	Create(dto *StorageClassDto) (*storagev1.StorageClass, *errors.RestErr)
 	Update(*StorageClassDto, *storagev1.StorageClass) (*storagev1.StorageClass, *errors.RestErr)
@@ -26,11 +26,12 @@ type storageClassServiceInterface interface {
 }
 
 var (
-	StorageClassService storageClassServiceInterface
-	k8sClient           = k8s.K8sClientService
+	k8sClient = k8s.NewClientService()
 )
 
-func init() { StorageClassService = &storageClassService{} }
+func NewStorageClassService() IService {
+	return storageClassService{}
+}
 
 // Get returns a single storage class  by name
 func (service storageClassService) Get(name string) (*storagev1.StorageClass, *errors.RestErr) {

@@ -15,6 +15,10 @@ import (
 	"time"
 )
 
+var (
+	k8sClient = k8s.NewClientService()
+)
+
 // Status returns a websocket that emits logs from pod
 // Possible values are: NotFound, Pending, PodInitializing, ContainerCreating, Running, Error, Terminating
 func Status(c *websocket.Conn) {
@@ -51,10 +55,10 @@ func Status(c *websocket.Conn) {
 	}
 
 	for {
-		err := k8s.Client().Get(context.Background(), stsKey, sts)
+		err := k8sClient.Get(context.Background(), stsKey, sts)
 		stsNotFound := apierrors.IsNotFound(err)
 
-		err = k8s.Client().Get(context.Background(), key, pod)
+		err = k8sClient.Get(context.Background(), key, pod)
 		if err != nil {
 			if stsNotFound {
 				return

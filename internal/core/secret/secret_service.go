@@ -17,7 +17,7 @@ import (
 
 type secretService struct{}
 
-type secretServiceInterface interface {
+type IService interface {
 	Get(name types.NamespacedName) (*corev1.Secret, *errors.RestErr)
 	Create(*SecretDto) (*corev1.Secret, *errors.RestErr)
 	List(namespace string) (*corev1.SecretList, *errors.RestErr)
@@ -26,11 +26,12 @@ type secretServiceInterface interface {
 }
 
 var (
-	SecretService secretServiceInterface
-	k8sClient     = k8s.K8sClientService
+	k8sClient = k8s.NewClientService()
 )
 
-func init() { SecretService = &secretService{} }
+func NewSecretService() IService {
+	return secretService{}
+}
 
 // Get returns a single secret  by name
 func (service secretService) Get(namespacedName types.NamespacedName) (*corev1.Secret, *errors.RestErr) {

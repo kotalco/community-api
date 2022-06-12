@@ -27,7 +27,10 @@ const (
 	defaultNamespace = "default"
 )
 
-var service = near.NearService
+var (
+	k8sClient = k8s.NewClientService()
+	service   = near.NewNearService()
+)
 
 // Get gets a single NEAR node by name
 // 1-get the node validated from ValidateNodeExist method
@@ -196,7 +199,7 @@ func Stats(c *websocket.Conn) {
 
 	for {
 
-		err := k8s.Client().Get(context.Background(), key, node)
+		err := k8sClient.Get(context.Background(), key, node)
 		if errors.IsNotFound(err) {
 			c.WriteJSON(fiber.Map{
 				"error": fmt.Sprintf("node by name %s doesn't exist", name),

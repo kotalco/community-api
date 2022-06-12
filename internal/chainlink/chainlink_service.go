@@ -18,7 +18,7 @@ import (
 
 type chainlinkService struct{}
 
-type chainlinkServiceInterface interface {
+type IService interface {
 	Get(types.NamespacedName) (*chainlinkv1alpha1.Node, *errors.RestErr)
 	Create(*ChainlinkDto) (*chainlinkv1alpha1.Node, *errors.RestErr)
 	Update(*ChainlinkDto, *chainlinkv1alpha1.Node) (*chainlinkv1alpha1.Node, *errors.RestErr)
@@ -28,11 +28,12 @@ type chainlinkServiceInterface interface {
 }
 
 var (
-	ChainlinkService chainlinkServiceInterface
-	k8sClient        = k8s.K8sClientService
+	k8sClient = k8s.NewClientService()
 )
 
-func init() { ChainlinkService = &chainlinkService{} }
+func NewChainLinkService() IService {
+	return chainlinkService{}
+}
 
 // Get returns a single chainlink node by name
 func (service chainlinkService) Get(namespacedName types.NamespacedName) (*chainlinkv1alpha1.Node, *errors.RestErr) {

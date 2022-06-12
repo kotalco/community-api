@@ -18,7 +18,7 @@ import (
 
 type ethereumService struct{}
 
-type ethereumServiceInterface interface {
+type IService interface {
 	Get(types.NamespacedName) (*ethereumv1alpha1.Node, *errors.RestErr)
 	Create(*EthereumDto) (*ethereumv1alpha1.Node, *errors.RestErr)
 	Update(*EthereumDto, *ethereumv1alpha1.Node) (*ethereumv1alpha1.Node, *errors.RestErr)
@@ -28,11 +28,12 @@ type ethereumServiceInterface interface {
 }
 
 var (
-	EthereumService ethereumServiceInterface
-	k8sClient       = k8s.K8sClientService
+	k8sClient = k8s.NewClientService()
 )
 
-func init() { EthereumService = &ethereumService{} }
+func NewEthereumService() IService {
+	return ethereumService{}
+}
 
 // Get returns a single ethereum node by name
 func (service ethereumService) Get(namespacedName types.NamespacedName) (*ethereumv1alpha1.Node, *errors.RestErr) {

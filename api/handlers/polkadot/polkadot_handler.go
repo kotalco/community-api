@@ -27,7 +27,10 @@ const (
 	defaultNamespace = "default"
 )
 
-var service = polkadot.PolkadotService
+var (
+	k8sClient = k8s.NewClientService()
+	service   = polkadot.NewPolkadotService()
+)
 
 // Get gets a single Polkadot node by name
 func Get(c *fiber.Ctx) error {
@@ -168,7 +171,7 @@ func Stats(c *websocket.Conn) {
 
 	for {
 
-		err := k8s.Client().Get(context.Background(), key, node)
+		err := k8sClient.Get(context.Background(), key, node)
 		if errors.IsNotFound(err) {
 			c.WriteJSON(fiber.Map{
 				"error": fmt.Sprintf("node by name %s doesn't exist", name),
