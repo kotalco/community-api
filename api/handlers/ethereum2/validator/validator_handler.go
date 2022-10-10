@@ -37,6 +37,7 @@ func Get(c *fiber.Ctx) error {
 // 3-marshall nodes  to validator dto and format the response using NewResponse
 func List(c *fiber.Ctx) error {
 	page, _ := strconv.Atoi(c.Query("page"))
+	limit, _ := strconv.Atoi(c.Query("limit"))
 
 	validatorList, err := service.List(c.Query(namespaceKeyword, defaultNamespace))
 	if err != nil {
@@ -46,7 +47,7 @@ func List(c *fiber.Ctx) error {
 	c.Set("Access-Control-Expose-Headers", "X-Total-Count")
 	c.Set("X-Total-Count", fmt.Sprintf("%d", len(validatorList.Items)))
 
-	start, end := shared.Page(uint(len(validatorList.Items)), uint(page))
+	start, end := shared.Page(uint(len(validatorList.Items)), uint(page), uint(limit))
 	sort.Slice(validatorList.Items[:], func(i, j int) bool {
 		return validatorList.Items[j].CreationTimestamp.Before(&validatorList.Items[i].CreationTimestamp)
 	})

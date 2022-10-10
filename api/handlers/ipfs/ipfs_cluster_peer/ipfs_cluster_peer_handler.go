@@ -39,6 +39,7 @@ func Get(c *fiber.Ctx) error {
 // 3-marshall cluster peers to the dto struct and format the response using NewResponse
 func List(c *fiber.Ctx) error {
 	page, _ := strconv.Atoi(c.Query("page"))
+	limit, _ := strconv.Atoi(c.Query("limit"))
 
 	peers, err := service.List(c.Query(namespaceKeyword, defaultNamespace))
 	if err != nil {
@@ -48,7 +49,7 @@ func List(c *fiber.Ctx) error {
 	c.Set("Access-Control-Expose-Headers", "X-Total-Count")
 	c.Set("X-Total-Count", fmt.Sprintf("%d", len(peers.Items)))
 
-	start, end := shared.Page(uint(len(peers.Items)), uint(page))
+	start, end := shared.Page(uint(len(peers.Items)), uint(page), uint(limit))
 	sort.Slice(peers.Items[:], func(i, j int) bool {
 		return peers.Items[j].CreationTimestamp.Before(&peers.Items[i].CreationTimestamp)
 	})

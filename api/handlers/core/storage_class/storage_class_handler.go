@@ -33,13 +33,14 @@ func Get(c *fiber.Ctx) error {
 // 3-marshall nodes  to storage class dto and format the response using NewResponse
 func List(c *fiber.Ctx) error {
 	page, _ := strconv.Atoi(c.Query("page")) // default page to 0
+	limit, _ := strconv.Atoi(c.Query("limit"))
 
 	storageClassList, err := service.List()
 	if err != nil {
 		return c.Status(err.Status).JSON(err)
 	}
 
-	start, end := shared.Page(uint(len(storageClassList.Items)), uint(page))
+	start, end := shared.Page(uint(len(storageClassList.Items)), uint(page), uint(limit))
 	sort.Slice(storageClassList.Items[:], func(i, j int) bool {
 		return storageClassList.Items[j].CreationTimestamp.Before(&storageClassList.Items[i].CreationTimestamp)
 	})

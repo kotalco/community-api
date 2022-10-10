@@ -40,13 +40,14 @@ func Get(c *fiber.Ctx) error {
 func List(c *fiber.Ctx) error {
 	secretType := c.Query("type")
 	page, _ := strconv.Atoi(c.Query("page")) // default page to 0
+	limit, _ := strconv.Atoi(c.Query("limit"))
 
 	secrets, err := service.List(c.Query(namespaceKeyword, defaultNamespace))
 	if err != nil {
 		return c.Status(err.Status).JSON(err)
 	}
 
-	start, end := shared.Page(uint(len(secrets.Items)), uint(page))
+	start, end := shared.Page(uint(len(secrets.Items)), uint(page), uint(limit))
 	sort.Slice(secrets.Items[:], func(i, j int) bool {
 		return secrets.Items[j].CreationTimestamp.Before(&secrets.Items[i].CreationTimestamp)
 	})
