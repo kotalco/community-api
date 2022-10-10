@@ -13,8 +13,11 @@ func Page(length, page, limit uint) (start, end uint) {
 	if length == 0 {
 		return
 	}
+
 	if limit == 0 {
 		limit = PerPage
+	} else if limit > length {
+		limit = length
 	}
 
 	start = page * limit
