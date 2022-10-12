@@ -87,6 +87,7 @@ func Update(c *fiber.Ctx) error {
 // 3-marshall nodes  to ethereum dto and format the response using NewResponse
 func List(c *fiber.Ctx) error {
 	page, _ := strconv.Atoi(c.Query("page"))
+	limit, _ := strconv.Atoi(c.Query("limit"))
 
 	nodes, err := service.List(c.Query(namespaceKeyword, defaultNamespace))
 
@@ -97,7 +98,7 @@ func List(c *fiber.Ctx) error {
 	c.Set("Access-Control-Expose-Headers", "X-Total-Count")
 	c.Set("X-Total-Count", fmt.Sprintf("%d", len(nodes.Items)))
 
-	start, end := shared.Page(uint(len(nodes.Items)), uint(page))
+	start, end := shared.Page(uint(len(nodes.Items)), uint(page), uint(limit))
 	sort.Slice(nodes.Items[:], func(i, j int) bool {
 		return nodes.Items[j].CreationTimestamp.Before(&nodes.Items[i].CreationTimestamp)
 	})

@@ -81,13 +81,14 @@ func Update(c *fiber.Ctx) error {
 func List(c *fiber.Ctx) error {
 	// default page to 0
 	page, _ := strconv.Atoi(c.Query("page"))
+	limit, _ := strconv.Atoi(c.Query("limit"))
 
 	nodeList, err := service.List(c.Query(namespaceKeyword, defaultNamespace))
 	if err != nil {
 		return c.Status(err.Status).JSON(err)
 	}
 
-	start, end := shared.Page(uint(len(nodeList.Items)), uint(page))
+	start, end := shared.Page(uint(len(nodeList.Items)), uint(page), uint(limit))
 	sort.Slice(nodeList.Items[:], func(i, j int) bool {
 		return nodeList.Items[j].CreationTimestamp.Before(&nodeList.Items[i].CreationTimestamp)
 	})
