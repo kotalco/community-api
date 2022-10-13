@@ -3,6 +3,8 @@ name: Build-Push kotal community api
 on:
   push:
     branches: [ master ]
+    tags:
+      - 'v*'
   pull_request:
     branches: [ master ]
 
@@ -13,11 +15,20 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v3
-    - name: Set Env
-      run: |
-        echo "BUILD_SHA=${GITHUB_SHA:0:7}" >> $GITHUB_ENV
-        echo "RELEASE_TAG=$(curl -s GET https://api.github.com/repos/kotalco/kotal/releases | jq -r '.[].name' | head -n1)" >> $GITHUB_ENV
+    - uses: actions/checkout@v2
+
+    - name: Generate Docker metadata
+      id: meta
+      uses: docker/metadata-action@v3
+      with:
+        images: |
+          docker.io/kotalco/community-api
+        tags: |
+          type=ref,event=tag
+          type=sha,prefix=,suffix=,format=short
+        flavor: |
+          latest=true
+
 
     - name: Set up QEMU
       uses: docker/setup-qemu-action@v2
@@ -37,4 +48,5 @@ jobs:
         context: .
         platforms: linux/amd64,linux/arm64
         push: true
-        tags: kotalco/community-api:latest,kotalco/community-api:${{ env.BUILD_SHA }},kotalco/community-api:${{ env.RELEASE_TAG }}
+        tags: ${{ steps.meta.outputs.tags }}
+        labels: ${{ steps.meta.outputs.labels }}
