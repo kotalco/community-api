@@ -18,15 +18,18 @@ import (
 	"sync"
 )
 
-var clientLock = &sync.Mutex{}
-var controllerRuntimeClient client.Client
+var (
+	clientLock              = &sync.Mutex{}
+	controllerRuntimeClient client.Client
+	RunTimeScheme           = runtime.NewScheme()
+)
 
 func newClient() client.Client {
 	var err error
 	clientLock.Lock()
 	defer clientLock.Unlock()
 	if controllerRuntimeClient == nil {
-		controllerRuntimeClient, err = NewRuntimeClient()
+		controllerRuntimeClient, err = newRuntimeClient()
 		if err != nil {
 			logger.Panic("K8S_CLIENT", err)
 		}
@@ -35,25 +38,23 @@ func newClient() client.Client {
 	return controllerRuntimeClient
 }
 
-// NewRuntimeClient creates new controller-runtime k8s client
-func NewRuntimeClient() (client.Client, error) {
-
+// newRuntimeClient creates new controller-runtime k8s client
+func newRuntimeClient() (client.Client, error) {
 	config, err := configs.KubeConfig()
 	if err != nil {
 		return nil, err
 	}
 
-	scheme := runtime.NewScheme()
-	clientgoscheme.AddToScheme(scheme)
-	ethereumv1alpha1.AddToScheme(scheme)
-	ethereum2v1alpha1.AddToScheme(scheme)
-	ipfsv1alpha1.AddToScheme(scheme)
-	filecoinv1alpha1.AddToScheme(scheme)
-	chainlinkv1alpha1.AddToScheme(scheme)
-	polkadotv1alpha1.AddToScheme(scheme)
-	nearv1alpha1.AddToScheme(scheme)
+	clientgoscheme.AddToScheme(RunTimeScheme)
+	ethereumv1alpha1.AddToScheme(RunTimeScheme)
+	ethereum2v1alpha1.AddToScheme(RunTimeScheme)
+	ipfsv1alpha1.AddToScheme(RunTimeScheme)
+	filecoinv1alpha1.AddToScheme(RunTimeScheme)
+	chainlinkv1alpha1.AddToScheme(RunTimeScheme)
+	polkadotv1alpha1.AddToScheme(RunTimeScheme)
+	nearv1alpha1.AddToScheme(RunTimeScheme)
 
-	opts := client.Options{Scheme: scheme}
+	opts := client.Options{Scheme: RunTimeScheme}
 
 	return client.New(config, opts)
 }
