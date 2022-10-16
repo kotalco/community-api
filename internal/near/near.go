@@ -1,9 +1,9 @@
 package near
 
 import (
-	"github.com/kotalco/api/internal/models"
-	"github.com/kotalco/api/pkg/k8s"
-	"github.com/kotalco/api/pkg/shared"
+	"github.com/kotalco/community-api/internal/models"
+	"github.com/kotalco/community-api/pkg/k8s"
+	"github.com/kotalco/community-api/pkg/shared"
 	nearv1alpha1 "github.com/kotalco/kotal/apis/near/v1alpha1"
 )
 

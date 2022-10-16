@@ -1,7 +1,7 @@
 package k8s
 
 import (
-	"github.com/kotalco/api/pkg/configs"
+	"github.com/kotalco/community-api/pkg/configs"
 	metrics "k8s.io/metrics/pkg/client/clientset/versioned"
 	"sync"
 )

@@ -2,8 +2,8 @@ package k8s
 
 import (
 	"context"
-	"github.com/kotalco/api/pkg/configs"
-	"github.com/kotalco/api/pkg/logger"
+	"github.com/kotalco/community-api/pkg/configs"
+	"github.com/kotalco/community-api/pkg/logger"
 	chainlinkv1alpha1 "github.com/kotalco/kotal/apis/chainlink/v1alpha1"
 	ethereumv1alpha1 "github.com/kotalco/kotal/apis/ethereum/v1alpha1"
 	ethereum2v1alpha1 "github.com/kotalco/kotal/apis/ethereum2/v1alpha1"

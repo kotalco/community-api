@@ -3,9 +3,9 @@ package polkadot
 import (
 	"context"
 	"fmt"
-	restErrors "github.com/kotalco/api/pkg/errors"
-	"github.com/kotalco/api/pkg/k8s"
-	"github.com/kotalco/api/pkg/logger"
+	restErrors "github.com/kotalco/community-api/pkg/errors"
+	"github.com/kotalco/community-api/pkg/k8s"
+	"github.com/kotalco/community-api/pkg/logger"
 	polkadotv1alpha1 "github.com/kotalco/kotal/apis/polkadot/v1alpha1"
 	sharedAPI "github.com/kotalco/kotal/apis/shared"
 	apiErrors "k8s.io/apimachinery/pkg/api/errors"

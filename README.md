@@ -42,7 +42,7 @@ MOCK=true go run main.go
 To run the API server from the docker image:
 
 ```
-docker run -p 3000:3000 -e MOCK=true kotalco/api:develop
+docker run -p 3000:3000 -e MOCK=true kotalco/community-api:develop
 ```
 
 ## :telephone_receiver: Sample cURL Calls

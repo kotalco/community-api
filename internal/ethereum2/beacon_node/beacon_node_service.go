@@ -5,9 +5,9 @@ package beacon_node
 import (
 	"context"
 	"fmt"
-	"github.com/kotalco/api/pkg/errors"
-	"github.com/kotalco/api/pkg/k8s"
-	"github.com/kotalco/api/pkg/logger"
+	"github.com/kotalco/community-api/pkg/errors"
+	"github.com/kotalco/community-api/pkg/k8s"
+	"github.com/kotalco/community-api/pkg/logger"
 	ethereum2v1alpha1 "github.com/kotalco/kotal/apis/ethereum2/v1alpha1"
 	sharedAPIs "github.com/kotalco/kotal/apis/shared"
 	apiErrors "k8s.io/apimachinery/pkg/api/errors"

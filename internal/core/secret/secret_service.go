@@ -5,9 +5,9 @@ package secret
 import (
 	"context"
 	"fmt"
-	"github.com/kotalco/api/pkg/errors"
-	"github.com/kotalco/api/pkg/k8s"
-	"github.com/kotalco/api/pkg/logger"
+	"github.com/kotalco/community-api/pkg/errors"
+	"github.com/kotalco/community-api/pkg/k8s"
+	"github.com/kotalco/community-api/pkg/logger"
 	corev1 "k8s.io/api/core/v1"
 	apiErrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"

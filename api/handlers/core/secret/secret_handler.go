@@ -5,9 +5,9 @@ package secret
 import (
 	"fmt"
 	"github.com/gofiber/fiber/v2"
-	"github.com/kotalco/api/internal/core/secret"
-	restErrors "github.com/kotalco/api/pkg/errors"
-	"github.com/kotalco/api/pkg/shared"
+	"github.com/kotalco/community-api/internal/core/secret"
+	restErrors "github.com/kotalco/community-api/pkg/errors"
+	"github.com/kotalco/community-api/pkg/shared"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"net/http"

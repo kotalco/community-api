@@ -5,9 +5,9 @@ package ipfs_cluster_peer
 import (
 	"fmt"
 	"github.com/gofiber/fiber/v2"
-	"github.com/kotalco/api/internal/ipfs/ipfs_cluster_peer"
-	restErrors "github.com/kotalco/api/pkg/errors"
-	"github.com/kotalco/api/pkg/shared"
+	"github.com/kotalco/community-api/internal/ipfs/ipfs_cluster_peer"
+	restErrors "github.com/kotalco/community-api/pkg/errors"
+	"github.com/kotalco/community-api/pkg/shared"
 	ipfsv1alpha1 "github.com/kotalco/kotal/apis/ipfs/v1alpha1"
 	"k8s.io/apimachinery/pkg/types"
 	"net/http"

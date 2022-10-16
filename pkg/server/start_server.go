@@ -3,15 +3,15 @@ package server
 import (
 	"fmt"
 	"github.com/gofiber/fiber/v2"
-	"github.com/kotalco/api/pkg/configs"
-	"github.com/kotalco/api/pkg/logger"
+	"github.com/kotalco/community-api/pkg/configs"
+	"github.com/kotalco/community-api/pkg/logger"
 	"os"
 	"os/signal"
 )
 
 // StartServerWithGracefulShutdown function for starting server with a graceful shutdown.
 // Create channel for idle connections.
-//check if  Received an interrupt signal, shutdown.
+// check if  Received an interrupt signal, shutdown.
 // Error if closing listeners, or context timeout
 // Run server.
 // Error if  Run server with reason
