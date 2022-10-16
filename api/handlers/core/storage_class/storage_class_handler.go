@@ -3,8 +3,8 @@ package storage_class
 import (
 	"fmt"
 	"github.com/gofiber/fiber/v2"
-	"github.com/kotalco/api/internal/core/storage_class"
-	"github.com/kotalco/api/pkg/shared"
+	"github.com/kotalco/community-api/internal/core/storage_class"
+	"github.com/kotalco/community-api/pkg/shared"
 	storagev1 "k8s.io/api/storage/v1"
 	"net/http"
 	"sort"
@@ -52,19 +52,19 @@ func List(c *fiber.Ctx) error {
 }
 
 // Create creates k8s storage class from spec
-//todo
+// todo
 func Create(c *fiber.Ctx) error {
 	return c.SendStatus(http.StatusMethodNotAllowed)
 }
 
 // Delete deletes k8s storage class by name
-//todo
+// todo
 func Delete(c *fiber.Ctx) error {
 	return c.SendStatus(http.StatusMethodNotAllowed)
 }
 
 // Update updates k8s storage class by name from spec
-//todo
+// todo
 func Update(c *fiber.Ctx) error {
 	return c.SendStatus(http.StatusMethodNotAllowed)
 }

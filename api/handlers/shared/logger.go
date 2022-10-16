@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/gofiber/websocket/v2"
-	"github.com/kotalco/api/pkg/k8s"
+	"github.com/kotalco/community-api/pkg/k8s"
 	corev1 "k8s.io/api/core/v1"
 	"os"
 	"time"

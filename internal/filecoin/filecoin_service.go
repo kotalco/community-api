@@ -3,9 +3,9 @@ package filecoin
 import (
 	"context"
 	"fmt"
-	restErrors "github.com/kotalco/api/pkg/errors"
-	"github.com/kotalco/api/pkg/k8s"
-	"github.com/kotalco/api/pkg/logger"
+	restErrors "github.com/kotalco/community-api/pkg/errors"
+	"github.com/kotalco/community-api/pkg/k8s"
+	"github.com/kotalco/community-api/pkg/logger"
 	filecoinv1alpha1 "github.com/kotalco/kotal/apis/filecoin/v1alpha1"
 	sharedAPIs "github.com/kotalco/kotal/apis/shared"
 	apiErrors "k8s.io/apimachinery/pkg/api/errors"
@@ -66,7 +66,7 @@ func (service filecoinService) Create(dto *FilecoinDto) (*filecoinv1alpha1.Node,
 
 	if err := k8sClient.Create(context.Background(), node); err != nil {
 		if apiErrors.IsAlreadyExists(err) {
-			return nil, restErrors.NewBadRequestError(fmt.Sprintf("node by name %s already exits", dto))
+			return nil, restErrors.NewBadRequestError(fmt.Sprintf("node by name %+v already exits", dto))
 		}
 		go logger.Error(service.Create, err)
 		return nil, restErrors.NewInternalServerError("failed to create node")

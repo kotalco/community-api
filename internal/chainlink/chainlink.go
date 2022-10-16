@@ -1,9 +1,9 @@
 package chainlink
 
 import (
-	"github.com/kotalco/api/internal/models"
-	"github.com/kotalco/api/pkg/k8s"
-	"github.com/kotalco/api/pkg/shared"
+	"github.com/kotalco/community-api/internal/models"
+	"github.com/kotalco/community-api/pkg/k8s"
+	"github.com/kotalco/community-api/pkg/shared"
 	chainlinkv1alpha1 "github.com/kotalco/kotal/apis/chainlink/v1alpha1"
 )
 

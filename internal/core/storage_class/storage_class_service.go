@@ -5,9 +5,9 @@ package storage_class
 import (
 	"context"
 	"fmt"
-	"github.com/kotalco/api/pkg/errors"
-	"github.com/kotalco/api/pkg/k8s"
-	"github.com/kotalco/api/pkg/logger"
+	"github.com/kotalco/community-api/pkg/errors"
+	"github.com/kotalco/community-api/pkg/k8s"
+	"github.com/kotalco/community-api/pkg/logger"
 	storagev1 "k8s.io/api/storage/v1"
 	apiErrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/types"

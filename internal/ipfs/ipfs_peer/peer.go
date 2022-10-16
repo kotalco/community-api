@@ -1,9 +1,9 @@
 package ipfs_peer
 
 import (
-	"github.com/kotalco/api/internal/models"
-	"github.com/kotalco/api/pkg/k8s"
-	"github.com/kotalco/api/pkg/shared"
+	"github.com/kotalco/community-api/internal/models"
+	"github.com/kotalco/community-api/pkg/k8s"
+	"github.com/kotalco/community-api/pkg/shared"
 	ipfsv1alpha1 "github.com/kotalco/kotal/apis/ipfs/v1alpha1"
 )
 

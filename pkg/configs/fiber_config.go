@@ -2,8 +2,8 @@ package configs
 
 import (
 	"github.com/gofiber/fiber/v2"
-	restErrors "github.com/kotalco/api/pkg/errors"
-	"github.com/kotalco/api/pkg/logger"
+	restErrors "github.com/kotalco/community-api/pkg/errors"
+	"github.com/kotalco/community-api/pkg/logger"
 	"strconv"
 	"time"
 )
@@ -16,9 +16,9 @@ func FiberConfig() fiber.Config {
 	}
 }
 
-//defaultErrorHandler used to catch all unhandled  run time errors mainly panics
-//logs errors using logger pkg
-//return custom error struct using restError pkg
+// defaultErrorHandler used to catch all unhandled  run time errors mainly panics
+// logs errors using logger pkg
+// return custom error struct using restError pkg
 var defaultErrorHandler = func(c *fiber.Ctx, err error) error {
 	go logger.Panic("PANICKING", err)
 

@@ -29,7 +29,7 @@ func TestPage(t *testing.T) {
 
 	for _, testCase := range testCases {
 		expectedStart, expectedEnd := testCase.start, testCase.end
-		gotStart, gotEnd := Page(testCase.len, testCase.page)
+		gotStart, gotEnd := Page(testCase.len, testCase.page, 0)
 
 		if expectedStart != gotStart {
 			t.Errorf("expected start to be %d, got %d", expectedStart, gotStart)
