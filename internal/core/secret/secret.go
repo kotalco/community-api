@@ -1,9 +1,9 @@
 package secret
 
 import (
-	"github.com/kotalco/api/internal/models"
-	"github.com/kotalco/api/pkg/k8s"
-	"github.com/kotalco/api/pkg/shared"
+	"github.com/kotalco/community-api/internal/models"
+	"github.com/kotalco/community-api/pkg/k8s"
+	"github.com/kotalco/community-api/pkg/shared"
 	corev1 "k8s.io/api/core/v1"
 )
 

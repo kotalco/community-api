@@ -1,7 +1,7 @@
 package polkadot
 
 import (
-	"github.com/kotalco/api/pkg/k8s"
+	"github.com/kotalco/community-api/pkg/k8s"
 	polkadotv1alpha1 "github.com/kotalco/kotal/apis/polkadot/v1alpha1"
 )
 

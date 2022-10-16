@@ -16,6 +16,6 @@ spec:
     spec:
       containers:
         - name: api
-          image: kotalco/api:develop
+          image: kotalco/community-api:develop
           ports:
             - containerPort: 3000

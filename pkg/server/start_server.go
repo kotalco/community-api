@@ -3,8 +3,8 @@ package server
 import (
 	"fmt"
 	"github.com/gofiber/fiber/v2"
-	"github.com/kotalco/api/pkg/configs"
-	"github.com/kotalco/api/pkg/logger"
+	"github.com/kotalco/community-api/pkg/configs"
+	"github.com/kotalco/community-api/pkg/logger"
 	"os"
 	"os/signal"
 )

@@ -5,9 +5,9 @@ package chainlink
 import (
 	"fmt"
 	"github.com/gofiber/fiber/v2"
-	"github.com/kotalco/api/internal/chainlink"
-	restErrors "github.com/kotalco/api/pkg/errors"
-	"github.com/kotalco/api/pkg/shared"
+	"github.com/kotalco/community-api/internal/chainlink"
+	restErrors "github.com/kotalco/community-api/pkg/errors"
+	"github.com/kotalco/community-api/pkg/shared"
 	chainlinkv1alpha1 "github.com/kotalco/kotal/apis/chainlink/v1alpha1"
 	"k8s.io/apimachinery/pkg/types"
 	"net/http"

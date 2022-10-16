@@ -3,8 +3,8 @@ package storage_class
 import (
 	"fmt"
 	"github.com/gofiber/fiber/v2"
-	"github.com/kotalco/api/internal/core/storage_class"
-	"github.com/kotalco/api/pkg/shared"
+	"github.com/kotalco/community-api/internal/core/storage_class"
+	"github.com/kotalco/community-api/pkg/shared"
 	storagev1 "k8s.io/api/storage/v1"
 	"net/http"
 	"sort"
