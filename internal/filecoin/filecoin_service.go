@@ -66,7 +66,7 @@ func (service filecoinService) Create(dto *FilecoinDto) (*filecoinv1alpha1.Node,
 
 	if err := k8sClient.Create(context.Background(), node); err != nil {
 		if apiErrors.IsAlreadyExists(err) {
-			return nil, restErrors.NewBadRequestError(fmt.Sprintf("node by name %s already exits", dto))
+			return nil, restErrors.NewBadRequestError(fmt.Sprintf("node by name %+v already exits", dto))
 		}
 		go logger.Error(service.Create, err)
 		return nil, restErrors.NewInternalServerError("failed to create node")
