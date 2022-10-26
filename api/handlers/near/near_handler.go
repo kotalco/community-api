@@ -22,9 +22,7 @@ import (
 )
 
 const (
-	nameKeyword      = "name"
-	namespaceKeyword = "namespace"
-	defaultNamespace = "default"
+	nameKeyword = "name"
 )
 
 var (
@@ -50,7 +48,7 @@ func List(c *fiber.Ctx) error {
 	page, _ := strconv.Atoi(c.Query("page"))
 	limit, _ := strconv.Atoi(c.Query("limit"))
 
-	nodes, err := service.List(c.Query(namespaceKeyword, defaultNamespace))
+	nodes, err := service.List(c.Locals("namespace").(string))
 	if err != nil {
 		return c.Status(err.Status).JSON(err)
 	}
@@ -79,6 +77,7 @@ func Create(c *fiber.Ctx) error {
 		return c.Status(badReq.Status).JSON(badReq)
 	}
 
+	dto.Namespace = c.Locals("namespace").(string)
 	node, err := service.Create(dto)
 	if err != nil {
 		return c.Status(err.Status).JSON(err)
@@ -129,7 +128,7 @@ func Update(c *fiber.Ctx) error {
 // 2-create X-Total-Count header with the length
 // 3-return
 func Count(c *fiber.Ctx) error {
-	length, err := service.Count(c.Query(namespaceKeyword, defaultNamespace))
+	length, err := service.Count(c.Locals("namespace").(string))
 	if err != nil {
 		return c.Status(err.Status).JSON(err)
 	}
@@ -194,7 +193,7 @@ func Stats(c *websocket.Conn) {
 	name := c.Params("name")
 	node := &nearv1alpha1.Node{}
 	key := types.NamespacedName{
-		Namespace: "default",
+		Namespace: c.Locals("namespace").(string),
 		Name:      name,
 	}
 
@@ -268,7 +267,7 @@ func Stats(c *websocket.Conn) {
 func ValidateNodeExist(c *fiber.Ctx) error {
 	nameSpacedName := types.NamespacedName{
 		Name:      c.Params(nameKeyword),
-		Namespace: c.Query(namespaceKeyword, defaultNamespace),
+		Namespace: c.Locals("namespace").(string),
 	}
 
 	node, err := service.Get(nameSpacedName)

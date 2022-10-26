@@ -6,6 +6,7 @@ import (
 	"github.com/kotalco/community-api/internal/core/storage_class"
 	"github.com/kotalco/community-api/pkg/shared"
 	storagev1 "k8s.io/api/storage/v1"
+	"k8s.io/apimachinery/pkg/types"
 	"net/http"
 	"sort"
 	"strconv"
@@ -35,7 +36,7 @@ func List(c *fiber.Ctx) error {
 	page, _ := strconv.Atoi(c.Query("page")) // default page to 0
 	limit, _ := strconv.Atoi(c.Query("limit"))
 
-	storageClassList, err := service.List()
+	storageClassList, err := service.List(c.Locals("namespace").(string))
 	if err != nil {
 		return c.Status(err.Status).JSON(err)
 	}
@@ -74,7 +75,11 @@ func Update(c *fiber.Ctx) error {
 // 2-return not found if it's not
 // 3-save the storage class to local with the key storage_class to be used by the other handlers
 func ValidateStorageClassExist(c *fiber.Ctx) error {
-	storageClass, err := service.Get(c.Params(nameKeyword))
+	nameSpacedName := types.NamespacedName{
+		Name:      c.Params(nameKeyword),
+		Namespace: c.Locals("namespace").(string),
+	}
+	storageClass, err := service.Get(nameSpacedName)
 	if err != nil {
 		return c.Status(err.Status).JSON(err)
 	}

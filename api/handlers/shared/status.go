@@ -44,13 +44,13 @@ func Status(c *websocket.Conn) {
 
 	sts := &appsv1.StatefulSet{}
 	stsKey := types.NamespacedName{
-		Namespace: c.Query("namespace", "default"),
+		Namespace: c.Locals("namespace").(string),
 		Name:      c.Params("name"),
 	}
 
 	pod := &corev1.Pod{}
 	key := types.NamespacedName{
-		Namespace: c.Query("namespace", "default"),
+		Namespace: c.Locals("namespace").(string),
 		Name:      fmt.Sprintf("%s-0", c.Params("name")),
 	}
 

@@ -15,6 +15,7 @@ import (
 	"github.com/kotalco/community-api/api/handlers/near"
 	"github.com/kotalco/community-api/api/handlers/polkadot"
 	"github.com/kotalco/community-api/api/handlers/shared"
+	"github.com/kotalco/community-api/pkg/middleware"
 )
 
 // MapUrl abstracted function to map and register all the url for the application
@@ -28,6 +29,7 @@ func MapUrl(app *fiber.App, handlers ...fiber.Handler) {
 	for i := 0; i < len(handlers); i++ {
 		v1.Use(handlers[i])
 	}
+	v1.Use(middleware.IsNamespace)
 	// chainlink group
 	chainlinkGroup := v1.Group("chainlink")
 	chainlinkNodes := chainlinkGroup.Group("nodes")
