@@ -7,12 +7,9 @@ type MetaDataDto struct {
 	Namespace string `json:"namespace,omitempty"`
 }
 
-func (workspace *MetaDataDto) ObjectMetaFromMetadataDto() metav1.ObjectMeta {
-	if workspace.Namespace == "" {
-		workspace.Namespace = "default"
-	}
+func (metaDto *MetaDataDto) ObjectMetaFromMetadataDto() metav1.ObjectMeta {
 	return metav1.ObjectMeta{
-		Name:      workspace.Name,
-		Namespace: workspace.Namespace,
+		Name:      metaDto.Name,
+		Namespace: metaDto.Namespace,
 	}
 }

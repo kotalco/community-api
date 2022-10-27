@@ -16,9 +16,7 @@ import (
 )
 
 const (
-	nameKeyword      = "name"
-	namespaceKeyword = "namespace"
-	defaultNamespace = "default"
+	nameKeyword = "name"
 )
 
 var service = ipfs_cluster_peer.NewIpfsClusterPeerService()
@@ -41,7 +39,7 @@ func List(c *fiber.Ctx) error {
 	page, _ := strconv.Atoi(c.Query("page"))
 	limit, _ := strconv.Atoi(c.Query("limit"))
 
-	peers, err := service.List(c.Query(namespaceKeyword, defaultNamespace))
+	peers, err := service.List(c.Locals("namespace").(string))
 	if err != nil {
 		return c.Status(err.Status).JSON(err)
 	}
@@ -68,6 +66,7 @@ func Create(c *fiber.Ctx) error {
 		return c.Status(badReq.Status).JSON(badReq)
 	}
 
+	dto.Namespace = c.Locals("namespace").(string)
 	peer, err := service.Create(dto)
 	if err != nil {
 		return c.Status(err.Status).JSON(err)
@@ -119,7 +118,7 @@ func Update(c *fiber.Ctx) error {
 // 2-create X-Total-Count header with the length
 // 3-return
 func Count(c *fiber.Ctx) error {
-	length, err := service.Count(c.Query(namespaceKeyword, defaultNamespace))
+	length, err := service.Count(c.Locals("namespace").(string))
 	if err != nil {
 		return c.Status(err.Status).JSON(err)
 	}
@@ -137,7 +136,7 @@ func Count(c *fiber.Ctx) error {
 func ValidateClusterPeerExist(c *fiber.Ctx) error {
 	nameSpacedName := types.NamespacedName{
 		Name:      c.Params(nameKeyword),
-		Namespace: c.Query(namespaceKeyword, defaultNamespace),
+		Namespace: c.Locals("namespace").(string),
 	}
 
 	peer, err := service.Get(nameSpacedName)
