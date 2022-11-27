@@ -2,6 +2,8 @@ package k8s
 
 import (
 	"context"
+	"sync"
+
 	"github.com/kotalco/community-api/pkg/configs"
 	"github.com/kotalco/community-api/pkg/logger"
 	chainlinkv1alpha1 "github.com/kotalco/kotal/apis/chainlink/v1alpha1"
@@ -15,7 +17,6 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
 	"sigs.k8s.io/controller-runtime/pkg/client"
-	"sync"
 )
 
 var (
@@ -75,7 +76,7 @@ func NewClientService() K8sClientServiceInterface {
 // Get retrieves an obj for the given object key from the Kubernetes Cluster.
 // obj must be a struct pointer so that obj can be updated with the response
 // returned by the Server.
-func (k8sClient k8sClientService) Get(ctx context.Context, key client.ObjectKey, obj client.Object) error {
+func (k8sClient k8sClientService) Get(ctx context.Context, key client.ObjectKey, obj client.Object, opts ...client.GetOption) error {
 	return newClient().Get(ctx, key, obj)
 }
 
