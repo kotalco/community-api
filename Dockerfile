@@ -1,4 +1,4 @@
-FROM golang:1.17-alpine AS builder
+FROM golang:1.19-alpine AS builder
 
 RUN apk add --no-cache curl tar
 ENV K8S_VERSION=1.21.2
