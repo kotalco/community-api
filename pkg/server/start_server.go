@@ -28,10 +28,8 @@ func StartServerWithGracefulShutdown(a *fiber.App) {
 		close(idleConnsClosed)
 	}()
 
-	port := os.Getenv("KOTAL_API_SERVER_PORT")
-	if port == "" {
-		port = configs.EnvironmentConf["KOTAL_API_SERVER_PORT"]
-	}
+	port := ":" + configs.Environment.ServerPort
+
 	if err := a.Listen(port); err != nil {
 		go logger.Info(fmt.Sprintf("Oops... Server is not running! Reason: %v", err))
 	}
