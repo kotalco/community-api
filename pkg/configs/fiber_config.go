@@ -9,7 +9,7 @@ import (
 )
 
 func FiberConfig() fiber.Config {
-	readTimeoutSecondsCount, _ := strconv.Atoi(EnvironmentConf["SERVER_READ_TIMEOUT"])
+	readTimeoutSecondsCount, _ := strconv.Atoi(Environment.ServerReadTimeout)
 	return fiber.Config{
 		ReadTimeout:  time.Second * time.Duration(readTimeoutSecondsCount),
 		ErrorHandler: defaultErrorHandler,
