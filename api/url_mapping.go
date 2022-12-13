@@ -60,7 +60,7 @@ func MapUrl(app *fiber.App, handlers ...fiber.Handler) {
 	coreGroup := v1.Group("core")
 	//secret group
 	secrets := coreGroup.Group("secrets")
-	secrets.Post("/", secret.Create, middleware.IsDuplicated)
+	secrets.Post("/", secret.Create)
 	secrets.Head("/", secret.Count)
 	secrets.Get("/", secret.List)
 	secrets.Get("/:name", secret.ValidateSecretExist, secret.Get)
@@ -68,7 +68,6 @@ func MapUrl(app *fiber.App, handlers ...fiber.Handler) {
 	secrets.Delete("/:name", secret.ValidateSecretExist, secret.Delete)
 	//storage class group
 	storageClasses := coreGroup.Group("storageclasses")
-	storageClasses.Post("/", storage_class.Create, middleware.IsDuplicated)
 	storageClasses.Get("/", storage_class.List)
 	storageClasses.Get("/:name", storage_class.ValidateStorageClassExist, storage_class.Get)
 	storageClasses.Put("/:name", storage_class.ValidateStorageClassExist, storage_class.Update)
