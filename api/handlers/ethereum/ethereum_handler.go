@@ -196,7 +196,7 @@ func Stats(c *websocket.Conn) {
 			return
 		}
 
-		client := jsonrpc.NewClient(fmt.Sprintf("http://%s:%d", node.Name, node.Spec.RPCPort))
+		client := jsonrpc.NewClient(fmt.Sprintf("http://%s.%s:%d", nameSpacedName.Name, nameSpacedName.Namespace, node.Spec.RPCPort))
 
 		type SyncStatus struct {
 			CurrentBlock string `json:"currentBlock"`
