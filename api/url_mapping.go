@@ -29,7 +29,7 @@ func MapUrl(app *fiber.App, handlers ...fiber.Handler) {
 	for i := 0; i < len(handlers); i++ {
 		v1.Use(handlers[i])
 	}
-	v1.Use(middleware.SetNamespace)
+	v1.Use(middleware.SetNamespace, middleware.IsDuplicated)
 	// chainlink group
 	chainlinkGroup := v1.Group("chainlink")
 	chainlinkNodes := chainlinkGroup.Group("nodes")
