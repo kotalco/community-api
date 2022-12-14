@@ -164,14 +164,14 @@ func Stats(c *websocket.Conn) {
 
 	name := c.Params("name")
 	node := &polkadotv1alpha1.Node{}
-	key := types.NamespacedName{
+	nameSpacedName := types.NamespacedName{
 		Namespace: c.Locals("namespace").(string),
 		Name:      name,
 	}
 
 	for {
 
-		err := k8sClient.Get(context.Background(), key, node)
+		err := k8sClient.Get(context.Background(), nameSpacedName, node)
 		if errors.IsNotFound(err) {
 			c.WriteJSON(fiber.Map{
 				"error": fmt.Sprintf("node by name %s doesn't exist", name),
@@ -187,7 +187,7 @@ func Stats(c *websocket.Conn) {
 			continue
 		}
 
-		client := jsonrpc.NewClient(fmt.Sprintf("http://%s:%d", node.Name, node.Spec.RPCPort))
+		client := jsonrpc.NewClient(fmt.Sprintf("http://%s.%s:%d", nameSpacedName.Name, nameSpacedName.Namespace, node.Spec.RPCPort))
 
 		type SyncState struct {
 			CurrentBlock uint `json:"currentBlock"`
