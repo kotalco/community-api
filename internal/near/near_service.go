@@ -62,6 +62,8 @@ func (service nearService) Create(dto *NearDto) (*nearv1alpha1.Node, *restErrors
 		},
 	}
 
+	k8s.DefaultResources(&node.Spec.Resources)
+
 	if os.Getenv("MOCK") == "true" {
 		node.Default()
 	}

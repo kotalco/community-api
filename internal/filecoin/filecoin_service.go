@@ -60,6 +60,8 @@ func (service filecoinService) Create(dto *FilecoinDto) (*filecoinv1alpha1.Node,
 		},
 	}
 
+	k8s.DefaultResources(&node.Spec.Resources)
+
 	if os.Getenv("MOCK") == "true" {
 		node.Default()
 	}
