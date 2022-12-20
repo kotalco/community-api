@@ -69,6 +69,8 @@ func (service validatorService) Create(dto *ValidatorDto) (*ethereum2v1alpha1.Va
 		},
 	}
 
+	k8s.DefaultResources(&validator.Spec.Resources)
+
 	if dto.Client == string(ethereum2v1alpha1.PrysmClient) && dto.WalletPasswordSecretName != "" {
 		validator.Spec.WalletPasswordSecret = dto.WalletPasswordSecretName
 	}

@@ -60,6 +60,8 @@ func (service ipfsClusterPeerService) Create(dto *ClusterPeerDto) (*ipfsv1alpha1
 		},
 	}
 
+	k8s.DefaultResources(&peer.Spec.Resources)
+
 	if dto.PeerEndpoint != "" {
 		peer.Spec.PeerEndpoint = dto.PeerEndpoint
 	}

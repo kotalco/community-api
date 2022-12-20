@@ -67,6 +67,8 @@ func (service chainlinkService) Create(dto *ChainlinkDto) (*chainlinkv1alpha1.No
 		},
 	}
 
+	k8s.DefaultResources(&node.Spec.Resources)
+
 	if os.Getenv("MOCK") == "true" {
 		node.Default()
 	}

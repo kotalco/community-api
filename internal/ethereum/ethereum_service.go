@@ -65,6 +65,8 @@ func (service ethereumService) Create(dto *EthereumDto) (*ethereumv1alpha1.Node,
 		},
 	}
 
+	k8s.DefaultResources(&node.Spec.Resources)
+
 	if os.Getenv("MOCK") == "true" {
 		node.Default()
 	}

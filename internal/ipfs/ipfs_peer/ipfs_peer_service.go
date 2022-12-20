@@ -65,6 +65,8 @@ func (service ipfsPeerService) Create(dto *PeerDto) (*ipfsv1alpha1.Peer, *restEr
 		},
 	}
 
+	k8s.DefaultResources(&peer.Spec.Resources)
+
 	if os.Getenv("MOCK") == "true" {
 		peer.Default()
 	}

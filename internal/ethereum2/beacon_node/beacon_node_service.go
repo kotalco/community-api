@@ -73,6 +73,8 @@ func (service beaconNodeService) Create(dto *BeaconNodeDto) (*ethereum2v1alpha1.
 		},
 	}
 
+	k8s.DefaultResources(&beaconnode.Spec.Resources)
+
 	if os.Getenv("MOCK") == "true" {
 		beaconnode.Default()
 	}
