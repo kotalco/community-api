@@ -3,6 +3,7 @@ package polkadot
 import (
 	"github.com/kotalco/community-api/pkg/k8s"
 	polkadotv1alpha1 "github.com/kotalco/kotal/apis/polkadot/v1alpha1"
+	sharedAPI "github.com/kotalco/kotal/apis/shared"
 )
 
 type PolkadotDto struct {
@@ -24,12 +25,7 @@ type PolkadotDto struct {
 	WS                       *bool    `json:"ws"`
 	WSPort                   uint     `json:"wsPort"`
 	CORSDomains              []string `json:"corsDomains"`
-	CPU                      string   `json:"cpu"`
-	CPULimit                 string   `json:"cpuLimit"`
-	Memory                   string   `json:"memory"`
-	MemoryLimit              string   `json:"memoryLimit"`
-	Storage                  string   `json:"storage"`
-	StorageClass             *string  `json:"storageClass"`
+	sharedAPI.Resources
 }
 
 type PolkadotListDto []PolkadotDto

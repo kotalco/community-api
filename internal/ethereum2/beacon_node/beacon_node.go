@@ -5,6 +5,7 @@ import (
 	"github.com/kotalco/community-api/pkg/k8s"
 	"github.com/kotalco/community-api/pkg/shared"
 	ethereum2v1alpha1 "github.com/kotalco/kotal/apis/ethereum2/v1alpha1"
+	sharedAPI "github.com/kotalco/kotal/apis/shared"
 )
 
 type BeaconNodeDto struct {
@@ -23,12 +24,7 @@ type BeaconNodeDto struct {
 	GRPC          *bool     `json:"grpc"`
 	GRPCHost      string    `json:"grpcHost"`
 	GRPCPort      uint      `json:"grpcPort"`
-	CPU           string    `json:"cpu"`
-	CPULimit      string    `json:"cpuLimit"`
-	Memory        string    `json:"memory"`
-	MemoryLimit   string    `json:"memoryLimit"`
-	Storage       string    `json:"storage"`
-	StorageClass  *string   `json:"storageClass"`
+	sharedAPI.Resources
 }
 type BeaconNodeListDto []BeaconNodeDto
 

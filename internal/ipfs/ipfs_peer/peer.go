@@ -5,6 +5,7 @@ import (
 	"github.com/kotalco/community-api/pkg/k8s"
 	"github.com/kotalco/community-api/pkg/shared"
 	ipfsv1alpha1 "github.com/kotalco/kotal/apis/ipfs/v1alpha1"
+	sharedAPI "github.com/kotalco/kotal/apis/shared"
 )
 
 // Peer is IPFS peer
@@ -19,12 +20,7 @@ type PeerDto struct {
 	GatewayHost  string   `json:"gatewayHost"`
 	Routing      string   `json:"routing"`
 	Profiles     []string `json:"profiles"`
-	CPU          string   `json:"cpu"`
-	CPULimit     string   `json:"cpuLimit"`
-	Memory       string   `json:"memory"`
-	MemoryLimit  string   `json:"memoryLimit"`
-	Storage      string   `json:"storage"`
-	StorageClass *string  `json:"storageClass"`
+	sharedAPI.Resources
 }
 
 type PeerListDto []PeerDto

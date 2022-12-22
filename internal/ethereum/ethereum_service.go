@@ -205,6 +205,13 @@ func (service ethereumService) Update(dto *EthereumDto, node *ethereumv1alpha1.N
 		return nil, errors.NewInternalServerError(fmt.Sprintf("can't update node by name %s", node.Name))
 	}
 
+	if k8s.CheckDeploymentResourcesChanged(&dto.Resources) {
+		err := k8s.DeployReconciliation(node.Name, node.Namespace)
+		if err != nil {
+			return nil, err
+		}
+	}
+
 	return node, nil
 }
 

@@ -5,6 +5,7 @@ import (
 	"github.com/kotalco/community-api/pkg/k8s"
 	"github.com/kotalco/community-api/pkg/shared"
 	ipfsv1alpha1 "github.com/kotalco/kotal/apis/ipfs/v1alpha1"
+	sharedAPI "github.com/kotalco/kotal/apis/shared"
 )
 
 type ClusterPeerDto struct {
@@ -17,12 +18,7 @@ type ClusterPeerDto struct {
 	Consensus            string   `json:"consensus"`
 	ClusterSecretName    string   `json:"clusterSecretName"`
 	PeerEndpoint         string   `json:"peerEndpoint"`
-	CPU                  string   `json:"cpu"`
-	CPULimit             string   `json:"cpuLimit"`
-	Memory               string   `json:"memory"`
-	MemoryLimit          string   `json:"memoryLimit"`
-	Storage              string   `json:"storage"`
-	StorageClass         *string  `json:"storageClass"`
+	sharedAPI.Resources
 }
 type ClusterPeerListDto []ClusterPeerDto
 

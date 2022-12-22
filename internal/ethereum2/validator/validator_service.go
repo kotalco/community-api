@@ -145,6 +145,12 @@ func (service validatorService) Update(dto *ValidatorDto, validator *ethereum2v1
 		return nil, errors.NewInternalServerError(fmt.Sprintf("can't update validator by name %s", validator.Name))
 	}
 
+	if k8s.CheckDeploymentResourcesChanged(&dto.Resources) {
+		err := k8s.DeployReconciliation(validator.Name, validator.Namespace)
+		if err != nil {
+			return nil, err
+		}
+	}
 	return validator, nil
 }
 

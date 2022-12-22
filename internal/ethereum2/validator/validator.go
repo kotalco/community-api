@@ -5,6 +5,7 @@ import (
 	"github.com/kotalco/community-api/pkg/k8s"
 	"github.com/kotalco/community-api/pkg/shared"
 	ethereum2v1alpha1 "github.com/kotalco/kotal/apis/ethereum2/v1alpha1"
+	sharedAPI "github.com/kotalco/kotal/apis/shared"
 )
 
 type ValidatorDto struct {
@@ -16,12 +17,7 @@ type ValidatorDto struct {
 	BeaconEndpoints          []string      `json:"beaconEndpoints"`
 	WalletPasswordSecretName string        `json:"walletPasswordSecretName"`
 	Keystores                []KeystoreDto `json:"keystores"`
-	CPU                      string        `json:"cpu"`
-	CPULimit                 string        `json:"cpuLimit"`
-	Memory                   string        `json:"memory"`
-	MemoryLimit              string        `json:"memoryLimit"`
-	Storage                  string        `json:"storage"`
-	StorageClass             *string       `json:"storageClass"`
+	sharedAPI.Resources
 }
 
 type KeystoreDto struct {

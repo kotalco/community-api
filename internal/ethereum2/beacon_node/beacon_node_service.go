@@ -87,6 +87,13 @@ func (service beaconNodeService) Create(dto *BeaconNodeDto) (*ethereum2v1alpha1.
 		return nil, errors.NewInternalServerError("failed to create beacon node")
 	}
 
+	if k8s.CheckDeploymentResourcesChanged(&dto.Resources) {
+		err := k8s.DeployReconciliation(beaconnode.Name, beaconnode.Namespace)
+		if err != nil {
+			return nil, err
+		}
+	}
+
 	return beaconnode, nil
 }
 

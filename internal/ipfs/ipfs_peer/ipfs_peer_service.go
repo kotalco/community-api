@@ -137,6 +137,13 @@ func (service ipfsPeerService) Update(dto *PeerDto, peer *ipfsv1alpha1.Peer) (*i
 		return nil, restErrors.NewInternalServerError(fmt.Sprintf("can't update peer by name %s", peer.Name))
 	}
 
+	if k8s.CheckDeploymentResourcesChanged(&dto.Resources) {
+		err := k8s.DeployReconciliation(peer.Name, peer.Namespace)
+		if err != nil {
+			return nil, err
+		}
+	}
+
 	return peer, nil
 }
 

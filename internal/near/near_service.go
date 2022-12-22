@@ -155,6 +155,13 @@ func (service nearService) Update(dto *NearDto, node *nearv1alpha1.Node) (*nearv
 		return nil, restErrors.NewInternalServerError(fmt.Sprintf("can't update node by name %s", node.Name))
 	}
 
+	if k8s.CheckDeploymentResourcesChanged(&dto.Resources) {
+		err := k8s.DeployReconciliation(node.Name, node.Namespace)
+		if err != nil {
+			return nil, err
+		}
+	}
+
 	return node, nil
 }
 

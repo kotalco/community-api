@@ -170,6 +170,13 @@ func (service polkadtoService) Update(dto *PolkadotDto, node *polkadotv1alpha1.N
 		return nil, restErrors.NewInternalServerError(fmt.Sprintf("can't updagte node by name %s", node.Name))
 	}
 
+	if k8s.CheckDeploymentResourcesChanged(&dto.Resources) {
+		err := k8s.DeployReconciliation(node.Name, node.Namespace)
+		if err != nil {
+			return nil, err
+		}
+	}
+
 	return node, nil
 }
 
