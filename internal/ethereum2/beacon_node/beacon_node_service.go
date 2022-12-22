@@ -87,13 +87,6 @@ func (service beaconNodeService) Create(dto *BeaconNodeDto) (*ethereum2v1alpha1.
 		return nil, errors.NewInternalServerError("failed to create beacon node")
 	}
 
-	if k8s.CheckDeploymentResourcesChanged(&dto.Resources) {
-		err := k8s.DeployReconciliation(beaconnode.Name, beaconnode.Namespace)
-		if err != nil {
-			return nil, err
-		}
-	}
-
 	return beaconnode, nil
 }
 
@@ -172,6 +165,13 @@ func (service beaconNodeService) Update(dto *BeaconNodeDto, node *ethereum2v1alp
 	if err := k8sClient.Update(context.Background(), node); err != nil {
 		go logger.Error(service.Update, err)
 		return nil, errors.NewInternalServerError(fmt.Sprintf("can't update node by name  %s", node.Name))
+	}
+
+	if k8s.CheckDeploymentResourcesChanged(&dto.Resources) {
+		err := k8s.DeployReconciliation(node.Name, node.Namespace)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	return node, nil
