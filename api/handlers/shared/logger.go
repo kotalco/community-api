@@ -3,11 +3,12 @@ package shared
 import (
 	"context"
 	"fmt"
+	"os"
+	"time"
+
 	"github.com/gofiber/websocket/v2"
 	"github.com/kotalco/community-api/pkg/k8s"
 	corev1 "k8s.io/api/core/v1"
-	"os"
-	"time"
 )
 
 // Logger returns a websocket that emits logs from pod
@@ -27,8 +28,11 @@ func Logger(c *websocket.Conn) {
 		}
 	}
 
+	lines := int64(100)
+
 	podLogOptions := corev1.PodLogOptions{
-		Follow: true,
+		Follow:    true,
+		TailLines: &lines,
 	}
 
 	podLogRequest := k8s.Clientset().CoreV1().Pods(c.Locals("namespace").(string)).GetLogs(fmt.Sprintf("%s-0", c.Params("name")), &podLogOptions)
