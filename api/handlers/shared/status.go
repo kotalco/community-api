@@ -4,15 +4,16 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"math/rand"
+	"os"
+	"time"
+
 	"github.com/gofiber/websocket/v2"
 	"github.com/kotalco/community-api/pkg/k8s"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/types"
-	"math/rand"
-	"os"
-	"time"
 )
 
 var (
@@ -55,20 +56,24 @@ func Status(c *websocket.Conn) {
 	}
 
 	for {
-		err := k8sClient.Get(context.Background(), stsKey, sts)
-		stsNotFound := apierrors.IsNotFound(err)
 
-		err = k8sClient.Get(context.Background(), key, pod)
+		err := k8sClient.Get(context.Background(), key, pod)
 		if err != nil {
-			if stsNotFound {
+
+			// is the pod error due to sts has been deleted ?
+			stsErr := k8sClient.Get(context.Background(), stsKey, sts)
+			if apierrors.IsNotFound(stsErr) {
 				return
-			} else {
-				if apierrors.IsNotFound(err) {
-					err = errors.New("NotFound")
-				}
-				c.WriteMessage(websocket.TextMessage, []byte(err.Error()))
-				continue
 			}
+
+			if apierrors.IsNotFound(err) {
+				err = errors.New("NotFound")
+			}
+
+			c.WriteMessage(websocket.TextMessage, []byte(err.Error()))
+
+			time.Sleep(3 * time.Second)
+			continue
 		}
 
 		phase := string(pod.Status.Phase)
@@ -83,7 +88,7 @@ func Status(c *websocket.Conn) {
 
 		c.WriteMessage(websocket.TextMessage, []byte(phase))
 
-		time.Sleep(1 * time.Second)
+		time.Sleep(time.Second)
 	}
 
 }
