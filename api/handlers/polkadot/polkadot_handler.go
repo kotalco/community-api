@@ -68,6 +68,12 @@ func Create(c *fiber.Ctx) error {
 	}
 
 	dto.Namespace = c.Locals("namespace").(string)
+
+	err := dto.MetaDataDto.Validate()
+	if err != nil {
+		return c.Status(err.Status).JSON(err)
+	}
+
 	node, err := service.Create(dto)
 	if err != nil {
 		return c.Status(err.Status).JSON(err)

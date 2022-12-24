@@ -34,15 +34,20 @@ func Get(c *fiber.Ctx) error {
 // 2-call chain link service to create chainlink node
 // 2-marshall node to and format the response
 func Create(c *fiber.Ctx) error {
-	chainlinkDto := new(chainlink.ChainlinkDto)
-	if err := c.BodyParser(chainlinkDto); err != nil {
+	dto := new(chainlink.ChainlinkDto)
+	if err := c.BodyParser(dto); err != nil {
 		badReqErr := restErrors.NewBadRequestError("invalid request body")
 		return c.Status(badReqErr.Status).JSON(badReqErr)
 	}
 
-	chainlinkDto.Namespace = c.Locals("namespace").(string)
+	dto.Namespace = c.Locals("namespace").(string)
 
-	node, err := service.Create(chainlinkDto)
+	err := dto.MetaDataDto.Validate()
+	if err != nil {
+		return c.Status(err.Status).JSON(err)
+	}
+
+	node, err := service.Create(dto)
 	if err != nil {
 		return c.Status(err.Status).JSON(err)
 	}
