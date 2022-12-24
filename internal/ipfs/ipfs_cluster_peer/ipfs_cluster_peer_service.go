@@ -169,14 +169,14 @@ func (service ipfsClusterPeerService) Update(dto *ClusterPeerDto, peer *ipfsv1al
 
 	if err := k8sClient.Update(context.Background(), peer); err != nil {
 		go logger.Error(service.Update, err)
-		return nil, restErrors.NewInternalServerError(fmt.Sprintf("can't update node by name %s", peer.Name))
+		return nil, restErrors.NewInternalServerError(fmt.Sprintf("can't update peer by name %s", peer.Name))
 	}
 
 	if podIsePending {
 		err := k8sClient.Delete(context.Background(), pod)
 		if err != nil {
 			go logger.Error(service.Update, err)
-			return nil, restErrors.NewInternalServerError(fmt.Sprintf("can't update node by name %s", peer.Name))
+			return nil, restErrors.NewInternalServerError(fmt.Sprintf("can't update peer by name %s", peer.Name))
 		}
 	}
 

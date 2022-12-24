@@ -150,7 +150,7 @@ func (service ipfsPeerService) Update(dto *PeerDto, peer *ipfsv1alpha1.Peer) (*i
 
 	if err := k8sClient.Update(context.Background(), peer); err != nil {
 		go logger.Error(service.Update, err)
-		return nil, restErrors.NewInternalServerError(fmt.Sprintf("can't update node by name %s", peer.Name))
+		return nil, restErrors.NewInternalServerError(fmt.Sprintf("can't update peer by name %s", peer.Name))
 	}
 
 	if podIsePending {
