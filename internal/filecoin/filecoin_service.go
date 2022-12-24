@@ -141,7 +141,7 @@ func (service filecoinService) Update(dto *FilecoinDto, node *filecoinv1alpha1.N
 	}
 
 	pod := &corev1.Pod{}
-	podIsePending := false
+	podIsPending := false
 	if dto.CPU != "" || dto.Memory != "" {
 		key := types.NamespacedName{
 			Namespace: node.Namespace,
@@ -152,7 +152,7 @@ func (service filecoinService) Update(dto *FilecoinDto, node *filecoinv1alpha1.N
 			go logger.Error(service.Update, err)
 			return nil, restErrors.NewBadRequestError(fmt.Sprintf("pod by name %s doesn't exit", key.Name))
 		}
-		podIsePending = pod.Status.Phase == corev1.PodPending
+		podIsPending = pod.Status.Phase == corev1.PodPending
 	}
 
 	if err := k8sClient.Update(context.Background(), node); err != nil {
@@ -160,7 +160,7 @@ func (service filecoinService) Update(dto *FilecoinDto, node *filecoinv1alpha1.N
 		return nil, restErrors.NewInternalServerError(fmt.Sprintf("can't update node by name %s", node.Name))
 	}
 
-	if podIsePending {
+	if podIsPending {
 		err := k8sClient.Delete(context.Background(), pod)
 		if err != nil {
 			go logger.Error(service.Update, err)

@@ -142,7 +142,7 @@ func (service validatorService) Update(dto *ValidatorDto, validator *ethereum2v1
 	}
 
 	pod := &corev1.Pod{}
-	podIsePending := false
+	podIsPending := false
 	if dto.CPU != "" || dto.Memory != "" {
 		key := types.NamespacedName{
 			Namespace: validator.Namespace,
@@ -153,7 +153,7 @@ func (service validatorService) Update(dto *ValidatorDto, validator *ethereum2v1
 			go logger.Error(service.Update, err)
 			return nil, errors.NewBadRequestError(fmt.Sprintf("pod by name %s doesn't exit", key.Name))
 		}
-		podIsePending = pod.Status.Phase == corev1.PodPending
+		podIsPending = pod.Status.Phase == corev1.PodPending
 	}
 
 	if err := k8sClient.Update(context.Background(), validator); err != nil {
@@ -161,7 +161,7 @@ func (service validatorService) Update(dto *ValidatorDto, validator *ethereum2v1
 		return nil, errors.NewInternalServerError(fmt.Sprintf("can't update node by name %s", validator.Name))
 	}
 
-	if podIsePending {
+	if podIsPending {
 		err := k8sClient.Delete(context.Background(), pod)
 		if err != nil {
 			go logger.Error(service.Update, err)
