@@ -10,7 +10,7 @@ import (
 )
 
 type MetaDataDto struct {
-	Name      string `json:"name" validate:"regexp,lt=40"`
+	Name      string `json:"name" validate:"regexp,lt=64"`
 	Namespace string `json:"namespace,omitempty"`
 }
 
@@ -24,7 +24,7 @@ func (metaDto *MetaDataDto) ObjectMetaFromMetadataDto() metav1.ObjectMeta {
 func (dto *MetaDataDto) Validate() *restErrors.RestErr {
 	newValidator := validator.New()
 	err := newValidator.RegisterValidation("regexp", func(fl validator.FieldLevel) bool {
-		re := regexp.MustCompile("^([a-z]|[0-9])+([a-z]|[0-9]|-)+$")
+		re := regexp.MustCompile("^([a-z]|[0-9])+([a-z]|[0-9]|-)+([a-z]|[0-9])+$")
 		return re.MatchString(fl.Field().String())
 	})
 	if err != nil {
@@ -39,7 +39,7 @@ func (dto *MetaDataDto) Validate() *restErrors.RestErr {
 		for _, err := range err.(validator.ValidationErrors) {
 			switch err.Field() {
 			case "Name":
-				fields["name"] = "name should only contains a lowercase alphanumeric characters or special character (-) and maximum length of 40 chars"
+				fields["name"] = "name must start and end with alphabet, and contains no more than 64 alphanumeric characters and - in total."
 				break
 			}
 		}
