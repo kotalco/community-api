@@ -39,8 +39,7 @@ func (dto *MetaDataDto) Validate() *restErrors.RestErr {
 		for _, err := range err.(validator.ValidationErrors) {
 			switch err.Field() {
 			case "Name":
-				fields["name"] = "name must start and end with alphabet, and contains no more than 64 alphanumeric characters and - in total."
-				break
+				fields["name"] = "name must start and end with an alphanumeric, and contains no more than 64 alphanumeric characters and - in total."
 			}
 		}
 
