@@ -8,6 +8,7 @@ import (
 	"github.com/kotalco/community-api/pkg/logger"
 	ipfsv1alpha1 "github.com/kotalco/kotal/apis/ipfs/v1alpha1"
 	sharedAPIs "github.com/kotalco/kotal/apis/shared"
+	corev1 "k8s.io/api/core/v1"
 	apiErrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/types"
 	"os"
@@ -151,9 +152,32 @@ func (service ipfsClusterPeerService) Update(dto *ClusterPeerDto, peer *ipfsv1al
 		peer.Default()
 	}
 
+	pod := &corev1.Pod{}
+	podIsePending := false
+	if dto.CPU != "" || dto.Memory != "" {
+		key := types.NamespacedName{
+			Namespace: peer.Namespace,
+			Name:      fmt.Sprintf("%s-0", peer.Name),
+		}
+		err := k8sClient.Get(context.Background(), key, pod)
+		if apiErrors.IsNotFound(err) {
+			go logger.Error(service.Update, err)
+			return nil, restErrors.NewBadRequestError(fmt.Sprintf("pod by name %s doesn't exit", key.Name))
+		}
+		podIsePending = pod.Status.Phase == corev1.PodPending
+	}
+
 	if err := k8sClient.Update(context.Background(), peer); err != nil {
 		go logger.Error(service.Update, err)
-		return nil, restErrors.NewInternalServerError(fmt.Sprintf("can't update cluster peer by name %s", peer.Name))
+		return nil, restErrors.NewInternalServerError(fmt.Sprintf("can't update node by name %s", peer.Name))
+	}
+
+	if podIsePending {
+		err := k8sClient.Delete(context.Background(), pod)
+		if err != nil {
+			go logger.Error(service.Update, err)
+			return nil, restErrors.NewInternalServerError(fmt.Sprintf("can't update node by name %s", peer.Name))
+		}
 	}
 
 	return peer, nil

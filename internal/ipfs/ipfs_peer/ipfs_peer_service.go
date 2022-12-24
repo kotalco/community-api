@@ -134,8 +134,8 @@ func (service ipfsPeerService) Update(dto *PeerDto, peer *ipfsv1alpha1.Peer) (*i
 	}
 
 	pod := &corev1.Pod{}
-	if dto.CPU != "" || dto.Memory != "" { //check if cpu or memory updated
-		//get pod
+	podIsePending := false
+	if dto.CPU != "" || dto.Memory != "" {
 		key := types.NamespacedName{
 			Namespace: peer.Namespace,
 			Name:      fmt.Sprintf("%s-0", peer.Name),
@@ -145,14 +145,15 @@ func (service ipfsPeerService) Update(dto *PeerDto, peer *ipfsv1alpha1.Peer) (*i
 			go logger.Error(service.Update, err)
 			return nil, restErrors.NewBadRequestError(fmt.Sprintf("pod by name %s doesn't exit", key.Name))
 		}
+		podIsePending = pod.Status.Phase == corev1.PodPending
 	}
 
 	if err := k8sClient.Update(context.Background(), peer); err != nil {
 		go logger.Error(service.Update, err)
-		return nil, restErrors.NewInternalServerError(fmt.Sprintf("can't update peer by name %s", peer.Name))
+		return nil, restErrors.NewInternalServerError(fmt.Sprintf("can't update node by name %s", peer.Name))
 	}
 
-	if pod.Status.Phase == corev1.PodPending { //delete pending pod
+	if podIsePending {
 		err := k8sClient.Delete(context.Background(), pod)
 		if err != nil {
 			go logger.Error(service.Update, err)
