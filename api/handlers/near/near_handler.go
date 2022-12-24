@@ -78,6 +78,12 @@ func Create(c *fiber.Ctx) error {
 	}
 
 	dto.Namespace = c.Locals("namespace").(string)
+
+	err := dto.MetaDataDto.Validate()
+	if err != nil {
+		return c.Status(err.Status).JSON(err)
+	}
+
 	node, err := service.Create(dto)
 	if err != nil {
 		return c.Status(err.Status).JSON(err)
@@ -115,12 +121,7 @@ func Update(c *fiber.Ctx) error {
 
 	node := c.Locals("node").(*nearv1alpha1.Node)
 
-	err := dto.MetaDataDto.Validate()
-	if err != nil {
-		return c.Status(err.Status).JSON(err)
-	}
-
-	node, err = service.Update(dto, node)
+	node, err := service.Update(dto, node)
 	if err != nil {
 		return c.Status(err.Status).JSON(err)
 	}
