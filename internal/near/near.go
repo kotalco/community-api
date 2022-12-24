@@ -5,6 +5,7 @@ import (
 	"github.com/kotalco/community-api/pkg/k8s"
 	"github.com/kotalco/community-api/pkg/shared"
 	nearv1alpha1 "github.com/kotalco/kotal/apis/near/v1alpha1"
+	sharedAPI "github.com/kotalco/kotal/apis/shared"
 )
 
 // NearDto is NEAR node
@@ -25,12 +26,7 @@ type NearDto struct {
 	PrometheusHost           string    `json:"prometheusHost"`
 	TelemetryURL             string    `json:"telemetryURL"`
 	Bootnodes                *[]string `json:"bootnodes"`
-	CPU                      string    `json:"cpu"`
-	CPULimit                 string    `json:"cpuLimit"`
-	Memory                   string    `json:"memory"`
-	MemoryLimit              string    `json:"memoryLimit"`
-	Storage                  string    `json:"storage"`
-	StorageClass             *string   `json:"storageClass"`
+	sharedAPI.Resources
 }
 
 type NearListDto []NearDto

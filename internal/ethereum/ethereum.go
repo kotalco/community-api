@@ -5,6 +5,7 @@ import (
 	"github.com/kotalco/community-api/pkg/k8s"
 	"github.com/kotalco/community-api/pkg/shared"
 	ethereumv1alpha1 "github.com/kotalco/kotal/apis/ethereum/v1alpha1"
+	sharedAPI "github.com/kotalco/kotal/apis/shared"
 )
 
 // ImportedAccount is account derived from private key
@@ -38,12 +39,7 @@ type EthereumDto struct {
 	GraphQLPort              uint             `json:"graphqlPort"`
 	Hosts                    []string         `json:"hosts"`
 	CORSDomains              []string         `json:"corsDomains"`
-	CPU                      string           `json:"cpu"`
-	CPULimit                 string           `json:"cpuLimit"`
-	Memory                   string           `json:"memory"`
-	MemoryLimit              string           `json:"memoryLimit"`
-	Storage                  string           `json:"storage"`
-	StorageClass             *string          `json:"storageClass"`
+	sharedAPI.Resources
 }
 type EthereumListDto []EthereumDto
 

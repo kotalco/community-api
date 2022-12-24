@@ -5,29 +5,25 @@ import (
 	"github.com/kotalco/community-api/pkg/k8s"
 	"github.com/kotalco/community-api/pkg/shared"
 	filecoinv1alpha1 "github.com/kotalco/kotal/apis/filecoin/v1alpha1"
+	sharedAPI "github.com/kotalco/kotal/apis/shared"
 )
 
 // Node is Filecoin node
 type FilecoinDto struct {
 	models.Time
 	k8s.MetaDataDto
-	Network            string  `json:"network"`
-	API                *bool   `json:"api"`
-	APIPort            uint    `json:"apiPort"`
-	APIHost            string  `json:"apiHost"`
-	APIRequestTimeout  uint    `json:"apiRequestTimeout"`
-	DisableMetadataLog *bool   `json:"disableMetadataLog"`
-	P2PPort            uint    `json:"p2pPort"`
-	P2PHost            string  `json:"p2pHost"`
-	IPFSPeerEndpoint   string  `json:"ipfsPeerEndpoint"`
-	IPFSOnlineMode     *bool   `json:"ipfsOnlineMode"`
-	IPFSForRetrieval   *bool   `json:"ipfsForRetrieval"`
-	CPU                string  `json:"cpu"`
-	CPULimit           string  `json:"cpuLimit"`
-	Memory             string  `json:"memory"`
-	MemoryLimit        string  `json:"memoryLimit"`
-	Storage            string  `json:"storage"`
-	StorageClass       *string `json:"storageClass"`
+	Network            string `json:"network"`
+	API                *bool  `json:"api"`
+	APIPort            uint   `json:"apiPort"`
+	APIHost            string `json:"apiHost"`
+	APIRequestTimeout  uint   `json:"apiRequestTimeout"`
+	DisableMetadataLog *bool  `json:"disableMetadataLog"`
+	P2PPort            uint   `json:"p2pPort"`
+	P2PHost            string `json:"p2pHost"`
+	IPFSPeerEndpoint   string `json:"ipfsPeerEndpoint"`
+	IPFSOnlineMode     *bool  `json:"ipfsOnlineMode"`
+	IPFSForRetrieval   *bool  `json:"ipfsForRetrieval"`
+	sharedAPI.Resources
 }
 
 type FilecoinListDto []FilecoinDto

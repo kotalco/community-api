@@ -5,6 +5,7 @@ import (
 	"github.com/kotalco/community-api/pkg/k8s"
 	"github.com/kotalco/community-api/pkg/shared"
 	chainlinkv1alpha1 "github.com/kotalco/kotal/apis/chainlink/v1alpha1"
+	sharedAPI "github.com/kotalco/kotal/apis/shared"
 )
 
 type apiCredentials struct {
@@ -29,12 +30,7 @@ type ChainlinkDto struct {
 	APIPort                    uint            `json:"apiPort"`
 	SecureCookies              *bool           `json:"secureCookies"`
 	Logging                    string          `json:"logging"`
-	CPU                        string          `json:"cpu"`
-	CPULimit                   string          `json:"cpuLimit"`
-	Memory                     string          `json:"memory"`
-	MemoryLimit                string          `json:"memoryLimit"`
-	Storage                    string          `json:"storage"`
-	StorageClass               *string         `json:"storageClass"`
+	sharedAPI.Resources
 }
 
 type ChainlinkListDto []ChainlinkDto
