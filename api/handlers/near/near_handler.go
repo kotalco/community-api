@@ -115,7 +115,12 @@ func Update(c *fiber.Ctx) error {
 
 	node := c.Locals("node").(*nearv1alpha1.Node)
 
-	node, err := service.Update(dto, node)
+	err := dto.MetaDataDto.Validate()
+	if err != nil {
+		return c.Status(err.Status).JSON(err)
+	}
+
+	node, err = service.Update(dto, node)
 	if err != nil {
 		return c.Status(err.Status).JSON(err)
 	}
