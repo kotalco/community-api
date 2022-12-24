@@ -10,6 +10,7 @@ import (
 	"github.com/kotalco/community-api/pkg/logger"
 	chainlinkv1alpha1 "github.com/kotalco/kotal/apis/chainlink/v1alpha1"
 	sharedAPI "github.com/kotalco/kotal/apis/shared"
+	corev1 "k8s.io/api/core/v1"
 	apiErrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/types"
 	"os"
@@ -157,16 +158,32 @@ func (service chainlinkService) Update(dto *ChainlinkDto, node *chainlinkv1alpha
 		node.Default()
 	}
 
+	pod := &corev1.Pod{}
+	if dto.CPU != "" || dto.Memory != "" { //check if cpu or memory updated
+		//get pod
+		key := types.NamespacedName{
+			Namespace: node.Namespace,
+			Name:      fmt.Sprintf("%s-0", node.Name),
+		}
+		err := k8sClient.Get(context.Background(), key, pod)
+		if apiErrors.IsNotFound(err) {
+			go logger.Error(service.Update, err)
+			return nil, errors.NewBadRequestError(fmt.Sprintf("pod by name %s doesn't exit", key.Name))
+		}
+	}
+
+	//update node
 	err := k8sClient.Update(context.Background(), node)
 	if err != nil {
 		go logger.Error(service.Update, err)
 		return nil, errors.NewInternalServerError(fmt.Sprintf("can't update node by name %s", node.Name))
 	}
 
-	if k8s.CheckDeploymentResourcesChanged(&dto.Resources) {
-		err := k8s.DeployReconciliation(node.Name, node.Namespace)
+	if pod.Status.Phase == corev1.PodPending { //delete pending pod
+		err = k8sClient.Delete(context.Background(), pod)
 		if err != nil {
-			return nil, err
+			go logger.Error(service.Update, err)
+			return nil, errors.NewInternalServerError(fmt.Sprintf("can't update node by name %s", node.Name))
 		}
 	}
 
