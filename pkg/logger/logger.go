@@ -34,7 +34,6 @@ func init() {
 		Level:       zap.NewAtomicLevelAt(getLevel()),
 		Encoding:    "json",
 		EncoderConfig: zapcore.EncoderConfig{
-			LevelKey:     "level",
 			TimeKey:      "time",
 			MessageKey:   "msg",
 			EncodeTime:   zapcore.ISO8601TimeEncoder,
@@ -87,24 +86,34 @@ func (l logger) Print(v ...interface{}) {
 }
 
 func Info(msg string, tags ...zap.Field) {
+	tags = append(tags, zap.String("level", "info"))
 	log.log.Info(msg, tags...)
 	log.log.Sync()
 }
 
 func Error(location interface{}, err error, tags ...zap.Field) {
-	tags = append(tags, zap.NamedError("error", err))
+	tags = append(tags, zap.String("level", "error"))
+
 	switch location.(type) {
 	case string:
-		log.log.Error(location.(string), tags...)
+		tags = append(tags, zap.String("location", location.(string)))
 	default:
-		log.log.Error(errorLocation(location), tags...)
+		tags = append(tags, zap.String("location", errorLocation(location)))
 	}
+
+	log.log.Error(err.Error(), tags...)
 	log.log.Sync()
 }
 
-func Panic(msg string, err error, tags ...zap.Field) {
-	tags = append(tags, zap.NamedError("panic", err))
-	log.log.Error(msg, tags...)
+func Panic(location interface{}, err error, tags ...zap.Field) {
+	tags = append(tags, zap.String("level", "panic"))
+	switch location.(type) {
+	case string:
+		tags = append(tags, zap.String("location", location.(string)))
+	default:
+		tags = append(tags, zap.String("location", errorLocation(location)))
+	}
+	log.log.Error(err.Error(), tags...)
 	log.log.Sync()
 }
 
