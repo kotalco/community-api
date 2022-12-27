@@ -1,7 +1,6 @@
 package logger
 
 import (
-	"fmt"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 	"os"
@@ -36,6 +35,7 @@ func init() {
 		EncoderConfig: zapcore.EncoderConfig{
 			TimeKey:      "time",
 			MessageKey:   "msg",
+			LevelKey:     "level",
 			EncodeTime:   zapcore.ISO8601TimeEncoder,
 			EncodeLevel:  zapcore.LowercaseLevelEncoder,
 			EncodeCaller: zapcore.ShortCallerEncoder,
@@ -69,31 +69,18 @@ func getOutput() string {
 	return output
 }
 
-func GetLogger() Logger {
-	return log
-}
-
-func (l logger) Printf(format string, v ...interface{}) {
-	if len(v) == 0 {
-		Info(format)
-	} else {
-		Info(fmt.Sprintf(format, v...))
+func Info(location interface{}, msg string, tags ...zap.Field) {
+	switch location.(type) {
+	case string:
+		tags = append(tags, zap.String("location", location.(string)))
+	default:
+		tags = append(tags, zap.String("location", errorLocation(location)))
 	}
-}
-
-func (l logger) Print(v ...interface{}) {
-	Info(fmt.Sprintf("%v", v))
-}
-
-func Info(msg string, tags ...zap.Field) {
-	tags = append(tags, zap.String("level", "info"))
 	log.log.Info(msg, tags...)
 	log.log.Sync()
 }
 
 func Error(location interface{}, err error, tags ...zap.Field) {
-	tags = append(tags, zap.String("level", "error"))
-
 	switch location.(type) {
 	case string:
 		tags = append(tags, zap.String("location", location.(string)))
@@ -106,14 +93,24 @@ func Error(location interface{}, err error, tags ...zap.Field) {
 }
 
 func Panic(location interface{}, err error, tags ...zap.Field) {
-	tags = append(tags, zap.String("level", "panic"))
 	switch location.(type) {
 	case string:
 		tags = append(tags, zap.String("location", location.(string)))
 	default:
 		tags = append(tags, zap.String("location", errorLocation(location)))
 	}
-	log.log.Error(err.Error(), tags...)
+	log.log.Panic(err.Error(), tags...)
+	log.log.Sync()
+}
+
+func Warn(location interface{}, err error, tags ...zap.Field) {
+	switch location.(type) {
+	case string:
+		tags = append(tags, zap.String("location", location.(string)))
+	default:
+		tags = append(tags, zap.String("location", errorLocation(location)))
+	}
+	log.log.Warn(err.Error(), tags...)
 	log.log.Sync()
 }
 

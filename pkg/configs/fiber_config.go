@@ -20,7 +20,7 @@ func FiberConfig() fiber.Config {
 // logs errors using logger pkg
 // return custom error struct using restError pkg
 var defaultErrorHandler = func(c *fiber.Ctx, err error) error {
-	go logger.Panic("PANICKING", err)
+	go logger.Warn("DEFAULT_ERROR_HANDLER", err)
 
 	internalErr := restErrors.NewInternalServerError("some thing went wrong...")
 

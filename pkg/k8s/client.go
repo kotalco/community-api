@@ -32,7 +32,7 @@ func newClient() client.Client {
 	if controllerRuntimeClient == nil {
 		controllerRuntimeClient, err = newRuntimeClient()
 		if err != nil {
-			logger.Panic("K8S_CLIENT", err)
+			logger.Warn("K8S_CLIENT", err)
 		}
 	}
 
