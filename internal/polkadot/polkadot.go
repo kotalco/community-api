@@ -1,12 +1,15 @@
 package polkadot
 
 import (
+	"github.com/kotalco/community-api/internal/models"
 	"github.com/kotalco/community-api/pkg/k8s"
+	"github.com/kotalco/community-api/pkg/shared"
 	polkadotv1alpha1 "github.com/kotalco/kotal/apis/polkadot/v1alpha1"
 	sharedAPI "github.com/kotalco/kotal/apis/shared"
 )
 
 type PolkadotDto struct {
+	models.Time
 	k8s.MetaDataDto
 	Network                  string   `json:"network"`
 	NodePrivateKeySecretName string   `json:"nodePrivateKeySecretName"`
@@ -31,6 +34,7 @@ type PolkadotDto struct {
 type PolkadotListDto []PolkadotDto
 
 func (dto PolkadotDto) FromPolkadotNode(node *polkadotv1alpha1.Node) *PolkadotDto {
+	dto.Time = models.Time{CreatedAt: node.CreationTimestamp.UTC().Format(shared.JavascriptISOString)}
 	dto.Name = node.Name
 	dto.Network = node.Spec.Network
 	dto.NodePrivateKeySecretName = node.Spec.NodePrivateKeySecretName
