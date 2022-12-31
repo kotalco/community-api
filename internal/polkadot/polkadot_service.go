@@ -51,7 +51,6 @@ func (service polkadtoService) Get(namespacedName types.NamespacedName) (*polkad
 
 // Create creates filecoin node from spec
 func (service polkadtoService) Create(dto *PolkadotDto) (*polkadotv1alpha1.Node, *restErrors.RestErr) {
-	fmt.Println(*dto.Pruning)
 	node := &polkadotv1alpha1.Node{
 		ObjectMeta: dto.ObjectMetaFromMetadataDto(),
 		Spec: polkadotv1alpha1.NodeSpec{
