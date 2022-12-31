@@ -56,6 +56,7 @@ func (service polkadtoService) Create(dto *PolkadotDto) (*polkadotv1alpha1.Node,
 		Spec: polkadotv1alpha1.NodeSpec{
 			Network: dto.Network,
 			RPC:     true,
+			Pruning: dto.Pruning,
 		},
 	}
 
