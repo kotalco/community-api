@@ -7,6 +7,7 @@ import (
 	"github.com/kotalco/community-api/pkg/logger"
 	"os"
 	"os/signal"
+	"syscall"
 )
 
 // StartServerWithGracefulShutdown function for starting server with a graceful shutdown.
@@ -20,10 +21,10 @@ func StartServerWithGracefulShutdown(a *fiber.App) {
 
 	go func() {
 		sigint := make(chan os.Signal, 1)
-		signal.Notify(sigint, os.Interrupt) // Catch OS signals.
+		signal.Notify(sigint, syscall.SIGINT) // Catch OS signals.
 		<-sigint
 		if err := a.Shutdown(); err != nil {
-			go logger.Info(fmt.Sprintf("Oops... Server is not shutting down! Reason:  %v", err))
+			go logger.Info("StartServerWithGracefulShutdown", fmt.Sprintf("Oops... Server is not shutting down! Reason:  %v", err))
 		}
 		close(idleConnsClosed)
 	}()
@@ -31,7 +32,7 @@ func StartServerWithGracefulShutdown(a *fiber.App) {
 	port := ":" + configs.Environment.ServerPort
 
 	if err := a.Listen(port); err != nil {
-		go logger.Info(fmt.Sprintf("Oops... Server is not running! Reason: %v", err))
+		go logger.Info("StartServerWithGracefulShutdown", fmt.Sprintf("Oops... Server is not running! Reason: %v", err))
 	}
 	<-idleConnsClosed
 }

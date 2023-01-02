@@ -28,7 +28,7 @@ func (dto *MetaDataDto) Validate() *restErrors.RestErr {
 		return re.MatchString(fl.Field().String())
 	})
 	if err != nil {
-		logger.Panic("USER_DTO_VALIDATE", err)
+		logger.Warn("USER_DTO_VALIDATE", err)
 		return restErrors.NewInternalServerError("something went wrong!")
 	}
 

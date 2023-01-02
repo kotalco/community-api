@@ -18,7 +18,7 @@ func Clientset() *kubernetes.Clientset {
 	if KubernetesClientset == nil {
 		KubernetesClientset, err = NewClientset()
 		if err != nil {
-			logger.Panic("K8S_CLIENT_SET", err)
+			logger.Warn("K8S_CLIENT_SET", err)
 		}
 	}
 
