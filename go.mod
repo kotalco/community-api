@@ -3,9 +3,10 @@ module github.com/kotalco/community-api
 go 1.19
 
 require (
+	github.com/go-playground/validator/v10 v10.11.1
 	github.com/gofiber/fiber/v2 v2.40.1
 	github.com/gofiber/websocket/v2 v2.1.2
-	github.com/kotalco/kotal v0.0.0-20221126235420-a65c5a9c285f
+	github.com/kotalco/kotal v0.0.0-20230112203831-11a04f3b7512
 	github.com/stretchr/testify v1.8.1
 	github.com/ybbus/jsonrpc/v2 v2.1.7
 	go.uber.org/zap v1.23.0
@@ -39,7 +40,6 @@ require (
 	github.com/go-openapi/swag v0.22.3 // indirect
 	github.com/go-playground/locales v0.14.0 // indirect
 	github.com/go-playground/universal-translator v0.18.0 // indirect
-	github.com/go-playground/validator/v10 v10.11.1 // indirect
 	github.com/gogo/protobuf v1.3.2 // indirect
 	github.com/golang-jwt/jwt/v4 v4.4.2 // indirect
 	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
