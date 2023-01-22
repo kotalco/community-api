@@ -53,21 +53,14 @@ func (service beaconNodeService) Get(namespacedNamed types.NamespacedName) (*eth
 
 // Create creates ethereum 2.0 beacon node from spec
 func (service beaconNodeService) Create(dto *BeaconNodeDto) (*ethereum2v1alpha1.BeaconNode, *errors.RestErr) {
-
-	var endpoints []string
-	if dto.Eth1Endpoints != nil {
-		endpoints = *dto.Eth1Endpoints
-	}
-
 	client := ethereum2v1alpha1.Ethereum2Client(dto.Client)
 
 	beaconnode := &ethereum2v1alpha1.BeaconNode{
 		ObjectMeta: dto.ObjectMetaFromMetadataDto(),
 		Spec: ethereum2v1alpha1.BeaconNodeSpec{
-			Network:       dto.Network,
-			Client:        client,
-			Eth1Endpoints: endpoints,
-			RPC:           client == ethereum2v1alpha1.PrysmClient,
+			Network: dto.Network,
+			Client:  client,
+			RPC:     client == ethereum2v1alpha1.PrysmClient,
 			Resources: sharedAPIs.Resources{
 				StorageClass: dto.StorageClass,
 			},
@@ -93,17 +86,6 @@ func (service beaconNodeService) Create(dto *BeaconNodeDto) (*ethereum2v1alpha1.
 
 // Update updates ethereum 2.0 beacon node by name from spec
 func (service beaconNodeService) Update(dto *BeaconNodeDto, node *ethereum2v1alpha1.BeaconNode) (*ethereum2v1alpha1.BeaconNode, *errors.RestErr) {
-	endpoints := dto.Eth1Endpoints
-	if endpoints != nil {
-		// all clients can clear ethereum endpoints
-		// prysm can clear ethereum endpoints only if network is mainnet
-		if node.Spec.Client == ethereum2v1alpha1.PrysmClient && node.Spec.Network != "mainnet" && len(*endpoints) == 0 {
-			// do nothing
-		} else {
-			node.Spec.Eth1Endpoints = *endpoints
-		}
-	}
-
 	if dto.REST != nil {
 		rest := *dto.REST
 		if rest {
