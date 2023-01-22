@@ -195,6 +195,15 @@ func (service ethereumService) Update(dto *EthereumDto, node *ethereumv1alpha1.N
 	if dto.Storage != "" {
 		node.Spec.Storage = dto.Storage
 	}
+	if dto.Engine != nil {
+		node.Spec.Engine = *dto.Engine
+	}
+
+	if node.Spec.Engine {
+		if dto.JWTSecretName != "" {
+			node.Spec.JWTSecretName = dto.JWTSecretName
+		}
+	}
 
 	if os.Getenv("MOCK") == "true" {
 		node.Default()
