@@ -11,17 +11,19 @@ import (
 type BeaconNodeDto struct {
 	models.Time
 	k8s.MetaDataDto
-	Network  string `json:"network"`
-	Client   string `json:"client"`
-	REST     *bool  `json:"rest"`
-	RESTHost string `json:"restHost"`
-	RESTPort uint   `json:"restPort"`
-	RPC      *bool  `json:"rpc"`
-	RPCHost  string `json:"rpcHost"`
-	RPCPort  uint   `json:"rpcPort"`
-	GRPC     *bool  `json:"grpc"`
-	GRPCHost string `json:"grpcHost"`
-	GRPCPort uint   `json:"grpcPort"`
+	Network                 string `json:"network"`
+	Client                  string `json:"client"`
+	REST                    *bool  `json:"rest"`
+	RESTHost                string `json:"restHost"`
+	RESTPort                uint   `json:"restPort"`
+	RPC                     *bool  `json:"rpc"`
+	RPCHost                 string `json:"rpcHost"`
+	RPCPort                 uint   `json:"rpcPort"`
+	GRPC                    *bool  `json:"grpc"`
+	GRPCHost                string `json:"grpcHost"`
+	GRPCPort                uint   `json:"grpcPort"`
+	ExecutionEngineEndpoint string `json:"executionEngineEndpoint"`
+	JWTSecretName           string `json:"jwtSecretName"`
 	sharedAPI.Resources
 }
 type BeaconNodeListDto []BeaconNodeDto
@@ -46,6 +48,8 @@ func (dto BeaconNodeDto) FromEthereum2BeaconNode(node *ethereum2v1alpha1.BeaconN
 	dto.MemoryLimit = node.Spec.MemoryLimit
 	dto.Storage = node.Spec.Storage
 	dto.StorageClass = node.Spec.StorageClass
+	dto.ExecutionEngineEndpoint = node.Spec.ExecutionEngineEndpoint
+	dto.JWTSecretName = node.Spec.JWTSecretName
 
 	return &dto
 }
