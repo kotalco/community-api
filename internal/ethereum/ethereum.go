@@ -39,6 +39,7 @@ type EthereumDto struct {
 	GraphQLPort              uint             `json:"graphqlPort"`
 	Hosts                    []string         `json:"hosts"`
 	CORSDomains              []string         `json:"corsDomains"`
+	Engine                   *bool            `json:"engine"`
 	sharedAPI.Resources
 }
 type EthereumListDto []EthereumDto
@@ -68,6 +69,7 @@ func (dto EthereumDto) FromEthereumNode(node *ethereumv1alpha1.Node) *EthereumDt
 	dto.MemoryLimit = node.Spec.MemoryLimit
 	dto.Storage = node.Spec.Storage
 	dto.StorageClass = node.Spec.StorageClass
+	dto.Engine = &node.Spec.Engine
 
 	if node.Spec.Miner && node.Spec.Import != nil {
 		dto.Import = &ImportedAccount{

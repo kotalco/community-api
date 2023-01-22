@@ -60,6 +60,7 @@ func (service ethereumService) Create(dto *EthereumDto) (*ethereumv1alpha1.Node,
 			Client:                   ethereumv1alpha1.EthereumClient(dto.Client),
 			RPC:                      true,
 			NodePrivateKeySecretName: dto.NodePrivateKeySecretName,
+			Engine:                   *dto.Engine,
 			Resources: sharedAPI.Resources{
 				StorageClass: dto.StorageClass,
 			},
@@ -194,6 +195,9 @@ func (service ethereumService) Update(dto *EthereumDto, node *ethereumv1alpha1.N
 	}
 	if dto.Storage != "" {
 		node.Spec.Storage = dto.Storage
+	}
+	if dto.Engine != nil {
+		node.Spec.Engine = *dto.Engine
 	}
 
 	if os.Getenv("MOCK") == "true" {
