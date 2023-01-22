@@ -40,6 +40,7 @@ type EthereumDto struct {
 	Hosts                    []string         `json:"hosts"`
 	CORSDomains              []string         `json:"corsDomains"`
 	Engine                   *bool            `json:"engine"`
+	JWTSecretName            string           `json:"jwtSecretName"`
 	sharedAPI.Resources
 }
 type EthereumListDto []EthereumDto
@@ -70,6 +71,7 @@ func (dto EthereumDto) FromEthereumNode(node *ethereumv1alpha1.Node) *EthereumDt
 	dto.Storage = node.Spec.Storage
 	dto.StorageClass = node.Spec.StorageClass
 	dto.Engine = &node.Spec.Engine
+	dto.JWTSecretName = node.Spec.JWTSecretName
 
 	if node.Spec.Miner && node.Spec.Import != nil {
 		dto.Import = &ImportedAccount{
