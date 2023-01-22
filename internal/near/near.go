@@ -26,6 +26,7 @@ type NearDto struct {
 	PrometheusHost           string    `json:"prometheusHost"`
 	TelemetryURL             string    `json:"telemetryURL"`
 	Bootnodes                *[]string `json:"bootnodes"`
+	Image                    *string   `json:"image"`
 	sharedAPI.Resources
 }
 

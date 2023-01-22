@@ -17,6 +17,7 @@ type ValidatorDto struct {
 	BeaconEndpoints          []string      `json:"beaconEndpoints"`
 	WalletPasswordSecretName string        `json:"walletPasswordSecretName"`
 	Keystores                []KeystoreDto `json:"keystores"`
+	Image                    *string       `json:"image"`
 	sharedAPI.Resources
 }
 
@@ -48,6 +49,7 @@ func (dto ValidatorDto) FromEthereum2Validator(validator *ethereum2v1alpha1.Vali
 	dto.Storage = validator.Spec.Storage
 	dto.StorageClass = validator.Spec.StorageClass
 	dto.WalletPasswordSecretName = validator.Spec.WalletPasswordSecret
+	dto.Image = validator.Spec.Image
 
 	return &dto
 }

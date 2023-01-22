@@ -60,6 +60,7 @@ func (service ipfsPeerService) Create(dto *PeerDto) (*ipfsv1alpha1.Peer, *restEr
 		ObjectMeta: dto.ObjectMetaFromMetadataDto(),
 		Spec: ipfsv1alpha1.PeerSpec{
 			InitProfiles: initProfiles,
+			Image:        dto.Image,
 			Resources: sharedAPIs.Resources{
 				StorageClass: dto.StorageClass,
 			},
@@ -128,11 +129,16 @@ func (service ipfsPeerService) Update(dto *PeerDto, peer *ipfsv1alpha1.Peer) (*i
 	if dto.Storage != "" {
 		peer.Spec.Storage = dto.Storage
 	}
+<<<<<<< HEAD
 	if dto.API != nil {
 		peer.Spec.API = *dto.API
 	}
 	if dto.Gateway != nil {
 		peer.Spec.Gateway = *dto.API
+=======
+	if *dto.Image != "" {
+		peer.Spec.Image = dto.Image
+>>>>>>> 851c69f (feat: all procols can set or update image version (closing #47))
 	}
 
 	if os.Getenv("MOCK") == "true" {

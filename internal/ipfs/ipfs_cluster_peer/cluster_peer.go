@@ -18,6 +18,7 @@ type ClusterPeerDto struct {
 	Consensus            string   `json:"consensus"`
 	ClusterSecretName    string   `json:"clusterSecretName"`
 	PeerEndpoint         string   `json:"peerEndpoint"`
+	Image                *string  `json:"image"`
 	sharedAPI.Resources
 }
 type ClusterPeerListDto []ClusterPeerDto
@@ -38,6 +39,7 @@ func (dto ClusterPeerDto) FromIPFSClusterPeer(peer *ipfsv1alpha1.ClusterPeer) *C
 	dto.MemoryLimit = peer.Spec.MemoryLimit
 	dto.Storage = peer.Spec.Storage
 	dto.StorageClass = peer.Spec.StorageClass
+	dto.Image = peer.Spec.Image
 
 	return &dto
 }

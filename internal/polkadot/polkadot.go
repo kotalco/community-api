@@ -28,6 +28,7 @@ type PolkadotDto struct {
 	WS                       *bool    `json:"ws"`
 	WSPort                   uint     `json:"wsPort"`
 	CORSDomains              []string `json:"corsDomains"`
+	Image                    *string  `json:"image"`
 	sharedAPI.Resources
 }
 

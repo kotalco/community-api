@@ -55,6 +55,7 @@ func (service ipfsClusterPeerService) Create(dto *ClusterPeerDto) (*ipfsv1alpha1
 	peer := &ipfsv1alpha1.ClusterPeer{
 		ObjectMeta: dto.ObjectMetaFromMetadataDto(),
 		Spec: ipfsv1alpha1.ClusterPeerSpec{
+			Image: dto.Image,
 			Resources: sharedAPIs.Resources{
 				StorageClass: dto.StorageClass,
 			},
@@ -146,6 +147,9 @@ func (service ipfsClusterPeerService) Update(dto *ClusterPeerDto, peer *ipfsv1al
 	}
 	if dto.Storage != "" {
 		peer.Spec.Storage = dto.Storage
+	}
+	if *dto.Image != "" {
+		peer.Spec.Image = dto.Image
 	}
 
 	if os.Getenv("MOCK") == "true" {

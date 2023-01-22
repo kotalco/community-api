@@ -57,6 +57,7 @@ func (service polkadtoService) Create(dto *PolkadotDto) (*polkadotv1alpha1.Node,
 			Network: dto.Network,
 			RPC:     true,
 			Pruning: dto.Pruning,
+			Image:   dto.Image,
 		},
 	}
 
@@ -161,6 +162,9 @@ func (service polkadtoService) Update(dto *PolkadotDto, node *polkadotv1alpha1.N
 
 	if dto.Storage != "" {
 		node.Spec.Storage = dto.Storage
+	}
+	if *dto.Image != "" {
+		node.Spec.Image = dto.Image
 	}
 
 	if os.Getenv("MOCK") == "true" {
