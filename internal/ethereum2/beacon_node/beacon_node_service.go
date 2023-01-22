@@ -58,9 +58,11 @@ func (service beaconNodeService) Create(dto *BeaconNodeDto) (*ethereum2v1alpha1.
 	beaconnode := &ethereum2v1alpha1.BeaconNode{
 		ObjectMeta: dto.ObjectMetaFromMetadataDto(),
 		Spec: ethereum2v1alpha1.BeaconNodeSpec{
-			Network: dto.Network,
-			Client:  client,
-			RPC:     client == ethereum2v1alpha1.PrysmClient,
+			Network:                 dto.Network,
+			Client:                  client,
+			RPC:                     client == ethereum2v1alpha1.PrysmClient,
+			ExecutionEngineEndpoint: dto.ExecutionEngineEndpoint,
+			JWTSecretName:           dto.JWTSecretName,
 			Resources: sharedAPIs.Resources{
 				StorageClass: dto.StorageClass,
 			},
@@ -139,6 +141,12 @@ func (service beaconNodeService) Update(dto *BeaconNodeDto, node *ethereum2v1alp
 	}
 	if dto.Storage != "" {
 		node.Spec.Storage = dto.Storage
+	}
+	if dto.ExecutionEngineEndpoint != "" {
+		node.Spec.ExecutionEngineEndpoint = dto.ExecutionEngineEndpoint
+	}
+	if dto.JWTSecretName != "" {
+		node.Spec.JWTSecretName = dto.JWTSecretName
 	}
 
 	if os.Getenv("MOCK") == "true" {
