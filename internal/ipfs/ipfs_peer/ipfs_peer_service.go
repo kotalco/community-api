@@ -128,6 +128,12 @@ func (service ipfsPeerService) Update(dto *PeerDto, peer *ipfsv1alpha1.Peer) (*i
 	if dto.Storage != "" {
 		peer.Spec.Storage = dto.Storage
 	}
+	if dto.API != nil {
+		peer.Spec.API = *dto.API
+	}
+	if dto.Gateway != nil {
+		peer.Spec.Gateway = *dto.API
+	}
 
 	if os.Getenv("MOCK") == "true" {
 		peer.Default()
