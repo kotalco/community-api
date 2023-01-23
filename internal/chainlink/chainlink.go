@@ -30,7 +30,7 @@ type ChainlinkDto struct {
 	APIPort                    uint            `json:"apiPort"`
 	SecureCookies              *bool           `json:"secureCookies"`
 	Logging                    string          `json:"logging"`
-	Image                      *string         `json:"image"`
+	Image                      string          `json:"image"`
 	sharedAPI.Resources
 }
 
@@ -62,7 +62,7 @@ func (dto ChainlinkDto) FromChainlinkNode(n *chainlinkv1alpha1.Node) *ChainlinkD
 	dto.MemoryLimit = n.Spec.MemoryLimit
 	dto.Storage = n.Spec.Storage
 	dto.StorageClass = n.Spec.StorageClass
-	dto.Image = n.Spec.Image
+	dto.Image = *n.Spec.Image
 
 	return &dto
 }

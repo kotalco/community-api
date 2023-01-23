@@ -55,7 +55,7 @@ func (service filecoinService) Create(dto *FilecoinDto) (*filecoinv1alpha1.Node,
 		ObjectMeta: dto.ObjectMetaFromMetadataDto(),
 		Spec: filecoinv1alpha1.NodeSpec{
 			Network: filecoinv1alpha1.FilecoinNetwork(dto.Network),
-			Image:   dto.Image,
+			Image:   &dto.Image,
 			Resources: sharedAPIs.Resources{
 				StorageClass: dto.StorageClass,
 			},
@@ -136,8 +136,8 @@ func (service filecoinService) Update(dto *FilecoinDto, node *filecoinv1alpha1.N
 	if dto.Storage != "" {
 		node.Spec.Storage = dto.Storage
 	}
-	if *dto.Image != "" {
-		node.Spec.Image = dto.Image
+	if dto.Image != "" {
+		node.Spec.Image = &dto.Image
 	}
 
 	if os.Getenv("MOCK") == "true" {

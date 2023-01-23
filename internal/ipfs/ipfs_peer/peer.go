@@ -20,12 +20,9 @@ type PeerDto struct {
 	GatewayHost  string   `json:"gatewayHost"`
 	Routing      string   `json:"routing"`
 	Profiles     []string `json:"profiles"`
-<<<<<<< HEAD
 	API          *bool    `json:"api"`
 	Gateway      *bool    `json:"gateway"`
-=======
-	Image        *string  `json:"image"`
->>>>>>> 851c69f (feat: all procols can set or update image version (closing #47))
+	Image        string   `json:"image"`
 	sharedAPI.Resources
 }
 
@@ -60,12 +57,9 @@ func (dto PeerDto) FromIPFSPeer(peer *ipfsv1alpha1.Peer) *PeerDto {
 	dto.MemoryLimit = peer.Spec.MemoryLimit
 	dto.Storage = peer.Spec.Storage
 	dto.StorageClass = peer.Spec.StorageClass
-<<<<<<< HEAD
 	dto.API = &peer.Spec.API
 	dto.Gateway = &peer.Spec.Gateway
-=======
-	dto.Image = peer.Spec.Image
->>>>>>> 851c69f (feat: all procols can set or update image version (closing #47))
+	dto.Image = *peer.Spec.Image
 
 	return &dto
 }

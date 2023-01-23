@@ -12,18 +12,18 @@ import (
 type FilecoinDto struct {
 	models.Time
 	k8s.MetaDataDto
-	Network            string  `json:"network"`
-	API                *bool   `json:"api"`
-	APIPort            uint    `json:"apiPort"`
-	APIHost            string  `json:"apiHost"`
-	APIRequestTimeout  uint    `json:"apiRequestTimeout"`
-	DisableMetadataLog *bool   `json:"disableMetadataLog"`
-	P2PPort            uint    `json:"p2pPort"`
-	P2PHost            string  `json:"p2pHost"`
-	IPFSPeerEndpoint   string  `json:"ipfsPeerEndpoint"`
-	IPFSOnlineMode     *bool   `json:"ipfsOnlineMode"`
-	IPFSForRetrieval   *bool   `json:"ipfsForRetrieval"`
-	Image              *string `json:"image"`
+	Network            string `json:"network"`
+	API                *bool  `json:"api"`
+	APIPort            uint   `json:"apiPort"`
+	APIHost            string `json:"apiHost"`
+	APIRequestTimeout  uint   `json:"apiRequestTimeout"`
+	DisableMetadataLog *bool  `json:"disableMetadataLog"`
+	P2PPort            uint   `json:"p2pPort"`
+	P2PHost            string `json:"p2pHost"`
+	IPFSPeerEndpoint   string `json:"ipfsPeerEndpoint"`
+	IPFSOnlineMode     *bool  `json:"ipfsOnlineMode"`
+	IPFSForRetrieval   *bool  `json:"ipfsForRetrieval"`
+	Image              string `json:"image"`
 	sharedAPI.Resources
 }
 
@@ -51,7 +51,7 @@ func (dto FilecoinDto) FromFilecoinNode(node *filecoinv1alpha1.Node) *FilecoinDt
 	dto.MemoryLimit = node.Spec.MemoryLimit
 	dto.Storage = node.Spec.Storage
 	dto.StorageClass = node.Spec.StorageClass
-	dto.Image = node.Spec.Image
+	dto.Image = *node.Spec.Image
 
 	return &dto
 }

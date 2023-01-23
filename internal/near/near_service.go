@@ -57,7 +57,7 @@ func (service nearService) Create(dto *NearDto) (*nearv1alpha1.Node, *restErrors
 			Network: dto.Network,
 			Archive: dto.Archive,
 			RPC:     true,
-			Image:   dto.Image,
+			Image:   &dto.Image,
 			Resources: sharedAPIs.Resources{
 				StorageClass: dto.StorageClass,
 			},
@@ -147,8 +147,8 @@ func (service nearService) Update(dto *NearDto, node *nearv1alpha1.Node) (*nearv
 	if dto.Storage != "" {
 		node.Spec.Storage = dto.Storage
 	}
-	if *dto.Image != "" {
-		node.Spec.Image = dto.Image
+	if dto.Image != "" {
+		node.Spec.Image = &dto.Image
 	}
 
 	if os.Getenv("MOCK") == "true" {

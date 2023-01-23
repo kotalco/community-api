@@ -64,7 +64,7 @@ func (service validatorService) Create(dto *ValidatorDto) (*ethereum2v1alpha1.Va
 			Network:   dto.Network,
 			Client:    ethereum2v1alpha1.Ethereum2Client(dto.Client),
 			Keystores: keystores,
-			Image:     dto.Image,
+			Image:     &dto.Image,
 			Resources: sharedAPIs.Resources{
 				StorageClass: dto.StorageClass,
 			},
@@ -137,8 +137,8 @@ func (service validatorService) Update(dto *ValidatorDto, validator *ethereum2v1
 	if dto.Storage != "" {
 		validator.Spec.Storage = dto.Storage
 	}
-	if *dto.Image != "" {
-		validator.Spec.Image = dto.Image
+	if dto.Image != "" {
+		validator.Spec.Image = &dto.Image
 	}
 
 	if os.Getenv("MOCK") == "true" {
