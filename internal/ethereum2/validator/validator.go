@@ -49,7 +49,7 @@ func (dto ValidatorDto) FromEthereum2Validator(validator *ethereum2v1alpha1.Vali
 	dto.Storage = validator.Spec.Storage
 	dto.StorageClass = validator.Spec.StorageClass
 	dto.WalletPasswordSecretName = validator.Spec.WalletPasswordSecret
-	dto.Image = *validator.Spec.Image
+	dto.Image = validator.Spec.Image
 
 	return &dto
 }

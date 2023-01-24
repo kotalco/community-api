@@ -60,7 +60,7 @@ func (service ipfsPeerService) Create(dto *PeerDto) (*ipfsv1alpha1.Peer, *restEr
 		ObjectMeta: dto.ObjectMetaFromMetadataDto(),
 		Spec: ipfsv1alpha1.PeerSpec{
 			InitProfiles: initProfiles,
-			Image:        &dto.Image,
+			Image:        dto.Image,
 			Resources: sharedAPIs.Resources{
 				StorageClass: dto.StorageClass,
 			},
@@ -136,7 +136,7 @@ func (service ipfsPeerService) Update(dto *PeerDto, peer *ipfsv1alpha1.Peer) (*i
 		peer.Spec.Gateway = *dto.API
 	}
 	if dto.Image != "" {
-		peer.Spec.Image = &dto.Image
+		peer.Spec.Image = dto.Image
 	}
 
 	if os.Getenv("MOCK") == "true" {

@@ -62,7 +62,7 @@ func (dto ChainlinkDto) FromChainlinkNode(n *chainlinkv1alpha1.Node) *ChainlinkD
 	dto.MemoryLimit = n.Spec.MemoryLimit
 	dto.Storage = n.Spec.Storage
 	dto.StorageClass = n.Spec.StorageClass
-	dto.Image = *n.Spec.Image
+	dto.Image = n.Spec.Image
 
 	return &dto
 }

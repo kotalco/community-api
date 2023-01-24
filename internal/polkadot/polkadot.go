@@ -60,7 +60,7 @@ func (dto PolkadotDto) FromPolkadotNode(node *polkadotv1alpha1.Node) *PolkadotDt
 	dto.MemoryLimit = node.Spec.MemoryLimit
 	dto.Storage = node.Spec.Storage
 	dto.StorageClass = node.Spec.StorageClass
-	dto.Image = *node.Spec.Image
+	dto.Image = node.Spec.Image
 
 	return &dto
 }

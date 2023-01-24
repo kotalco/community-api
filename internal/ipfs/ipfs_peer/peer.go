@@ -59,7 +59,7 @@ func (dto PeerDto) FromIPFSPeer(peer *ipfsv1alpha1.Peer) *PeerDto {
 	dto.StorageClass = peer.Spec.StorageClass
 	dto.API = &peer.Spec.API
 	dto.Gateway = &peer.Spec.Gateway
-	dto.Image = *peer.Spec.Image
+	dto.Image = peer.Spec.Image
 
 	return &dto
 }

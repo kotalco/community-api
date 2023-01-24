@@ -51,7 +51,7 @@ func (dto FilecoinDto) FromFilecoinNode(node *filecoinv1alpha1.Node) *FilecoinDt
 	dto.MemoryLimit = node.Spec.MemoryLimit
 	dto.Storage = node.Spec.Storage
 	dto.StorageClass = node.Spec.StorageClass
-	dto.Image = *node.Spec.Image
+	dto.Image = node.Spec.Image
 
 	return &dto
 }

@@ -73,7 +73,7 @@ func (dto EthereumDto) FromEthereumNode(node *ethereumv1alpha1.Node) *EthereumDt
 	dto.StorageClass = node.Spec.StorageClass
 	dto.Engine = &node.Spec.Engine
 	dto.JWTSecretName = node.Spec.JWTSecretName
-	dto.Image = *node.Spec.Image
+	dto.Image = node.Spec.Image
 
 	if node.Spec.Miner && node.Spec.Import != nil {
 		dto.Import = &ImportedAccount{

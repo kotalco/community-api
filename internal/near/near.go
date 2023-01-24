@@ -56,7 +56,7 @@ func (dto NearDto) FromNEARNode(node *nearv1alpha1.Node) *NearDto {
 	dto.MemoryLimit = node.Spec.MemoryLimit
 	dto.Storage = node.Spec.Storage
 	dto.StorageClass = node.Spec.StorageClass
-	dto.Image = *node.Spec.Image
+	dto.Image = node.Spec.Image
 
 	return &dto
 }
