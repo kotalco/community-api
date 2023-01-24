@@ -23,6 +23,7 @@ type FilecoinDto struct {
 	IPFSPeerEndpoint   string `json:"ipfsPeerEndpoint"`
 	IPFSOnlineMode     *bool  `json:"ipfsOnlineMode"`
 	IPFSForRetrieval   *bool  `json:"ipfsForRetrieval"`
+	Image              string `json:"image"`
 	sharedAPI.Resources
 }
 
@@ -50,6 +51,7 @@ func (dto FilecoinDto) FromFilecoinNode(node *filecoinv1alpha1.Node) *FilecoinDt
 	dto.MemoryLimit = node.Spec.MemoryLimit
 	dto.Storage = node.Spec.Storage
 	dto.StorageClass = node.Spec.StorageClass
+	dto.Image = node.Spec.Image
 
 	return &dto
 }

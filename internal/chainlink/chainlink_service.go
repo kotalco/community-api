@@ -61,6 +61,7 @@ func (service chainlinkService) Create(dto *ChainlinkDto) (*chainlinkv1alpha1.No
 			EthereumWSEndpoint:         dto.EthereumWSEndpoint,
 			DatabaseURL:                dto.DatabaseURL,
 			KeystorePasswordSecretName: dto.KeystorePasswordSecretName,
+			Image:                      dto.Image,
 			APICredentials: chainlinkv1alpha1.APICredentials{
 				Email:              dto.APICredentials.Email,
 				PasswordSecretName: dto.APICredentials.PasswordSecretName,
@@ -152,6 +153,9 @@ func (service chainlinkService) Update(dto *ChainlinkDto, node *chainlinkv1alpha
 	}
 	if dto.Storage != "" {
 		node.Spec.Storage = dto.Storage
+	}
+	if dto.Image != "" {
+		node.Spec.Image = dto.Image
 	}
 
 	if os.Getenv("MOCK") == "true" {

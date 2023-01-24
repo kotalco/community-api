@@ -26,6 +26,7 @@ type NearDto struct {
 	PrometheusHost           string    `json:"prometheusHost"`
 	TelemetryURL             string    `json:"telemetryURL"`
 	Bootnodes                *[]string `json:"bootnodes"`
+	Image                    string    `json:"image"`
 	sharedAPI.Resources
 }
 
@@ -55,6 +56,7 @@ func (dto NearDto) FromNEARNode(node *nearv1alpha1.Node) *NearDto {
 	dto.MemoryLimit = node.Spec.MemoryLimit
 	dto.Storage = node.Spec.Storage
 	dto.StorageClass = node.Spec.StorageClass
+	dto.Image = node.Spec.Image
 
 	return &dto
 }

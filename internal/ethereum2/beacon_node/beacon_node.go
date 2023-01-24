@@ -24,6 +24,7 @@ type BeaconNodeDto struct {
 	GRPCPort                uint   `json:"grpcPort"`
 	ExecutionEngineEndpoint string `json:"executionEngineEndpoint"`
 	JWTSecretName           string `json:"jwtSecretName"`
+	Image                   string `json:"image"`
 	sharedAPI.Resources
 }
 type BeaconNodeListDto []BeaconNodeDto
@@ -50,6 +51,7 @@ func (dto BeaconNodeDto) FromEthereum2BeaconNode(node *ethereum2v1alpha1.BeaconN
 	dto.StorageClass = node.Spec.StorageClass
 	dto.ExecutionEngineEndpoint = node.Spec.ExecutionEngineEndpoint
 	dto.JWTSecretName = node.Spec.JWTSecretName
+	dto.Image = node.Spec.Image
 
 	return &dto
 }

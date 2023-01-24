@@ -22,6 +22,7 @@ type PeerDto struct {
 	Profiles     []string `json:"profiles"`
 	API          *bool    `json:"api"`
 	Gateway      *bool    `json:"gateway"`
+	Image        string   `json:"image"`
 	sharedAPI.Resources
 }
 
@@ -58,6 +59,7 @@ func (dto PeerDto) FromIPFSPeer(peer *ipfsv1alpha1.Peer) *PeerDto {
 	dto.StorageClass = peer.Spec.StorageClass
 	dto.API = &peer.Spec.API
 	dto.Gateway = &peer.Spec.Gateway
+	dto.Image = peer.Spec.Image
 
 	return &dto
 }
