@@ -133,7 +133,7 @@ func (service ipfsPeerService) Update(dto *PeerDto, peer *ipfsv1alpha1.Peer) (*i
 		peer.Spec.API = *dto.API
 	}
 	if dto.Gateway != nil {
-		peer.Spec.Gateway = *dto.API
+		peer.Spec.Gateway = *dto.Gateway
 	}
 	if dto.Image != "" {
 		peer.Spec.Image = dto.Image
