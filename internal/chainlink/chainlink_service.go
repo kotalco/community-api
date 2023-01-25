@@ -154,6 +154,9 @@ func (service chainlinkService) Update(dto *ChainlinkDto, node *chainlinkv1alpha
 	if dto.Storage != "" {
 		node.Spec.Storage = dto.Storage
 	}
+	if dto.API != nil {
+		node.Spec.API = *dto.API
+	}
 	if dto.Image != "" {
 		node.Spec.Image = dto.Image
 	}
