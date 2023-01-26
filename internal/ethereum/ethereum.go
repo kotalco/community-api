@@ -40,6 +40,7 @@ type EthereumDto struct {
 	Hosts                    []string         `json:"hosts"`
 	CORSDomains              []string         `json:"corsDomains"`
 	Engine                   *bool            `json:"engine"`
+	EnginePort               uint             `json:"enginePort"`
 	JWTSecretName            string           `json:"jwtSecretName"`
 	Image                    string           `json:"image"`
 	sharedAPI.Resources
@@ -72,6 +73,7 @@ func (dto EthereumDto) FromEthereumNode(node *ethereumv1alpha1.Node) *EthereumDt
 	dto.Storage = node.Spec.Storage
 	dto.StorageClass = node.Spec.StorageClass
 	dto.Engine = &node.Spec.Engine
+	dto.EnginePort = node.Spec.EnginePort
 	dto.JWTSecretName = node.Spec.JWTSecretName
 	dto.Image = node.Spec.Image
 
