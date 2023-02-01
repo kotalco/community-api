@@ -21,7 +21,7 @@ func KubeConfig() (*rest.Config, error) {
 		log.Println("creating k8s client using test environment ...")
 		testEnv := envtest.Environment{
 			CRDDirectoryPaths: []string{
-				filepath.Join(build.Default.GOPATH, "pkg", "mod", "github.com", "kotalco", "kotal@v0.0.0-20230124184344-65d52739f9c5", "config", "crd", "bases"),
+				filepath.Join(build.Default.GOPATH, "pkg", "mod", "github.com", "kotalco", "kotal@v0.1.0", "config", "crd", "bases"),
 			},
 			ErrorIfCRDPathMissing: true,
 		}
