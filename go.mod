@@ -6,7 +6,7 @@ require (
 	github.com/go-playground/validator/v10 v10.11.1
 	github.com/gofiber/fiber/v2 v2.40.1
 	github.com/gofiber/websocket/v2 v2.1.2
-	github.com/kotalco/kotal v0.0.0-20230124184344-65d52739f9c5
+	github.com/kotalco/kotal v0.1.0
 	github.com/stretchr/testify v1.8.1
 	github.com/ybbus/jsonrpc/v2 v2.1.7
 	go.uber.org/zap v1.23.0
