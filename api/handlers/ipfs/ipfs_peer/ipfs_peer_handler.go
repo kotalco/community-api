@@ -3,23 +3,34 @@
 package ipfs_peer
 
 import (
+	"bytes"
+	"context"
+	"encoding/json"
 	"fmt"
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/websocket/v2"
 	"github.com/kotalco/community-api/internal/ipfs/ipfs_peer"
 	restErrors "github.com/kotalco/community-api/pkg/errors"
+	"github.com/kotalco/community-api/pkg/k8s"
 	"github.com/kotalco/community-api/pkg/shared"
 	ipfsv1alpha1 "github.com/kotalco/kotal/apis/ipfs/v1alpha1"
+	"io/ioutil"
+	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/types"
 	"net/http"
 	"sort"
 	"strconv"
+	"time"
 )
 
 const (
 	nameKeyword = "name"
 )
 
-var service = ipfs_peer.NewIpfsPeerService()
+var (
+	service   = ipfs_peer.NewIpfsPeerService()
+	k8sClient = k8s.NewClientService()
+)
 
 // Get gets a single IPFS peer by name
 // 1-get the node validated from ValidatePeerExist method
@@ -153,4 +164,73 @@ func ValidatePeerExist(c *fiber.Ctx) error {
 	c.Locals("peer", peer)
 
 	return c.Next()
+}
+
+func Stats(c *websocket.Conn) {
+	defer c.Close()
+
+	name := c.Params("name")
+	peer := &ipfsv1alpha1.Peer{}
+	nameSpacedName := types.NamespacedName{
+		Namespace: c.Locals("namespace").(string),
+		Name:      name,
+	}
+
+	for {
+
+		err := k8sClient.Get(context.Background(), nameSpacedName, peer)
+		if errors.IsNotFound(err) {
+			c.WriteJSON(fiber.Map{
+				"error": fmt.Sprintf("peer by name %s doesn't exist", name),
+			})
+			return
+		}
+
+		if !peer.Spec.API {
+			c.WriteJSON(fiber.Map{
+				"error": "peer api is not enabled",
+			})
+			time.Sleep(time.Second * 3)
+			continue
+		}
+
+		req, err := http.NewRequest(http.MethodPost, fmt.Sprintf("http://%s:%d/api/v0/swarm/peers", peer.Spec.APIHost, peer.Spec.APIPort), bytes.NewReader([]byte(nil)))
+		if err != nil {
+			c.WriteJSON(fiber.Map{
+				"error": err.Error(),
+			})
+			return
+		}
+		client := http.Client{
+			Timeout: 30 * time.Second,
+		}
+
+		res, err := client.Do(req)
+		if err != nil {
+			c.WriteJSON(fiber.Map{
+				"error": err.Error(),
+			})
+			return
+		}
+
+		responseData, err := ioutil.ReadAll(res.Body)
+		if err != nil {
+			c.WriteJSON(fiber.Map{
+				"error": err.Error(),
+			})
+			return
+		}
+
+		var responseBody map[string][]interface{}
+		intErr := json.Unmarshal(responseData, &responseBody)
+		if intErr != nil {
+			c.WriteJSON(fiber.Map{
+				"error": err.Error(),
+			})
+			return
+		}
+
+		fmt.Println(len(responseBody["Peers"]))
+		time.Sleep(time.Second * 3)
+	}
 }
