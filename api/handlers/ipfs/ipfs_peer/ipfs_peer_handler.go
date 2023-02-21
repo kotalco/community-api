@@ -175,62 +175,103 @@ func Stats(c *websocket.Conn) {
 		Namespace: c.Locals("namespace").(string),
 		Name:      name,
 	}
-
-	for {
-
-		err := k8sClient.Get(context.Background(), nameSpacedName, peer)
+	err := k8sClient.Get(context.Background(), nameSpacedName, peer)
+	if err != nil {
 		if errors.IsNotFound(err) {
 			c.WriteJSON(fiber.Map{
 				"error": fmt.Sprintf("peer by name %s doesn't exist", name),
 			})
 			return
 		}
+		c.WriteJSON(fiber.Map{
+			"error": err.Error(),
+		})
+		return
+	}
 
-		if !peer.Spec.API {
-			c.WriteJSON(fiber.Map{
-				"error": "peer api is not enabled",
-			})
-			time.Sleep(time.Second * 3)
-			continue
-		}
+	if !peer.Spec.API {
+		c.WriteJSON(fiber.Map{
+			"error": "peer api is not enabled",
+		})
+		return
+	}
 
-		req, err := http.NewRequest(http.MethodPost, fmt.Sprintf("http://%s:%d/api/v0/swarm/peers", peer.Spec.APIHost, peer.Spec.APIPort), bytes.NewReader([]byte(nil)))
+	for {
+		peerCount, err := peerCount(peer)
 		if err != nil {
 			c.WriteJSON(fiber.Map{
 				"error": err.Error(),
 			})
 			return
 		}
-		client := http.Client{
-			Timeout: 30 * time.Second,
-		}
+		c.WriteJSON(fiber.Map{
+			"peers": peerCount,
+		})
 
-		res, err := client.Do(req)
+		bw, err := bwStat(peer)
 		if err != nil {
 			c.WriteJSON(fiber.Map{
 				"error": err.Error(),
 			})
 			return
 		}
+		c.WriteJSON(bw)
 
-		responseData, err := ioutil.ReadAll(res.Body)
-		if err != nil {
-			c.WriteJSON(fiber.Map{
-				"error": err.Error(),
-			})
-			return
-		}
-
-		var responseBody map[string][]interface{}
-		intErr := json.Unmarshal(responseData, &responseBody)
-		if intErr != nil {
-			c.WriteJSON(fiber.Map{
-				"error": err.Error(),
-			})
-			return
-		}
-
-		fmt.Println(len(responseBody["Peers"]))
 		time.Sleep(time.Second * 3)
 	}
+}
+
+func peerCount(peer *ipfsv1alpha1.Peer) (int, error) {
+	client := http.Client{
+		Timeout: 10 * time.Second,
+	}
+	req, err := http.NewRequest(http.MethodPost, fmt.Sprintf("http://%s:%d/api/v0/swarm/peers", peer.Spec.APIHost, peer.Spec.APIPort), bytes.NewReader([]byte(nil)))
+	if err != nil {
+		return 0, err
+	}
+	res, err := client.Do(req)
+	if err != nil {
+		return 0, err
+	}
+	responseData, err := ioutil.ReadAll(res.Body)
+	if err != nil {
+		return 0, err
+	}
+
+	var responseBody map[string][]interface{}
+	err = json.Unmarshal(responseData, &responseBody)
+	if err != nil {
+		return 0, err
+	}
+	return len(responseBody["Peers"]), nil
+}
+
+func bwStat(peer *ipfsv1alpha1.Peer) (interface{}, error) {
+	client := http.Client{
+		Timeout: 10 * time.Second,
+	}
+	req, err := http.NewRequest(http.MethodPost, fmt.Sprintf("http://%s:%d/api/v0/stats/bw", peer.Spec.APIHost, peer.Spec.APIPort), bytes.NewReader([]byte(nil)))
+	if err != nil {
+		return nil, err
+	}
+	res, err := client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	responseData, err := ioutil.ReadAll(res.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	var responseBody struct {
+		RateIn   float64 // MB
+		RateOut  float64 // MB
+		TotalIn  int64   // B/s
+		TotalOut int64   // B/s
+	}
+	err = json.Unmarshal(responseData, &responseBody)
+	if err != nil {
+		return nil, err
+	}
+	return responseBody, nil
 }
