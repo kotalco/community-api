@@ -217,6 +217,14 @@ func Stats(c *websocket.Conn) {
 		}
 		c.WriteJSON(bw)
 
+		_, err = pinStat(peer)
+		if err != nil {
+			c.WriteJSON(fiber.Map{
+				"error": err.Error(),
+			})
+			return
+		}
+
 		time.Sleep(time.Second * 3)
 	}
 }
@@ -274,4 +282,25 @@ func bwStat(peer *ipfsv1alpha1.Peer) (interface{}, error) {
 		return nil, err
 	}
 	return responseBody, nil
+}
+
+func pinStat(peer *ipfsv1alpha1.Peer) (interface{}, error) {
+	client := http.Client{
+		Timeout: 10 * time.Second,
+	}
+	req, err := http.NewRequest(http.MethodPost, fmt.Sprintf("http://%s:%d/api/v0/pin/ls", peer.Spec.APIHost, peer.Spec.APIPort), bytes.NewReader([]byte(nil)))
+	if err != nil {
+		return nil, err
+	}
+	res, err := client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	responseData, err := ioutil.ReadAll(res.Body)
+	if err != nil {
+		return nil, err
+	}
+	fmt.Println(string(responseData))
+
+	return nil, nil
 }
