@@ -10,7 +10,6 @@ import (
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"os"
 	"time"
 
 	"github.com/gofiber/websocket/v2"
@@ -19,33 +18,14 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 )
 
-const megabyte = "MB"
-const milliCore = "m"
-
-type metricDto struct {
-	Value int64  `json:"value"`
-	Unit  string `json:"unit"`
-}
 type metricsResponseDto struct {
-	Cpu    metricDto `json:"cpu"`
-	Memory metricDto `json:"memory"`
+	Cpu    int64 `json:"cpu"`
+	Memory int64 `json:"memory"`
 }
 
 // Metrics returns a websocket that emits cpu and memory usage
 func Metrics(c *websocket.Conn) {
 	defer c.Close()
-
-	if os.Getenv("MOCK") == "true" {
-		for {
-			response := new(metricsResponseDto)
-			response.Cpu.Value = 0
-			response.Cpu.Unit = milliCore
-			response.Memory.Value = 0
-			response.Memory.Unit = megabyte
-			c.WriteJSON(shared.NewResponse(response))
-			time.Sleep(time.Second * 3)
-		}
-	}
 
 	pod := &corev1.Pod{}
 	key := types.NamespacedName{
@@ -90,13 +70,11 @@ func Metrics(c *websocket.Conn) {
 		response := new(metricsResponseDto)
 		//cpu are represented in nano-cores which is 1/1000000000 (1 billionth) of a cpu
 		//scaling to milli core which is 1/1000 of a cpu
-		response.Cpu.Value = metrics.Containers[0].Usage.Cpu().ScaledValue(resource.Milli)
-		response.Cpu.Unit = milliCore
+		response.Cpu = metrics.Containers[0].Usage.Cpu().ScaledValue(resource.Milli)
 		//memory usage are represented in ki  (1 Kibibyte = 1.024 kilobytes) (1000 Kibibyte  = 1.024 megabytes)
 		//scaling to megabytes
 		//the value won't overflow int64 coz we are scaling to megabytes
-		response.Memory.Value = metrics.Containers[0].Usage.Memory().ScaledValue(resource.Mega)
-		response.Memory.Unit = megabyte
+		response.Memory = metrics.Containers[0].Usage.Memory().ScaledValue(resource.Mega)
 
 		c.WriteJSON(shared.NewResponse(response))
 		time.Sleep(time.Second * 3)
