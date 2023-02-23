@@ -23,6 +23,16 @@ import (
 	"time"
 )
 
+type statCalls struct {
+	url  string
+	name string
+}
+type result struct {
+	err  error
+	name string
+	data []byte
+}
+
 const (
 	nameKeyword = "name"
 )
@@ -166,17 +176,7 @@ func ValidatePeerExist(c *fiber.Ctx) error {
 	return c.Next()
 }
 
-// Stats returns a websocket that emits peers, bw and files stats
-type statCalls struct {
-	url  string
-	name string
-}
-type result struct {
-	err  error
-	name string
-	data []byte
-}
-
+// Stats returns a websocket that emits peers, bw ,pin and files stats
 func Stats(c *websocket.Conn) {
 	defer c.Close()
 
