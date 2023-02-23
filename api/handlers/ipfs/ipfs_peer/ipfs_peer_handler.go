@@ -166,6 +166,17 @@ func ValidatePeerExist(c *fiber.Ctx) error {
 	return c.Next()
 }
 
+// Stats returns a websocket that emits peers, bw and files stats
+type statCalls struct {
+	url  string
+	name string
+}
+type result struct {
+	err  error
+	name string
+	data []byte
+}
+
 func Stats(c *websocket.Conn) {
 	defer c.Close()
 
@@ -197,110 +208,135 @@ func Stats(c *websocket.Conn) {
 	}
 
 	for {
-		peerCount, err := peerCount(peer)
-		if err != nil {
-			c.WriteJSON(fiber.Map{
-				"error": err.Error(),
-			})
-			return
-		}
-		c.WriteJSON(fiber.Map{
-			"peers": peerCount,
-		})
+		jobs := make(chan statCalls, 4) //buffered job channel
+		results := make(chan result, 4) //buffered results channel
 
-		bw, err := bwStat(peer)
-		if err != nil {
-			c.WriteJSON(fiber.Map{
-				"error": err.Error(),
-			})
-			return
+		//loop over a worker that accepts jobs receive-channel and results send-channel
+		for i := 0; i < 4; i++ { //the total execution time decreases with the increase of this loop number
+			go worker(jobs, results)
 		}
-		c.WriteJSON(bw)
 
-		_, err = pinStat(peer)
-		if err != nil {
-			c.WriteJSON(fiber.Map{
-				"error": err.Error(),
-			})
-			return
+		//send tasks to the jobs channel
+		jobs <- statCalls{name: "peerCount", url: fmt.Sprintf("http://%s:%d/api/v0/swarm/peers", peer.Spec.APIHost, peer.Spec.APIPort)}
+		jobs <- statCalls{name: "bwStat", url: fmt.Sprintf("http://%s:%d/api/v0/stats/bw", peer.Spec.APIHost, peer.Spec.APIPort)}
+		jobs <- statCalls{name: "filesStat", url: fmt.Sprintf("http://%s:%d/api/v0/files/stat?arg=/", peer.Spec.APIHost, peer.Spec.APIPort)}
+		jobs <- statCalls{name: "pinStat", url: fmt.Sprintf("http://%s:%d/api/v0/pin/ls", peer.Spec.APIHost, peer.Spec.APIPort)}
+
+		close(jobs)
+
+		var ipfsStatResponseDto struct {
+			PeerCount      int
+			PinCount       int
+			RateIn         float64
+			RateOut        float64
+			Blocks         int
+			CumulativeSize uint64 //in Bytes
 		}
+		newIpfsResponse := ipfsStatResponseDto
+		//loop over your results channel and receive the results
+		for i := 0; i < 4; i++ {
+			//wait for the chan result to return its response
+			resp := <-results
+			if resp.err != nil {
+				c.WriteJSON(fiber.Map{
+					"error": err.Error(),
+				})
+				continue
+			}
+
+			switch resp.name {
+			case "peerCount":
+				var responseBody map[string][]interface{}
+				err = json.Unmarshal(resp.data, &responseBody)
+				if err != nil {
+					c.WriteJSON(fiber.Map{
+						"error": err.Error(),
+					})
+					break
+				}
+				newIpfsResponse.PeerCount = len(responseBody["Peers"])
+				break
+			case "bwStat":
+				var responseBody struct {
+					RateIn   float64 // MB
+					RateOut  float64 // MB
+					TotalIn  int64   // B/s
+					TotalOut int64   // B/s
+				}
+				err = json.Unmarshal(resp.data, &responseBody)
+				if err != nil {
+					c.WriteJSON(fiber.Map{
+						"error": err.Error(),
+					})
+					break
+				}
+				newIpfsResponse.RateIn = responseBody.RateIn
+				newIpfsResponse.RateOut = responseBody.RateOut
+				break
+			case "filesStat":
+				var responseBody struct {
+					Blocks         int
+					CumulativeSize uint64 //in Bytes
+				}
+				err = json.Unmarshal(resp.data, &responseBody)
+				if err != nil {
+					c.WriteJSON(fiber.Map{
+						"error": err.Error(),
+					})
+					break
+				}
+				newIpfsResponse.Blocks = responseBody.Blocks
+				newIpfsResponse.CumulativeSize = responseBody.CumulativeSize
+				break
+
+			case "pinStat":
+				var responseBody map[string]map[string]interface{}
+				err = json.Unmarshal(resp.data, &responseBody)
+				if err != nil {
+					c.WriteJSON(fiber.Map{
+						"error": err.Error(),
+					})
+					break
+				}
+				newIpfsResponse.PinCount = len(responseBody["Keys"])
+				break
+			}
+		}
+		close(results)
+
+		c.WriteJSON(newIpfsResponse)
 
 		time.Sleep(time.Second * 3)
 	}
 }
 
-func peerCount(peer *ipfsv1alpha1.Peer) (int, error) {
-	client := http.Client{
-		Timeout: 10 * time.Second,
-	}
-	req, err := http.NewRequest(http.MethodPost, fmt.Sprintf("http://%s:%d/api/v0/swarm/peers", peer.Spec.APIHost, peer.Spec.APIPort), bytes.NewReader([]byte(nil)))
-	if err != nil {
-		return 0, err
-	}
-	res, err := client.Do(req)
-	if err != nil {
-		return 0, err
-	}
-	responseData, err := ioutil.ReadAll(res.Body)
-	if err != nil {
-		return 0, err
-	}
+// worker is a  collection of threads that running at the same time
+// used to prevent the d-dossing of the ipfs peer
+func worker(jobs <-chan statCalls, results chan<- result) {
+	chanRes := result{}
+	for x := range jobs {
+		chanRes.name = x.name
 
-	var responseBody map[string][]interface{}
-	err = json.Unmarshal(responseData, &responseBody)
-	if err != nil {
-		return 0, err
-	}
-	return len(responseBody["Peers"]), nil
-}
+		client := http.Client{
+			Timeout: 4 * time.Second,
+		}
+		req, e := http.NewRequest(http.MethodPost, x.url, bytes.NewReader([]byte(nil)))
+		if e != nil {
+			chanRes.err = e
+			return
+		}
+		resp, e := client.Do(req)
+		if e != nil {
+			chanRes.err = e
+			return
+		}
 
-func bwStat(peer *ipfsv1alpha1.Peer) (interface{}, error) {
-	client := http.Client{
-		Timeout: 10 * time.Second,
+		responseData, e := ioutil.ReadAll(resp.Body)
+		if e != nil {
+			chanRes.err = e
+			return
+		}
+		chanRes.data = responseData
+		results <- chanRes
 	}
-	req, err := http.NewRequest(http.MethodPost, fmt.Sprintf("http://%s:%d/api/v0/stats/bw", peer.Spec.APIHost, peer.Spec.APIPort), bytes.NewReader([]byte(nil)))
-	if err != nil {
-		return nil, err
-	}
-	res, err := client.Do(req)
-	if err != nil {
-		return nil, err
-	}
-	responseData, err := ioutil.ReadAll(res.Body)
-	if err != nil {
-		return nil, err
-	}
-
-	var responseBody struct {
-		RateIn   float64 // MB
-		RateOut  float64 // MB
-		TotalIn  int64   // B/s
-		TotalOut int64   // B/s
-	}
-	err = json.Unmarshal(responseData, &responseBody)
-	if err != nil {
-		return nil, err
-	}
-	return responseBody, nil
-}
-
-func pinStat(peer *ipfsv1alpha1.Peer) (interface{}, error) {
-	client := http.Client{
-		Timeout: 10 * time.Second,
-	}
-	req, err := http.NewRequest(http.MethodPost, fmt.Sprintf("http://%s:%d/api/v0/pin/ls", peer.Spec.APIHost, peer.Spec.APIPort), bytes.NewReader([]byte(nil)))
-	if err != nil {
-		return nil, err
-	}
-	res, err := client.Do(req)
-	if err != nil {
-		return nil, err
-	}
-	responseData, err := ioutil.ReadAll(res.Body)
-	if err != nil {
-		return nil, err
-	}
-	fmt.Println(string(responseData))
-
-	return nil, nil
 }
