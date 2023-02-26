@@ -292,13 +292,13 @@ func Stats(c *websocket.Conn) {
 // worker is a  collection of threads for the ipfs peer stats
 func worker(jobs <-chan request, results chan<- result) {
 	chanRes := result{}
-	for x := range jobs {
-		chanRes.name = x.name
+	for job := range jobs {
+		chanRes.name = job.name
 
 		client := http.Client{
 			Timeout: 4 * time.Second,
 		}
-		req, e := http.NewRequest(http.MethodPost, x.url, bytes.NewReader([]byte(nil)))
+		req, e := http.NewRequest(http.MethodPost, job.url, bytes.NewReader([]byte(nil)))
 		if e != nil {
 			chanRes.err = e
 			return
