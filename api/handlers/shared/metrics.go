@@ -18,6 +18,8 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 )
 
+var metricsClientset = k8s.MetricsClientset()
+
 type metricsResponseDto struct {
 	Cpu    int64 `json:"cpu"`
 	Memory int64 `json:"memory"`
@@ -59,7 +61,6 @@ func Metrics(c *websocket.Conn) {
 			continue
 		}
 
-		metricsClientset := k8s.MetricsClientset()
 		opts := metav1.GetOptions{}
 		metrics, err := metricsClientset.MetricsV1beta1().PodMetricses(key.Namespace).Get(context.Background(), key.Name, opts)
 		if err != nil {
@@ -68,12 +69,7 @@ func Metrics(c *websocket.Conn) {
 		}
 
 		response := new(metricsResponseDto)
-		//cpu are represented in nano-cores which is 1/1000000000 (1 billionth) of a cpu
-		//scaling to milli core which is 1/1000 of a cpu
 		response.Cpu = metrics.Containers[0].Usage.Cpu().ScaledValue(resource.Milli)
-		//memory usage are represented in ki  (1 Kibibyte = 1.024 kilobytes) (1000 Kibibyte  = 1.024 megabytes)
-		//scaling to megabytes
-		//the value won't overflow int64 coz we are scaling to megabytes
 		response.Memory = metrics.Containers[0].Usage.Memory().ScaledValue(resource.Mega)
 
 		c.WriteJSON(shared.NewResponse(response))
