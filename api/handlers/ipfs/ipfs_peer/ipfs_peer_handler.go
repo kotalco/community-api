@@ -23,7 +23,7 @@ import (
 	"time"
 )
 
-type statCalls struct {
+type request struct {
 	url  string
 	name string
 }
@@ -208,34 +208,30 @@ func Stats(c *websocket.Conn) {
 	}
 
 	for {
-		jobs := make(chan statCalls, 4) //buffered job channel
-		results := make(chan result, 4) //buffered results channel
+		jobs := make(chan request, 3)
+		results := make(chan result, 3)
 
-		//loop over a worker that accepts jobs receive-channel and results send-channel
-		for i := 0; i < 4; i++ { //the total execution time decreases with the increase of this loop number
+		for i := 0; i < 3; i++ {
 			go worker(jobs, results)
 		}
 
-		//send tasks to the jobs channel
-		jobs <- statCalls{name: "peerCount", url: fmt.Sprintf("http://%s:%d/api/v0/swarm/peers", peer.Spec.APIHost, peer.Spec.APIPort)}
-		jobs <- statCalls{name: "bwStat", url: fmt.Sprintf("http://%s:%d/api/v0/stats/bw", peer.Spec.APIHost, peer.Spec.APIPort)}
-		jobs <- statCalls{name: "filesStat", url: fmt.Sprintf("http://%s:%d/api/v0/files/stat?arg=/", peer.Spec.APIHost, peer.Spec.APIPort)}
-		jobs <- statCalls{name: "pinStat", url: fmt.Sprintf("http://%s:%d/api/v0/pin/ls", peer.Spec.APIHost, peer.Spec.APIPort)}
+		baseUrl := fmt.Sprintf("http://%s:%d/api/v0", peer.Name, peer.Spec.APIPort)
+		jobs <- request{name: "peerCount", url: fmt.Sprintf("%s/swarm/peers", baseUrl)}
+		jobs <- request{name: "filesStat", url: fmt.Sprintf("%s/files/stat?arg=/", baseUrl)}
+		jobs <- request{name: "pinStat", url: fmt.Sprintf("%s/pin/ls", baseUrl)}
 
 		close(jobs)
 
 		var ipfsStatResponseDto struct {
 			PeerCount      int
 			PinCount       int
-			RateIn         float64
-			RateOut        float64
 			Blocks         int
 			CumulativeSize uint64 //in Bytes
 		}
+
 		newIpfsResponse := ipfsStatResponseDto
-		//loop over your results channel and receive the results
-		for i := 0; i < 4; i++ {
-			//wait for the chan result to return its response
+
+		for i := 0; i < 3; i++ {
 			resp := <-results
 			if resp.err != nil {
 				c.WriteJSON(fiber.Map{
@@ -255,23 +251,6 @@ func Stats(c *websocket.Conn) {
 					break
 				}
 				newIpfsResponse.PeerCount = len(responseBody["Peers"])
-				break
-			case "bwStat":
-				var responseBody struct {
-					RateIn   float64 // MB
-					RateOut  float64 // MB
-					TotalIn  int64   // B/s
-					TotalOut int64   // B/s
-				}
-				err = json.Unmarshal(resp.data, &responseBody)
-				if err != nil {
-					c.WriteJSON(fiber.Map{
-						"error": err.Error(),
-					})
-					break
-				}
-				newIpfsResponse.RateIn = responseBody.RateIn
-				newIpfsResponse.RateOut = responseBody.RateOut
 				break
 			case "filesStat":
 				var responseBody struct {
@@ -312,7 +291,7 @@ func Stats(c *websocket.Conn) {
 
 // worker is a  collection of threads that running at the same time
 // used to prevent the d-dossing of the ipfs peer
-func worker(jobs <-chan statCalls, results chan<- result) {
+func worker(jobs <-chan request, results chan<- result) {
 	chanRes := result{}
 	for x := range jobs {
 		chanRes.name = x.name
