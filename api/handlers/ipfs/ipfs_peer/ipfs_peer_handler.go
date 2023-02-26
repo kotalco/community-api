@@ -176,7 +176,7 @@ func ValidatePeerExist(c *fiber.Ctx) error {
 	return c.Next()
 }
 
-// Stats returns a websocket that emits peers, bw ,pin and files stats
+// Stats returns a websocket that emits peers,pin and files stats
 func Stats(c *websocket.Conn) {
 	defer c.Close()
 
@@ -289,8 +289,7 @@ func Stats(c *websocket.Conn) {
 	}
 }
 
-// worker is a  collection of threads that running at the same time
-// used to prevent the d-dossing of the ipfs peer
+// worker is a  collection of threads for the ipfs peer stats
 func worker(jobs <-chan request, results chan<- result) {
 	chanRes := result{}
 	for x := range jobs {
