@@ -298,20 +298,20 @@ func worker(jobs <-chan request, results chan<- result) {
 		client := http.Client{
 			Timeout: 4 * time.Second,
 		}
-		req, e := http.NewRequest(http.MethodPost, job.url, bytes.NewReader([]byte(nil)))
-		if e != nil {
-			chanRes.err = e
+		req, err := http.NewRequest(http.MethodPost, job.url, bytes.NewReader([]byte(nil)))
+		if err != nil {
+			chanRes.err = err
 			return
 		}
-		resp, e := client.Do(req)
-		if e != nil {
-			chanRes.err = e
+		resp, err := client.Do(req)
+		if err != nil {
+			chanRes.err = err
 			return
 		}
 
-		responseData, e := ioutil.ReadAll(resp.Body)
-		if e != nil {
-			chanRes.err = e
+		responseData, err := ioutil.ReadAll(resp.Body)
+		if err != nil {
+			chanRes.err = err
 			return
 		}
 		chanRes.data = responseData
