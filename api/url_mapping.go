@@ -40,6 +40,7 @@ func MapUrl(app *fiber.App, handlers ...fiber.Handler) {
 	chainlinkNodes.Get("/:name", chainlink.ValidateNodeExist, chainlink.Get)
 	chainlinkNodes.Get("/:name/logs", websocket.New(shared.Logger))
 	chainlinkNodes.Get("/:name/status", websocket.New(shared.Status))
+	chainlinkNodes.Get("/:name/metrics", websocket.New(shared.Metrics))
 	chainlinkNodes.Put("/:name", chainlink.ValidateNodeExist, chainlink.Update)
 	chainlinkNodes.Delete("/:name", chainlink.ValidateNodeExist, chainlink.Delete)
 
@@ -53,6 +54,7 @@ func MapUrl(app *fiber.App, handlers ...fiber.Handler) {
 	ethereumNodes.Get("/:name/logs", websocket.New(shared.Logger))
 	ethereumNodes.Get("/:name/status", websocket.New(shared.Status))
 	ethereumNodes.Get("/:name/stats", websocket.New(ethereum.Stats))
+	ethereumNodes.Get("/:name/metrics", websocket.New(shared.Metrics))
 	ethereumNodes.Put("/:name", ethereum.ValidateNodeExist, ethereum.Update)
 	ethereumNodes.Delete("/:name", ethereum.ValidateNodeExist, ethereum.Delete)
 
@@ -83,6 +85,7 @@ func MapUrl(app *fiber.App, handlers ...fiber.Handler) {
 	beaconnodesGroup.Get("/:name", beacon_node.ValidateBeaconNodeExist, beacon_node.Get)
 	beaconnodesGroup.Get("/:name/logs", websocket.New(shared.Logger))
 	beaconnodesGroup.Get("/:name/status", websocket.New(shared.Status))
+	beaconnodesGroup.Get("/:name/metrics", websocket.New(shared.Metrics))
 	beaconnodesGroup.Put("/:name", beacon_node.ValidateBeaconNodeExist, beacon_node.Update)
 	beaconnodesGroup.Delete("/:name", beacon_node.ValidateBeaconNodeExist, beacon_node.Delete)
 	//validators group
@@ -93,6 +96,7 @@ func MapUrl(app *fiber.App, handlers ...fiber.Handler) {
 	validatorsGroup.Get("/:name", validator.ValidateValidatorExist, validator.Get)
 	validatorsGroup.Get("/:name/logs", websocket.New(shared.Logger))
 	validatorsGroup.Get("/:name/status", websocket.New(shared.Status))
+	validatorsGroup.Get("/:name/metrics", websocket.New(shared.Metrics))
 	validatorsGroup.Put("/:name", validator.ValidateValidatorExist, validator.Update)
 	validatorsGroup.Delete("/:name", validator.ValidateValidatorExist, validator.Delete)
 
@@ -105,6 +109,7 @@ func MapUrl(app *fiber.App, handlers ...fiber.Handler) {
 	filecoinNodes.Get("/:name", filecoin.ValidateNodeExist, filecoin.Get)
 	filecoinNodes.Get("/:name/logs", websocket.New(shared.Logger))
 	filecoinNodes.Get("/:name/status", websocket.New(shared.Status))
+	filecoinNodes.Get("/:name/metrics", websocket.New(shared.Metrics))
 	filecoinNodes.Put("/:name", filecoin.ValidateNodeExist, filecoin.Update)
 	filecoinNodes.Delete("/:name", filecoin.ValidateNodeExist, filecoin.Delete)
 
@@ -118,6 +123,7 @@ func MapUrl(app *fiber.App, handlers ...fiber.Handler) {
 	ipfsPeersGroup.Get("/:name", ipfs_peer.ValidatePeerExist, ipfs_peer.Get)
 	ipfsPeersGroup.Get("/:name/logs", websocket.New(shared.Logger))
 	ipfsPeersGroup.Get("/:name/status", websocket.New(shared.Status))
+	ipfsPeersGroup.Get("/:name/metrics", websocket.New(shared.Metrics))
 	ipfsPeersGroup.Put("/:name", ipfs_peer.ValidatePeerExist, ipfs_peer.Update)
 	ipfsPeersGroup.Delete("/:name", ipfs_peer.ValidatePeerExist, ipfs_peer.Delete)
 	//ipfs peer group
@@ -128,6 +134,7 @@ func MapUrl(app *fiber.App, handlers ...fiber.Handler) {
 	clusterpeersGroup.Get("/:name", ipfs_cluster_peer.ValidateClusterPeerExist, ipfs_cluster_peer.Get)
 	clusterpeersGroup.Get("/:name/logs", websocket.New(shared.Logger))
 	clusterpeersGroup.Get("/:name/status", websocket.New(shared.Status))
+	clusterpeersGroup.Get("/:name/metrics", websocket.New(shared.Metrics))
 	clusterpeersGroup.Put("/:name", ipfs_cluster_peer.ValidateClusterPeerExist, ipfs_cluster_peer.Update)
 	clusterpeersGroup.Delete("/:name", ipfs_cluster_peer.ValidateClusterPeerExist, ipfs_cluster_peer.Delete)
 
@@ -141,6 +148,7 @@ func MapUrl(app *fiber.App, handlers ...fiber.Handler) {
 	nearNodesGroup.Get("/:name/logs", websocket.New(shared.Logger))
 	nearNodesGroup.Get("/:name/status", websocket.New(shared.Status))
 	nearNodesGroup.Get("/:name/stats", websocket.New(near.Stats))
+	nearNodesGroup.Get("/:name/metrics", websocket.New(shared.Metrics))
 	nearNodesGroup.Put("/:name", near.ValidateNodeExist, near.Update)
 	nearNodesGroup.Delete("/:name", near.ValidateNodeExist, near.Delete)
 
@@ -153,6 +161,7 @@ func MapUrl(app *fiber.App, handlers ...fiber.Handler) {
 	polkadotNodesGroup.Get("/:name/logs", websocket.New(shared.Logger))
 	polkadotNodesGroup.Get("/:name/status", websocket.New(shared.Status))
 	polkadotNodesGroup.Get("/:name/stats", websocket.New(polkadot.Stats))
+	polkadotNodesGroup.Get("/:name/metrics", websocket.New(shared.Metrics))
 	polkadotNodesGroup.Put("/:name", polkadot.ValidateNodeExist, polkadot.Update)
 	polkadotNodesGroup.Delete("/:name", polkadot.ValidateNodeExist, polkadot.Delete)
 
