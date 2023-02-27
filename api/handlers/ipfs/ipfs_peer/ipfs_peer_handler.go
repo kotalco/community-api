@@ -3,23 +3,44 @@
 package ipfs_peer
 
 import (
+	"bytes"
+	"context"
+	"encoding/json"
 	"fmt"
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/websocket/v2"
 	"github.com/kotalco/community-api/internal/ipfs/ipfs_peer"
 	restErrors "github.com/kotalco/community-api/pkg/errors"
+	"github.com/kotalco/community-api/pkg/k8s"
 	"github.com/kotalco/community-api/pkg/shared"
 	ipfsv1alpha1 "github.com/kotalco/kotal/apis/ipfs/v1alpha1"
+	"io/ioutil"
+	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/types"
 	"net/http"
 	"sort"
 	"strconv"
+	"time"
 )
+
+type request struct {
+	url  string
+	name string
+}
+type result struct {
+	err  error
+	name string
+	data []byte
+}
 
 const (
 	nameKeyword = "name"
 )
 
-var service = ipfs_peer.NewIpfsPeerService()
+var (
+	service   = ipfs_peer.NewIpfsPeerService()
+	k8sClient = k8s.NewClientService()
+)
 
 // Get gets a single IPFS peer by name
 // 1-get the node validated from ValidatePeerExist method
@@ -153,4 +174,147 @@ func ValidatePeerExist(c *fiber.Ctx) error {
 	c.Locals("peer", peer)
 
 	return c.Next()
+}
+
+// Stats returns a websocket that emits peers,pin and files stats
+func Stats(c *websocket.Conn) {
+	defer c.Close()
+
+	name := c.Params("name")
+	peer := &ipfsv1alpha1.Peer{}
+	nameSpacedName := types.NamespacedName{
+		Namespace: c.Locals("namespace").(string),
+		Name:      name,
+	}
+	err := k8sClient.Get(context.Background(), nameSpacedName, peer)
+	if err != nil {
+		if errors.IsNotFound(err) {
+			c.WriteJSON(fiber.Map{
+				"error": fmt.Sprintf("peer by name %s doesn't exist", name),
+			})
+			return
+		}
+		c.WriteJSON(fiber.Map{
+			"error": err.Error(),
+		})
+		return
+	}
+
+	if !peer.Spec.API {
+		c.WriteJSON(fiber.Map{
+			"error": "peer api is not enabled",
+		})
+		return
+	}
+
+	for {
+		jobs := make(chan request, 3)
+		results := make(chan result, 3)
+
+		for i := 0; i < 3; i++ {
+			go worker(jobs, results)
+		}
+
+		baseUrl := fmt.Sprintf("http://%s:%d/api/v0", peer.Name, peer.Spec.APIPort)
+		jobs <- request{name: "peerCount", url: fmt.Sprintf("%s/swarm/peers", baseUrl)}
+		jobs <- request{name: "filesStat", url: fmt.Sprintf("%s/files/stat?arg=/", baseUrl)}
+		jobs <- request{name: "pinStat", url: fmt.Sprintf("%s/pin/ls", baseUrl)}
+
+		close(jobs)
+
+		var ipfsStatResponseDto struct {
+			PeerCount      int
+			PinCount       int
+			Blocks         int
+			CumulativeSize uint64 //in Bytes
+		}
+
+		newIpfsResponse := ipfsStatResponseDto
+
+		for i := 0; i < 3; i++ {
+			resp := <-results
+			if resp.err != nil {
+				c.WriteJSON(fiber.Map{
+					"error": err.Error(),
+				})
+				continue
+			}
+
+			switch resp.name {
+			case "peerCount":
+				var responseBody map[string][]interface{}
+				err = json.Unmarshal(resp.data, &responseBody)
+				if err != nil {
+					c.WriteJSON(fiber.Map{
+						"error": err.Error(),
+					})
+					break
+				}
+				newIpfsResponse.PeerCount = len(responseBody["Peers"])
+				break
+			case "filesStat":
+				var responseBody struct {
+					Blocks         int
+					CumulativeSize uint64 //in Bytes
+				}
+				err = json.Unmarshal(resp.data, &responseBody)
+				if err != nil {
+					c.WriteJSON(fiber.Map{
+						"error": err.Error(),
+					})
+					break
+				}
+				newIpfsResponse.Blocks = responseBody.Blocks
+				newIpfsResponse.CumulativeSize = responseBody.CumulativeSize
+				break
+
+			case "pinStat":
+				var responseBody map[string]map[string]interface{}
+				err = json.Unmarshal(resp.data, &responseBody)
+				if err != nil {
+					c.WriteJSON(fiber.Map{
+						"error": err.Error(),
+					})
+					break
+				}
+				newIpfsResponse.PinCount = len(responseBody["Keys"])
+				break
+			}
+		}
+		close(results)
+
+		c.WriteJSON(newIpfsResponse)
+
+		time.Sleep(time.Second * 3)
+	}
+}
+
+// worker is a  collection of threads for the ipfs peer stats
+func worker(jobs <-chan request, results chan<- result) {
+	chanRes := result{}
+	for job := range jobs {
+		chanRes.name = job.name
+
+		client := http.Client{
+			Timeout: 4 * time.Second,
+		}
+		req, err := http.NewRequest(http.MethodPost, job.url, bytes.NewReader([]byte(nil)))
+		if err != nil {
+			chanRes.err = err
+			return
+		}
+		resp, err := client.Do(req)
+		if err != nil {
+			chanRes.err = err
+			return
+		}
+
+		responseData, err := ioutil.ReadAll(resp.Body)
+		if err != nil {
+			chanRes.err = err
+			return
+		}
+		chanRes.data = responseData
+		results <- chanRes
+	}
 }

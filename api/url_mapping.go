@@ -123,6 +123,7 @@ func MapUrl(app *fiber.App, handlers ...fiber.Handler) {
 	ipfsPeersGroup.Get("/:name", ipfs_peer.ValidatePeerExist, ipfs_peer.Get)
 	ipfsPeersGroup.Get("/:name/logs", websocket.New(shared.Logger))
 	ipfsPeersGroup.Get("/:name/status", websocket.New(shared.Status))
+	ipfsPeersGroup.Get("/:name/stats", websocket.New(ipfs_peer.Stats))
 	ipfsPeersGroup.Get("/:name/metrics", websocket.New(shared.Metrics))
 	ipfsPeersGroup.Put("/:name", ipfs_peer.ValidatePeerExist, ipfs_peer.Update)
 	ipfsPeersGroup.Delete("/:name", ipfs_peer.ValidatePeerExist, ipfs_peer.Delete)
