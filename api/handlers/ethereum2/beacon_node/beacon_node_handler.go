@@ -213,26 +213,26 @@ func Stats(c *websocket.Conn) {
 		}
 
 		baseUrl := fmt.Sprintf("http://%s:%d/eth/v1/node/", "localhost", beaconnode.Spec.RESTPort)
-		jobs <- request{name: "peerCount", url: fmt.Sprintf("%speer_count", baseUrl)}
+		jobs <- request{name: "peers", url: fmt.Sprintf("%speer_count", baseUrl)}
 		jobs <- request{name: "isSyncing", url: fmt.Sprintf("%ssyncing", baseUrl)}
 
 		close(jobs)
 
 		type NodePeerCountDto struct {
-			Disconnected  string
-			Connecting    string
-			Connected     string
-			Disconnecting string
+			Disconnected  string `json:"disconnected"`
+			Connecting    string `json:"connecting"`
+			Connected     string `json:"connected"`
+			Disconnecting string `json:"disconnecting"`
 		}
 		type NodeSyncingStatusDto struct {
-			HeadSlot     string
-			SyncDistance string
-			IsSyncing    bool
-			IsOptimistic bool
+			HeadSlot     string `json:"head_slot"`
+			SyncDistance string `json:"sync_distance"`
+			IsSyncing    bool   `json:"is_syncing"`
+			IsOptimistic bool   `json:"is_optimistic"`
 		}
 		var nodeStatResponseDto struct {
-			PeerCount     NodePeerCountDto     `json:"peer_count"`
-			SyncingStatus NodeSyncingStatusDto `json:"syncing_status"`
+			Peers   NodePeerCountDto     `json:"peers"`
+			Syncing NodeSyncingStatusDto `json:"syncing"`
 		}
 
 		newNodeResponse := nodeStatResponseDto
@@ -246,7 +246,7 @@ func Stats(c *websocket.Conn) {
 				continue
 			}
 			switch resp.name {
-			case "peerCount":
+			case "peers":
 				var responseBody struct {
 					Data NodePeerCountDto `json:"data"`
 				}
@@ -257,10 +257,10 @@ func Stats(c *websocket.Conn) {
 					})
 					break
 				}
-				newNodeResponse.PeerCount.Disconnected = responseBody.Data.Disconnected
-				newNodeResponse.PeerCount.Connecting = responseBody.Data.Connecting
-				newNodeResponse.PeerCount.Connected = responseBody.Data.Connected
-				newNodeResponse.PeerCount.Disconnecting = responseBody.Data.Disconnecting
+				newNodeResponse.Peers.Disconnected = responseBody.Data.Disconnected
+				newNodeResponse.Peers.Connecting = responseBody.Data.Connecting
+				newNodeResponse.Peers.Connected = responseBody.Data.Connected
+				newNodeResponse.Peers.Disconnecting = responseBody.Data.Disconnecting
 				break
 			case "isSyncing":
 				var responseBody struct {
@@ -273,10 +273,10 @@ func Stats(c *websocket.Conn) {
 					})
 					break
 				}
-				newNodeResponse.SyncingStatus.HeadSlot = responseBody.Data.HeadSlot
-				newNodeResponse.SyncingStatus.SyncDistance = responseBody.Data.SyncDistance
-				newNodeResponse.SyncingStatus.IsSyncing = responseBody.Data.IsSyncing
-				newNodeResponse.SyncingStatus.IsOptimistic = responseBody.Data.IsOptimistic
+				newNodeResponse.Syncing.HeadSlot = responseBody.Data.HeadSlot
+				newNodeResponse.Syncing.SyncDistance = responseBody.Data.SyncDistance
+				newNodeResponse.Syncing.IsSyncing = responseBody.Data.IsSyncing
+				newNodeResponse.Syncing.IsOptimistic = responseBody.Data.IsOptimistic
 				break
 			}
 		}
