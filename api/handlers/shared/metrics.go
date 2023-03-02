@@ -73,7 +73,7 @@ func Metrics(c *websocket.Conn) {
 		response.Memory = metrics.Containers[0].Usage.Memory().ScaledValue(resource.Mega)
 
 		c.WriteJSON(response)
-		time.Sleep(time.Second * 3)
+		time.Sleep(time.Second * 1)
 	}
 
 }

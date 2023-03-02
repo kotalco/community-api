@@ -215,7 +215,7 @@ func Stats(c *websocket.Conn) {
 			go worker(jobs, results)
 		}
 
-		baseUrl := fmt.Sprintf("http://%s:%d/api/v0", peer.Name, peer.Spec.APIPort)
+		baseUrl := fmt.Sprintf("http://%s.%s:%d/api/v0", peer.Name, nameSpacedName.Namespace, peer.Spec.APIPort)
 		jobs <- request{name: "peerCount", url: fmt.Sprintf("%s/swarm/peers", baseUrl)}
 		jobs <- request{name: "filesStat", url: fmt.Sprintf("%s/files/stat?arg=/", baseUrl)}
 		jobs <- request{name: "pinStat", url: fmt.Sprintf("%s/pin/ls", baseUrl)}
