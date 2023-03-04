@@ -9,12 +9,14 @@ import (
 	bitcointv1alpha1 "github.com/kotalco/kotal/apis/bitcoin/v1alpha1"
 	apiErrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/types"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 type bitcoinService struct{}
 
 type IService interface {
 	Get(types.NamespacedName) (*bitcointv1alpha1.Node, *errors.RestErr)
+	List(namespace string) (*bitcointv1alpha1.NodeList, *errors.RestErr)
 }
 
 var (
@@ -38,4 +40,16 @@ func (service bitcoinService) Get(namespacedName types.NamespacedName) (*bitcoin
 	}
 
 	return node, nil
+}
+
+// List returns all bitcoin nodes
+func (service bitcoinService) List(namespace string) (*bitcointv1alpha1.NodeList, *errors.RestErr) {
+	nodes := &bitcointv1alpha1.NodeList{}
+	err := k8sClient.List(context.Background(), nodes, client.InNamespace(namespace))
+	if err != nil {
+		go logger.Error(service.List, err)
+		return nil, errors.NewInternalServerError("failed to get all nodes")
+	}
+
+	return nodes, nil
 }
