@@ -49,6 +49,22 @@ func List(c *fiber.Ctx) error {
 	return c.Status(http.StatusOK).JSON(shared.NewResponse(new(bitcoin.BitcoinListDto).FromBitcoinNode(nodeList.Items[start:end])))
 }
 
+// Count returns total number of nodes
+// 1-call bitcoin service to get exiting node list
+// 2-create X-Total-Count header with the length
+// 3-return
+func Count(c *fiber.Ctx) error {
+	length, err := service.Count(c.Locals("namespace").(string))
+	if err != nil {
+		return c.Status(err.Status).JSON(err)
+	}
+
+	c.Set("Access-Control-Expose-Headers", "X-Total-Count")
+	c.Set("X-Total-Count", fmt.Sprintf("%d", *length))
+
+	return c.SendStatus(http.StatusOK)
+}
+
 func ValidateNodeExist(c *fiber.Ctx) error {
 	nameSpacedName := types.NamespacedName{
 		Name:      c.Params(nameKeyword),

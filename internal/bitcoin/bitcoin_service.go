@@ -17,6 +17,7 @@ type bitcoinService struct{}
 type IService interface {
 	Get(types.NamespacedName) (*bitcointv1alpha1.Node, *errors.RestErr)
 	List(namespace string) (*bitcointv1alpha1.NodeList, *errors.RestErr)
+	Count(namespace string) (*int, *errors.RestErr)
 }
 
 var (
@@ -52,4 +53,17 @@ func (service bitcoinService) List(namespace string) (*bitcointv1alpha1.NodeList
 	}
 
 	return nodes, nil
+}
+
+// Count returns all nodes length
+func (service bitcoinService) Count(namespace string) (*int, *errors.RestErr) {
+	nodes := &bitcointv1alpha1.NodeList{}
+	err := k8sClient.List(context.Background(), nodes, client.InNamespace(namespace))
+	if err != nil {
+		go logger.Error(service.Count, err)
+		return nil, errors.NewInternalServerError("failed to get all nodes")
+	}
+
+	length := len(nodes.Items)
+	return &length, nil
 }
