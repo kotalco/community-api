@@ -65,6 +65,21 @@ func Count(c *fiber.Ctx) error {
 	return c.SendStatus(http.StatusOK)
 }
 
+// Delete a single bitcoin node by name
+// 1-get node from locals which checked and assigned by ValidateNodeExist
+// 2-call service to delete the node
+// 3-return ok if deleted with no errors
+func Delete(c *fiber.Ctx) error {
+	node := c.Locals("node").(*bitcointv1alpha1.Node)
+
+	err := service.Delete(node)
+	if err != nil {
+		return c.Status(err.Status).JSON(err)
+	}
+
+	return c.SendStatus(http.StatusNoContent)
+}
+
 func ValidateNodeExist(c *fiber.Ctx) error {
 	nameSpacedName := types.NamespacedName{
 		Name:      c.Params(nameKeyword),

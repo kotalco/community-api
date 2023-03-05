@@ -18,6 +18,7 @@ type IService interface {
 	Get(types.NamespacedName) (*bitcointv1alpha1.Node, *errors.RestErr)
 	List(namespace string) (*bitcointv1alpha1.NodeList, *errors.RestErr)
 	Count(namespace string) (*int, *errors.RestErr)
+	Delete(node *bitcointv1alpha1.Node) *errors.RestErr
 }
 
 var (
@@ -66,4 +67,13 @@ func (service bitcoinService) Count(namespace string) (*int, *errors.RestErr) {
 
 	length := len(nodes.Items)
 	return &length, nil
+}
+
+// Delete deletes bitcoin node by name
+func (service bitcoinService) Delete(node *bitcointv1alpha1.Node) *errors.RestErr {
+	if err := k8sClient.Delete(context.Background(), node); err != nil {
+		go logger.Error(service.Delete, err)
+		return errors.NewInternalServerError(fmt.Sprintf("can't delte node by name %s", node.Name))
+	}
+	return nil
 }
