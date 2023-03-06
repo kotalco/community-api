@@ -19,6 +19,7 @@ type IService interface {
 	Get(types.NamespacedName) (*bitcointv1alpha1.Node, *errors.RestErr)
 	List(namespace string) (*bitcointv1alpha1.NodeList, *errors.RestErr)
 	Count(namespace string) (*int, *errors.RestErr)
+	Create(dto *BitcoinDto) (node *bitcointv1alpha1.Node, err *errors.RestErr)
 	Delete(node *bitcointv1alpha1.Node) *errors.RestErr
 	Update(dto *BitcoinDto, node *bitcointv1alpha1.Node) (*bitcointv1alpha1.Node, *errors.RestErr)
 }
@@ -71,9 +72,42 @@ func (service bitcoinService) Count(namespace string) (*int, *errors.RestErr) {
 	return &length, nil
 }
 
+// Create creates bitcoin node from the given specs
+func (service bitcoinService) Create(dto *BitcoinDto) (node *bitcointv1alpha1.Node, err *errors.RestErr) {
+	node = &bitcointv1alpha1.Node{
+		ObjectMeta: dto.ObjectMetaFromMetadataDto(),
+		Spec: bitcointv1alpha1.NodeSpec{
+			Image:            dto.Image,
+			Network:          dto.Network,
+			RPC:              true,
+			RPCPort:          dto.RPCPort,
+			RPCUsers:         make([]bitcointv1alpha1.RPCUser, 0),
+			Wallet:           true,
+			TransactionIndex: true,
+		},
+	}
+
+	for _, v := range dto.RPCUsers {
+		node.Spec.RPCUsers = append(node.Spec.RPCUsers, bitcointv1alpha1.RPCUser{
+			Username:           v.Username,
+			PasswordSecretName: v.PasswordSecretName,
+		})
+	}
+
+	k8s.DefaultResources(&node.Spec.Resources)
+
+	if err := k8sClient.Create(context.Background(), node); err != nil {
+		if apiErrors.IsAlreadyExists(err) {
+			return nil, errors.NewBadRequestError(fmt.Sprintf("node by name %s already exist", node.Name))
+		}
+		go logger.Error(service.Create, err)
+		return nil, errors.NewInternalServerError("failed to create node")
+	}
+	return node, nil
+}
+
 // Update updates a single node by name from spec
 func (service bitcoinService) Update(dto *BitcoinDto, node *bitcointv1alpha1.Node) (*bitcointv1alpha1.Node, *errors.RestErr) {
-	fmt.Println(node.Spec.Network, dto.Network)
 	if dto.Image != "" {
 		node.Spec.Image = dto.Image
 	}

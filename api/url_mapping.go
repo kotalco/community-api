@@ -170,6 +170,7 @@ func MapUrl(app *fiber.App, handlers ...fiber.Handler) {
 
 	bitcoinGroup := v1.Group("bitcoin")
 	bitcoinNodesGroup := bitcoinGroup.Group("nodes")
+	bitcoinNodesGroup.Post("/", bitcoin.Create, middleware.IsDuplicated)
 	bitcoinNodesGroup.Get("/:name", bitcoin.ValidateNodeExist, bitcoin.Get)
 	bitcoinNodesGroup.Get("/", bitcoin.List)
 	bitcoinNodesGroup.Head("/", bitcoin.Count)

@@ -19,6 +19,9 @@ const (
 
 var service = bitcoin.NewBitcoinService()
 
+// Get returns a single bitcoin node by name
+// 1-get the node validated from ValidateNodeExist method
+// 2-marshall node to dto and format the response
 func Get(c *fiber.Ctx) error {
 	node := c.Locals("node").(*bitcointv1alpha1.Node)
 	return c.JSON(shared.NewResponse(new(bitcoin.BitcoinDto).FromBitcoinNode(node)))
@@ -48,6 +51,28 @@ func List(c *fiber.Ctx) error {
 	c.Set("X-Total-Count", fmt.Sprintf("%d", len(nodeList.Items)))
 
 	return c.Status(http.StatusOK).JSON(shared.NewResponse(new(bitcoin.BitcoinListDto).FromBitcoinNode(nodeList.Items[start:end])))
+}
+
+// Create created bitcoin node from given specs
+// 1-call bitcoin service to create node
+// 2-marshall node to bitcoinDto and format the response
+func Create(c *fiber.Ctx) error {
+	dto := new(bitcoin.BitcoinDto)
+	if err := c.BodyParser(dto); err != nil {
+		badReqErr := restErrors.NewBadRequestError("invalid request body")
+		return c.Status(badReqErr.Status).JSON(badReqErr)
+	}
+
+	dto.Namespace = c.Locals("namespace").(string)
+	if err := dto.MetaDataDto.Validate(); err != nil {
+		return c.Status(err.Status).JSON(err)
+	}
+
+	node, err := service.Create(dto)
+	if err != nil {
+		return c.Status(err.Status).JSON(err)
+	}
+	return c.Status(http.StatusCreated).JSON(shared.NewResponse(new(bitcoin.BitcoinDto).FromBitcoinNode(node)))
 }
 
 // Update updates a single bitcoin node by name from spec

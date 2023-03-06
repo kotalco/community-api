@@ -16,14 +16,14 @@ type RPCUser struct {
 type BitcoinDto struct {
 	models.Time
 	k8s.MetaDataDto
-	Image            string                          `json:"image,omitempty"`
+	Image            string                          `json:"image"`
 	Network          bitcointv1alpha1.BitcoinNetwork `json:"network"`
-	P2PPort          uint                            `json:"p2pPort,omitempty"`
-	RPC              *bool                           `json:"rpc,omitempty"`
-	RPCPort          uint                            `json:"rpcPort,omitempty"`
-	RPCUsers         []RPCUser                       `json:"rpcUsers,omitempty"`
-	Wallet           *bool                           `json:"wallet,omitempty"`
-	TransactionIndex *bool                           `json:"txIndex,omitempty"`
+	P2PPort          uint                            `json:"p2pPort"`
+	RPC              *bool                           `json:"rpc"`
+	RPCPort          uint                            `json:"rpcPort"`
+	RPCUsers         []RPCUser                       `json:"rpcUsers"`
+	Wallet           *bool                           `json:"wallet"`
+	TransactionIndex *bool                           `json:"txIndex"`
 	sharedAPI.Resources
 }
 
