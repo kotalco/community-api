@@ -56,13 +56,14 @@ func Metrics(c *websocket.Conn) {
 				err = errors.New("NotFound")
 			}
 			c.WriteJSON(shared.NewResponse(restError.NewNotFoundError(err.Error())))
-
 			time.Sleep(3 * time.Second)
 			continue
 		}
+		break
+	}
 
-		opts := metav1.GetOptions{}
-		metrics, err := metricsClientset.MetricsV1beta1().PodMetricses(key.Namespace).Get(context.Background(), key.Name, opts)
+	for {
+		metrics, err := metricsClientset.MetricsV1beta1().PodMetricses(key.Namespace).Get(context.Background(), key.Name, metav1.GetOptions{})
 		if err != nil {
 			c.WriteJSON(restError.NewInternalServerError(err.Error()))
 			return
@@ -75,5 +76,4 @@ func Metrics(c *websocket.Conn) {
 		c.WriteJSON(response)
 		time.Sleep(time.Second * 1)
 	}
-
 }
