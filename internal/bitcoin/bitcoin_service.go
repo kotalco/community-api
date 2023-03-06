@@ -7,6 +7,7 @@ import (
 	"github.com/kotalco/community-api/pkg/k8s"
 	"github.com/kotalco/community-api/pkg/logger"
 	bitcointv1alpha1 "github.com/kotalco/kotal/apis/bitcoin/v1alpha1"
+	corev1 "k8s.io/api/core/v1"
 	apiErrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -19,6 +20,7 @@ type IService interface {
 	List(namespace string) (*bitcointv1alpha1.NodeList, *errors.RestErr)
 	Count(namespace string) (*int, *errors.RestErr)
 	Delete(node *bitcointv1alpha1.Node) *errors.RestErr
+	Update(dto *BitcoinDto, node *bitcointv1alpha1.Node) (*bitcointv1alpha1.Node, *errors.RestErr)
 }
 
 var (
@@ -67,6 +69,84 @@ func (service bitcoinService) Count(namespace string) (*int, *errors.RestErr) {
 
 	length := len(nodes.Items)
 	return &length, nil
+}
+
+// Update updates a single node by name from spec
+func (service bitcoinService) Update(dto *BitcoinDto, node *bitcointv1alpha1.Node) (*bitcointv1alpha1.Node, *errors.RestErr) {
+	fmt.Println(node.Spec.Network, dto.Network)
+	if dto.Image != "" {
+		node.Spec.Image = dto.Image
+	}
+	if dto.Network != "" {
+		node.Spec.Network = dto.Network
+	}
+	if dto.P2PPort != 0 {
+		node.Spec.P2PPort = dto.P2PPort
+	}
+	if dto.RPC != nil {
+		node.Spec.RPC = *dto.RPC
+	}
+	if len(dto.RPCUsers) != 0 {
+		node.Spec.RPCUsers = make([]bitcointv1alpha1.RPCUser, 0)
+		for _, v := range dto.RPCUsers {
+			node.Spec.RPCUsers = append(node.Spec.RPCUsers, bitcointv1alpha1.RPCUser{
+				Username:           v.Username,
+				PasswordSecretName: v.PasswordSecretName,
+			})
+		}
+	}
+	if dto.Wallet != nil {
+		node.Spec.Wallet = *dto.Wallet
+	}
+	if dto.TransactionIndex != nil {
+		node.Spec.TransactionIndex = *dto.TransactionIndex
+	}
+
+	if dto.CPU != "" {
+		node.Spec.CPU = dto.CPU
+	}
+	if dto.CPULimit != "" {
+		node.Spec.CPULimit = dto.CPULimit
+	}
+	if dto.Memory != "" {
+		node.Spec.Memory = dto.Memory
+	}
+	if dto.MemoryLimit != "" {
+		node.Spec.MemoryLimit = dto.MemoryLimit
+	}
+	if dto.Storage != "" {
+		node.Spec.Storage = dto.Storage
+	}
+
+	pod := &corev1.Pod{}
+	podIsPending := false
+	if dto.CPU != "" || dto.Memory != "" {
+		key := types.NamespacedName{
+			Namespace: node.Namespace,
+			Name:      fmt.Sprintf("%s-0", node.Name),
+		}
+		err := k8sClient.Get(context.Background(), key, pod)
+		if apiErrors.IsNotFound(err) {
+			go logger.Error(service.Update, err)
+			return nil, errors.NewBadRequestError(fmt.Sprintf("pod by name %s doesn't exit", key.Name))
+		}
+		podIsPending = pod.Status.Phase == corev1.PodPending
+	}
+
+	if err := k8sClient.Update(context.Background(), node); err != nil {
+		go logger.Error(service.Update, err)
+		return nil, errors.NewInternalServerError(fmt.Sprintf("can't update node by name %s", node.Name))
+	}
+
+	if podIsPending {
+		err := k8sClient.Delete(context.Background(), pod)
+		if err != nil {
+			go logger.Error(service.Update, err)
+			return nil, errors.NewInternalServerError(fmt.Sprintf("can't update node by name %s", node.Name))
+		}
+	}
+
+	return node, nil
 }
 
 // Delete deletes bitcoin node by name

@@ -173,6 +173,6 @@ func MapUrl(app *fiber.App, handlers ...fiber.Handler) {
 	bitcoinNodesGroup.Get("/:name", bitcoin.ValidateNodeExist, bitcoin.Get)
 	bitcoinNodesGroup.Get("/", bitcoin.List)
 	bitcoinNodesGroup.Head("/", bitcoin.Count)
+	bitcoinNodesGroup.Put("/:name", bitcoin.ValidateNodeExist, bitcoin.Update)
 	bitcoinNodesGroup.Delete("/:name", bitcoin.ValidateNodeExist, bitcoin.Delete)
-
 }

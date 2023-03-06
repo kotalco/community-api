@@ -16,14 +16,14 @@ type RPCUser struct {
 type BitcoinDto struct {
 	models.Time
 	k8s.MetaDataDto
-	Image            string    `json:"image,omitempty"`
-	Network          string    `json:"network"`
-	P2PPort          uint      `json:"p2pPort,omitempty"`
-	RPC              bool      `json:"rpc,omitempty"`
-	RPCPort          uint      `json:"rpcPort,omitempty"`
-	RPCUsers         []RPCUser `json:"rpcUsers,omitempty"`
-	Wallet           bool      `json:"wallet,omitempty"`
-	TransactionIndex bool      `json:"txIndex,omitempty"`
+	Image            string                          `json:"image,omitempty"`
+	Network          bitcointv1alpha1.BitcoinNetwork `json:"network"`
+	P2PPort          uint                            `json:"p2pPort,omitempty"`
+	RPC              *bool                           `json:"rpc,omitempty"`
+	RPCPort          uint                            `json:"rpcPort,omitempty"`
+	RPCUsers         []RPCUser                       `json:"rpcUsers,omitempty"`
+	Wallet           *bool                           `json:"wallet,omitempty"`
+	TransactionIndex *bool                           `json:"txIndex,omitempty"`
 	sharedAPI.Resources
 }
 
@@ -33,9 +33,9 @@ func (dto BitcoinDto) FromBitcoinNode(n *bitcointv1alpha1.Node) *BitcoinDto {
 	dto.Name = n.Name
 	dto.Time = models.Time{CreatedAt: n.CreationTimestamp.UTC().Format(shared.JavascriptISOString)}
 	dto.Image = n.Spec.Image
-	dto.Network = string(n.Spec.Network)
+	dto.Network = n.Spec.Network
 	dto.P2PPort = n.Spec.P2PPort
-	dto.RPC = n.Spec.RPC
+	dto.RPC = &n.Spec.RPC
 	dto.RPCPort = n.Spec.RPCPort
 	dto.RPCUsers = make([]RPCUser, 0)
 	for _, v := range n.Spec.RPCUsers {
@@ -44,8 +44,8 @@ func (dto BitcoinDto) FromBitcoinNode(n *bitcointv1alpha1.Node) *BitcoinDto {
 			PasswordSecretName: v.PasswordSecretName,
 		})
 	}
-	dto.Wallet = n.Spec.Wallet
-	dto.TransactionIndex = n.Spec.TransactionIndex
+	dto.Wallet = &n.Spec.Wallet
+	dto.TransactionIndex = &n.Spec.TransactionIndex
 	dto.CPU = n.Spec.CPU
 	dto.CPULimit = n.Spec.CPULimit
 	dto.Memory = n.Spec.Memory

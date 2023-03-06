@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/gofiber/fiber/v2"
 	"github.com/kotalco/community-api/internal/bitcoin"
+	restErrors "github.com/kotalco/community-api/pkg/errors"
 	"github.com/kotalco/community-api/pkg/shared"
 	bitcointv1alpha1 "github.com/kotalco/kotal/apis/bitcoin/v1alpha1"
 	"k8s.io/apimachinery/pkg/types"
@@ -47,6 +48,27 @@ func List(c *fiber.Ctx) error {
 	c.Set("X-Total-Count", fmt.Sprintf("%d", len(nodeList.Items)))
 
 	return c.Status(http.StatusOK).JSON(shared.NewResponse(new(bitcoin.BitcoinListDto).FromBitcoinNode(nodeList.Items[start:end])))
+}
+
+// Update updates a single bitcoin node by name from spec
+// 1-get node from locals which checked and assigned by ValidateNodeExist
+// 3-call bitcoin service to update node which returns *bitcointv1alpha1.Node
+// 4-marshall node to node dto and format the response
+func Update(c *fiber.Ctx) error {
+	dto := new(bitcoin.BitcoinDto)
+	if err := c.BodyParser(dto); err != nil {
+		badReq := restErrors.NewBadRequestError("invalid request body")
+		return c.Status(badReq.Status).JSON(err)
+	}
+
+	node := c.Locals("node").(*bitcointv1alpha1.Node)
+
+	node, err := service.Update(dto, node)
+	if err != nil {
+		return c.Status(err.Status).JSON(err)
+	}
+
+	return c.Status(http.StatusOK).JSON(shared.NewResponse(new(bitcoin.BitcoinDto).FromBitcoinNode(node)))
 }
 
 // Count returns total number of nodes
