@@ -4,7 +4,9 @@ import (
 	"fmt"
 	"github.com/gofiber/fiber/v2"
 	"github.com/kotalco/community-api/internal/bitcoin"
+	"github.com/kotalco/community-api/internal/core/secret"
 	restErrors "github.com/kotalco/community-api/pkg/errors"
+	"github.com/kotalco/community-api/pkg/k8s"
 	"github.com/kotalco/community-api/pkg/shared"
 	bitcointv1alpha1 "github.com/kotalco/kotal/apis/bitcoin/v1alpha1"
 	"k8s.io/apimachinery/pkg/types"
@@ -17,7 +19,10 @@ const (
 	nameKeyword = "name"
 )
 
-var service = bitcoin.NewBitcoinService()
+var (
+	service       = bitcoin.NewBitcoinService()
+	secretService = secret.NewSecretService()
+)
 
 // Get returns a single bitcoin node by name
 // 1-get the node validated from ValidateNodeExist method
@@ -68,7 +73,27 @@ func Create(c *fiber.Ctx) error {
 		return c.Status(err.Status).JSON(err)
 	}
 
-	node, err := service.Create(dto)
+	//check for bitcoin json rpc default user secret
+	rpcSec, err := secretService.Get(types.NamespacedName{
+		Name:      bitcoin.BitcoinJsonRpcDefaultUserPasswordName,
+		Namespace: "kotal",
+	})
+	if err != nil {
+		if err.Status != http.StatusNotFound {
+			return c.Status(err.Status).JSON(err)
+		}
+		//create bitcoin user default secret
+		rpcSec, err = secretService.Create(&secret.SecretDto{
+			MetaDataDto: k8s.MetaDataDto{Name: bitcoin.BitcoinJsonRpcDefaultUserPasswordName, Namespace: "kotal"},
+			Type:        "password",
+			Data:        map[string]string{"password": bitcoin.BitcoinJsonRpcDefaultUserPasswordSecret},
+		})
+		if err != nil {
+			return c.Status(err.Status).JSON(err)
+		}
+	}
+
+	node, err := service.Create(dto, rpcSec)
 	if err != nil {
 		return c.Status(err.Status).JSON(err)
 	}

@@ -8,6 +8,12 @@ import (
 	sharedAPI "github.com/kotalco/kotal/apis/shared"
 )
 
+const (
+	BitcoinJsonRpcDefaultUserName           = "bitcoin-json-rpc-default-user"
+	BitcoinJsonRpcDefaultUserPasswordName   = "kotal-bitcoin-json-rpc-default-user-password-name"
+	BitcoinJsonRpcDefaultUserPasswordSecret = "kotal-bitcoin-json-rpc-default-user-password-secret"
+)
+
 type RPCUser struct {
 	Username           string `json:"username"`
 	PasswordSecretName string `json:"passwordSecretName"`

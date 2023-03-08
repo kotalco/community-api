@@ -19,7 +19,7 @@ type IService interface {
 	Get(types.NamespacedName) (*bitcointv1alpha1.Node, *errors.RestErr)
 	List(namespace string) (*bitcointv1alpha1.NodeList, *errors.RestErr)
 	Count(namespace string) (*int, *errors.RestErr)
-	Create(dto *BitcoinDto) (node *bitcointv1alpha1.Node, err *errors.RestErr)
+	Create(dto *BitcoinDto, rpcUserSec *corev1.Secret) (node *bitcointv1alpha1.Node, err *errors.RestErr)
 	Delete(node *bitcointv1alpha1.Node) *errors.RestErr
 	Update(dto *BitcoinDto, node *bitcointv1alpha1.Node) (*bitcointv1alpha1.Node, *errors.RestErr)
 }
@@ -73,25 +73,18 @@ func (service bitcoinService) Count(namespace string) (*int, *errors.RestErr) {
 }
 
 // Create creates bitcoin node from the given specs
-func (service bitcoinService) Create(dto *BitcoinDto) (node *bitcointv1alpha1.Node, err *errors.RestErr) {
+func (service bitcoinService) Create(dto *BitcoinDto, rpcUserSec *corev1.Secret) (node *bitcointv1alpha1.Node, err *errors.RestErr) {
 	node = &bitcointv1alpha1.Node{
 		ObjectMeta: dto.ObjectMetaFromMetadataDto(),
 		Spec: bitcointv1alpha1.NodeSpec{
-			Image:            dto.Image,
-			Network:          dto.Network,
-			RPC:              true,
-			RPCPort:          dto.RPCPort,
-			RPCUsers:         make([]bitcointv1alpha1.RPCUser, 0),
-			Wallet:           true,
-			TransactionIndex: true,
+			Network: dto.Network,
+			RPCUsers: []bitcointv1alpha1.RPCUser{
+				{
+					Username:           BitcoinJsonRpcDefaultUserName,
+					PasswordSecretName: BitcoinJsonRpcDefaultUserPasswordName,
+				},
+			},
 		},
-	}
-
-	for _, v := range dto.RPCUsers {
-		node.Spec.RPCUsers = append(node.Spec.RPCUsers, bitcointv1alpha1.RPCUser{
-			Username:           v.Username,
-			PasswordSecretName: v.PasswordSecretName,
-		})
 	}
 
 	k8s.DefaultResources(&node.Spec.Resources)
