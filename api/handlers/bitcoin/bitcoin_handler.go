@@ -1,19 +1,37 @@
 package bitcoin
 
 import (
+	"context"
+	"encoding/json"
+	"errors"
 	"fmt"
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/websocket/v2"
 	"github.com/kotalco/community-api/internal/bitcoin"
 	"github.com/kotalco/community-api/internal/core/secret"
 	restErrors "github.com/kotalco/community-api/pkg/errors"
 	"github.com/kotalco/community-api/pkg/k8s"
 	"github.com/kotalco/community-api/pkg/shared"
 	bitcointv1alpha1 "github.com/kotalco/kotal/apis/bitcoin/v1alpha1"
+	"github.com/ybbus/jsonrpc/v2"
+	apiError "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/types"
 	"net/http"
 	"sort"
 	"strconv"
+	"time"
 )
+
+type request struct {
+	endpoint string
+	method   string
+	name     string
+}
+type result struct {
+	err  error
+	name string
+	data interface{}
+}
 
 const (
 	nameKeyword = "name"
@@ -22,6 +40,7 @@ const (
 var (
 	service       = bitcoin.NewBitcoinService()
 	secretService = secret.NewSecretService()
+	k8sClient     = k8s.NewClientService()
 )
 
 // Get returns a single bitcoin node by name
@@ -76,7 +95,7 @@ func Create(c *fiber.Ctx) error {
 	//check for bitcoin json rpc default user secret
 	rpcSec, err := secretService.Get(types.NamespacedName{
 		Name:      bitcoin.BitcoinJsonRpcDefaultUserPasswordName,
-		Namespace: "kotal",
+		Namespace: "default",
 	})
 	if err != nil {
 		if err.Status != http.StatusNotFound {
@@ -84,7 +103,7 @@ func Create(c *fiber.Ctx) error {
 		}
 		//create bitcoin user default secret
 		rpcSec, err = secretService.Create(&secret.SecretDto{
-			MetaDataDto: k8s.MetaDataDto{Name: bitcoin.BitcoinJsonRpcDefaultUserPasswordName, Namespace: "kotal"},
+			MetaDataDto: k8s.MetaDataDto{Name: bitcoin.BitcoinJsonRpcDefaultUserPasswordName, Namespace: "default"},
 			Type:        "password",
 			Data:        map[string]string{"password": bitcoin.BitcoinJsonRpcDefaultUserPasswordSecret},
 		})
@@ -165,4 +184,155 @@ func ValidateNodeExist(c *fiber.Ctx) error {
 
 	c.Locals("node", node)
 	return c.Next()
+}
+
+//func Stats(c *websocket.Conn) {
+//	defer c.Close()
+//
+//	name := c.Params("name")
+//	node := &bitcointv1alpha1.Node{}
+//	nameSpacedName := types.NamespacedName{
+//		Namespace: c.Locals("namespace").(string),
+//		Name:      name,
+//	}
+//
+//	for {
+//
+//		err := k8sClient.Get(context.Background(), nameSpacedName, node)
+//		if errors.IsNotFound(err) {
+//			c.WriteJSON(fiber.Map{
+//				"error": fmt.Sprintf("node by name %s doesn't exist", name),
+//			})
+//			return
+//		}
+//
+//		if !node.Spec.RPC {
+//			c.WriteJSON(fiber.Map{
+//				"error": "JSON-RPC server is not enabled",
+//			})
+//			time.Sleep(time.Second)
+//			continue
+//		}
+//
+//		client := jsonrpc.NewClient(fmt.Sprintf("http://%s:%s@%s:%d/", "dummy", "s3cr3t", "localhost", node.Spec.RPCPort))
+//
+//		type NodeBlockCount struct {
+//			Result int         `json:"result"`
+//			Error  interface{} `json:"error"`
+//			Id     string      `json:"id"`
+//		}
+//
+//		// node status rpc call
+//		res, err := client.Call("getblockcount")
+//		if err != nil {
+//			fmt.Println(err)
+//		}
+//		fmt.Println(res)
+//
+//		c.WriteJSON(nil)
+//
+//		time.Sleep(time.Second)
+//	}
+//}
+
+// Stats returns a websocket that emits bitcoin block count stats
+func Stats(c *websocket.Conn) {
+	defer c.Close()
+	name := c.Params("name")
+	node := &bitcointv1alpha1.Node{}
+	nameSpacedName := types.NamespacedName{
+		Namespace: c.Locals("namespace").(string),
+		Name:      name,
+	}
+	err := k8sClient.Get(context.Background(), nameSpacedName, node)
+	if err != nil {
+		if apiError.IsNotFound(err) {
+			c.WriteJSON(fiber.Map{
+				"error": fmt.Sprintf("peer by name %s doesn't exist", name),
+			})
+			return
+		}
+		c.WriteJSON(fiber.Map{
+			"error": err.Error(),
+		})
+		return
+	}
+
+	if !node.Spec.RPC {
+		c.WriteJSON(fiber.Map{
+			"error": "JSON-RPC server is not enabled",
+		})
+		return
+	}
+
+	for {
+		jobs := make(chan request, 1)
+		results := make(chan result, 1)
+
+		for i := 0; i < 1; i++ {
+			go worker(jobs, results)
+		}
+
+		endpoint := fmt.Sprintf("http://%s:%s@%s.%s:%d/", bitcoin.BitcoinJsonRpcDefaultUserName, bitcoin.BitcoinJsonRpcDefaultUserPasswordSecret, nameSpacedName.Name, nameSpacedName.Namespace, node.Spec.RPCPort)
+		jobs <- request{name: "blockCount", endpoint: endpoint, method: "getblockcount"}
+
+		close(jobs)
+
+		var bitcoinStatResponseDto struct {
+			BlockCount int64 `json:"blockCount"`
+		}
+
+		newBitcoinResponseDto := bitcoinStatResponseDto
+
+		for i := 0; i < 1; i++ {
+			resp := <-results
+			if resp.err != nil {
+				c.WriteJSON(fiber.Map{
+					"error": err.Error(),
+				})
+				return
+			}
+
+			switch resp.name {
+			case "blockCount":
+				newBitcoinResponseDto.BlockCount, err = resp.data.(json.Number).Int64()
+				if err != nil {
+					c.WriteJSON(fiber.Map{
+						"error": err.Error(),
+					})
+					return
+				}
+				break
+			}
+		}
+		close(results)
+
+		c.WriteJSON(newBitcoinResponseDto)
+
+		time.Sleep(time.Second * 3)
+	}
+
+}
+
+// worker is a  collection of threads for the ipfs bitcoin stats
+func worker(jobs <-chan request, results chan<- result) {
+	chanRes := result{}
+	for job := range jobs {
+		chanRes.name = job.name
+
+		client := jsonrpc.NewClient(job.endpoint)
+
+		res, err := client.Call(job.method)
+		if err != nil {
+			chanRes.err = err
+		} else {
+			if res.Error != nil {
+				chanRes.err = errors.New(res.Error.Message)
+			} else {
+				chanRes.data = res.Result
+			}
+		}
+
+		results <- chanRes
+	}
 }

@@ -9,9 +9,9 @@ import (
 )
 
 const (
-	BitcoinJsonRpcDefaultUserName           = "bitcoin-json-rpc-default-user"
-	BitcoinJsonRpcDefaultUserPasswordName   = "kotal-bitcoin-json-rpc-default-user-password-name"
-	BitcoinJsonRpcDefaultUserPasswordSecret = "kotal-bitcoin-json-rpc-default-user-password-secret"
+	BitcoinJsonRpcDefaultUserName           = "xhdhhddhdhdh"
+	BitcoinJsonRpcDefaultUserPasswordName   = "xhdhhddhdhdh"
+	BitcoinJsonRpcDefaultUserPasswordSecret = "xhdhhddhdhdh"
 )
 
 type RPCUser struct {

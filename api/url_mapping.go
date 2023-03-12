@@ -179,5 +179,6 @@ func MapUrl(app *fiber.App, handlers ...fiber.Handler) {
 	bitcoinNodesGroup.Get("/:name/logs", websocket.New(shared.Logger))
 	bitcoinNodesGroup.Get("/:name/status", websocket.New(shared.Status))
 	bitcoinNodesGroup.Get("/:name/metrics", websocket.New(shared.Metrics))
+	bitcoinNodesGroup.Get("/:name/stats", websocket.New(bitcoin.Stats))
 
 }
