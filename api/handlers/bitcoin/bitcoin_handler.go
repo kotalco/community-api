@@ -186,56 +186,7 @@ func ValidateNodeExist(c *fiber.Ctx) error {
 	return c.Next()
 }
 
-//func Stats(c *websocket.Conn) {
-//	defer c.Close()
-//
-//	name := c.Params("name")
-//	node := &bitcointv1alpha1.Node{}
-//	nameSpacedName := types.NamespacedName{
-//		Namespace: c.Locals("namespace").(string),
-//		Name:      name,
-//	}
-//
-//	for {
-//
-//		err := k8sClient.Get(context.Background(), nameSpacedName, node)
-//		if errors.IsNotFound(err) {
-//			c.WriteJSON(fiber.Map{
-//				"error": fmt.Sprintf("node by name %s doesn't exist", name),
-//			})
-//			return
-//		}
-//
-//		if !node.Spec.RPC {
-//			c.WriteJSON(fiber.Map{
-//				"error": "JSON-RPC server is not enabled",
-//			})
-//			time.Sleep(time.Second)
-//			continue
-//		}
-//
-//		client := jsonrpc.NewClient(fmt.Sprintf("http://%s:%s@%s:%d/", "dummy", "s3cr3t", "localhost", node.Spec.RPCPort))
-//
-//		type NodeBlockCount struct {
-//			Result int         `json:"result"`
-//			Error  interface{} `json:"error"`
-//			Id     string      `json:"id"`
-//		}
-//
-//		// node status rpc call
-//		res, err := client.Call("getblockcount")
-//		if err != nil {
-//			fmt.Println(err)
-//		}
-//		fmt.Println(res)
-//
-//		c.WriteJSON(nil)
-//
-//		time.Sleep(time.Second)
-//	}
-//}
-
-// Stats returns a websocket that emits bitcoin block count stats
+// Stats returns a websocket that emits bitcoin block and peer count stats
 func Stats(c *websocket.Conn) {
 	defer c.Close()
 	name := c.Params("name")
@@ -266,29 +217,31 @@ func Stats(c *websocket.Conn) {
 	}
 
 	for {
-		jobs := make(chan request, 1)
-		results := make(chan result, 1)
+		jobs := make(chan request, 2)
+		results := make(chan result, 2)
 
-		for i := 0; i < 1; i++ {
+		for i := 0; i < 2; i++ {
 			go worker(jobs, results)
 		}
 
 		endpoint := fmt.Sprintf("http://%s:%s@%s.%s:%d/", bitcoin.BitcoinJsonRpcDefaultUserName, bitcoin.BitcoinJsonRpcDefaultUserPasswordSecret, nameSpacedName.Name, nameSpacedName.Namespace, node.Spec.RPCPort)
 		jobs <- request{name: "blockCount", endpoint: endpoint, method: "getblockcount"}
+		jobs <- request{name: "peerCount", endpoint: endpoint, method: "getconnectioncount"}
 
 		close(jobs)
 
 		var bitcoinStatResponseDto struct {
 			BlockCount int64 `json:"blockCount"`
+			PeerCount  int64 `json:"peerCount"`
 		}
 
 		newBitcoinResponseDto := bitcoinStatResponseDto
 
-		for i := 0; i < 1; i++ {
+		for i := 0; i < 2; i++ {
 			resp := <-results
 			if resp.err != nil {
 				c.WriteJSON(fiber.Map{
-					"error": err.Error(),
+					"error": resp.err,
 				})
 				return
 			}
@@ -296,6 +249,15 @@ func Stats(c *websocket.Conn) {
 			switch resp.name {
 			case "blockCount":
 				newBitcoinResponseDto.BlockCount, err = resp.data.(json.Number).Int64()
+				if err != nil {
+					c.WriteJSON(fiber.Map{
+						"error": err.Error(),
+					})
+					return
+				}
+				break
+			case "peerCount":
+				newBitcoinResponseDto.PeerCount, err = resp.data.(json.Number).Int64()
 				if err != nil {
 					c.WriteJSON(fiber.Map{
 						"error": err.Error(),
@@ -314,7 +276,7 @@ func Stats(c *websocket.Conn) {
 
 }
 
-// worker is a  collection of threads for the ipfs bitcoin stats
+// worker is a  collection of threads for the bitcoin stats
 func worker(jobs <-chan request, results chan<- result) {
 	chanRes := result{}
 	for job := range jobs {
