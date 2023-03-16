@@ -187,7 +187,7 @@ func Stats(c *websocket.Conn) {
 	if err != nil {
 		if errors.IsNotFound(err) {
 			c.WriteJSON(fiber.Map{
-				"error": fmt.Sprintf("peer by name %s doesn't exist", name),
+				"error": fmt.Sprintf("beacon node by name %s doesn't exist", name),
 			})
 			return
 		}
@@ -199,7 +199,7 @@ func Stats(c *websocket.Conn) {
 
 	if !beaconnode.Spec.REST {
 		c.WriteJSON(fiber.Map{
-			"error": "node rest is not enabled",
+			"error": "REST API sever is not enabled",
 		})
 		return
 	}
@@ -218,24 +218,12 @@ func Stats(c *websocket.Conn) {
 
 		close(jobs)
 
-		type NodePeerCountDto struct {
-			Disconnected  int `json:"disconnected"`
-			Connecting    int `json:"connecting"`
-			Connected     int `json:"connected"`
-			Disconnecting int `json:"disconnecting"`
-		}
-		type NodeSyncingStatusDto struct {
-			HeadSlot     int  `json:"head_slot"`
-			SyncDistance int  `json:"sync_distance"`
-			IsSyncing    bool `json:"is_syncing"`
-			IsOptimistic bool `json:"is_optimistic"`
-		}
 		var nodeStatResponseDto struct {
-			Peers   NodePeerCountDto     `json:"peers"`
-			Syncing NodeSyncingStatusDto `json:"syncing"`
+			CurrentSlot int  `json:"currentSlot"`
+			TargetSlot  int  `json:"targetSlot"`
+			PeersCount  int  `json:"peersCount"`
+			Syncing     bool `json:"syncing"`
 		}
-
-		newNodeResponse := nodeStatResponseDto
 
 		for i := 0; i < 2; i++ {
 			resp := <-results
@@ -249,10 +237,7 @@ func Stats(c *websocket.Conn) {
 			case "peers":
 				var responseBody struct {
 					Data struct {
-						Disconnected  string `json:"disconnected"`
-						Connecting    string `json:"connecting"`
-						Connected     string `json:"connected"`
-						Disconnecting string `json:"disconnecting"`
+						Connected string `json:"connected"`
 					} `json:"data"`
 				}
 				err = json.Unmarshal(resp.data, &responseBody)
@@ -262,10 +247,7 @@ func Stats(c *websocket.Conn) {
 					})
 					break
 				}
-				newNodeResponse.Peers.Disconnected, _ = strconv.Atoi(responseBody.Data.Disconnected)
-				newNodeResponse.Peers.Connecting, _ = strconv.Atoi(responseBody.Data.Connecting)
-				newNodeResponse.Peers.Connected, _ = strconv.Atoi(responseBody.Data.Connected)
-				newNodeResponse.Peers.Disconnecting, _ = strconv.Atoi(responseBody.Data.Disconnecting)
+				nodeStatResponseDto.PeersCount, _ = strconv.Atoi(responseBody.Data.Connected)
 				break
 			case "isSyncing":
 				var responseBody struct {
@@ -273,7 +255,6 @@ func Stats(c *websocket.Conn) {
 						HeadSlot     string `json:"head_slot"`
 						SyncDistance string `json:"sync_distance"`
 						IsSyncing    bool   `json:"is_syncing"`
-						IsOptimistic bool   `json:"is_optimistic"`
 					} `json:"data"`
 				}
 				err = json.Unmarshal(resp.data, &responseBody)
@@ -283,16 +264,16 @@ func Stats(c *websocket.Conn) {
 					})
 					break
 				}
-				newNodeResponse.Syncing.HeadSlot, _ = strconv.Atoi(responseBody.Data.HeadSlot)
-				newNodeResponse.Syncing.SyncDistance, _ = strconv.Atoi(responseBody.Data.SyncDistance)
-				newNodeResponse.Syncing.IsSyncing = responseBody.Data.IsSyncing
-				newNodeResponse.Syncing.IsOptimistic = responseBody.Data.IsOptimistic
+				nodeStatResponseDto.CurrentSlot, _ = strconv.Atoi(responseBody.Data.HeadSlot)
+				nodeStatResponseDto.Syncing = responseBody.Data.IsSyncing
+				syncingDistance, _ := strconv.Atoi(responseBody.Data.SyncDistance)
+				nodeStatResponseDto.TargetSlot = syncingDistance + nodeStatResponseDto.CurrentSlot
 				break
 			}
 		}
 		close(results)
 
-		c.WriteJSON(newNodeResponse)
+		c.WriteJSON(nodeStatResponseDto)
 
 		time.Sleep(time.Second * 3)
 	}
