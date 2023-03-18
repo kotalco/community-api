@@ -86,6 +86,7 @@ func MapUrl(app *fiber.App, handlers ...fiber.Handler) {
 	beaconnodesGroup.Get("/:name/logs", websocket.New(shared.Logger))
 	beaconnodesGroup.Get("/:name/status", websocket.New(shared.Status))
 	beaconnodesGroup.Get("/:name/metrics", websocket.New(shared.Metrics))
+	beaconnodesGroup.Get("/:name/stats", websocket.New(beacon_node.Stats))
 	beaconnodesGroup.Put("/:name", beacon_node.ValidateBeaconNodeExist, beacon_node.Update)
 	beaconnodesGroup.Delete("/:name", beacon_node.ValidateBeaconNodeExist, beacon_node.Delete)
 	//validators group

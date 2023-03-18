@@ -1,23 +1,44 @@
 package beacon_node
 
 import (
+	"bytes"
+	"context"
+	"encoding/json"
 	"fmt"
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/websocket/v2"
 	"github.com/kotalco/community-api/internal/ethereum2/beacon_node"
 	restErrors "github.com/kotalco/community-api/pkg/errors"
+	"github.com/kotalco/community-api/pkg/k8s"
 	"github.com/kotalco/community-api/pkg/shared"
 	ethereum2v1alpha1 "github.com/kotalco/kotal/apis/ethereum2/v1alpha1"
+	"io/ioutil"
+	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/types"
 	"net/http"
 	"sort"
 	"strconv"
+	"time"
 )
+
+type request struct {
+	url  string
+	name string
+}
+type result struct {
+	err  error
+	name string
+	data []byte
+}
 
 const (
 	nameKeyword = "name"
 )
 
-var service = beacon_node.NewBeaconNodeService()
+var (
+	service   = beacon_node.NewBeaconNodeService()
+	k8sClient = k8s.NewClientService()
+)
 
 // Get gets a single ethereum 2.0 beacon node by name
 // 1-get the node validated from ValidateNodeExist method
@@ -150,4 +171,140 @@ func ValidateBeaconNodeExist(c *fiber.Ctx) error {
 
 	c.Locals("node", node)
 	return c.Next()
+}
+
+// Stats returns a websocket that emits peer  count and node syncing status
+func Stats(c *websocket.Conn) {
+	defer c.Close()
+
+	name := c.Params("name")
+	beaconnode := &ethereum2v1alpha1.BeaconNode{}
+	nameSpacedName := types.NamespacedName{
+		Namespace: c.Locals("namespace").(string),
+		Name:      name,
+	}
+	err := k8sClient.Get(context.Background(), nameSpacedName, beaconnode)
+	if err != nil {
+		if errors.IsNotFound(err) {
+			c.WriteJSON(fiber.Map{
+				"error": fmt.Sprintf("beacon node by name %s doesn't exist", name),
+			})
+			return
+		}
+		c.WriteJSON(fiber.Map{
+			"error": err.Error(),
+		})
+		return
+	}
+
+	if !beaconnode.Spec.REST {
+		c.WriteJSON(fiber.Map{
+			"error": "REST API sever is not enabled",
+		})
+		return
+	}
+
+	for {
+		jobs := make(chan request, 2)
+		results := make(chan result, 2)
+
+		for i := 0; i < 2; i++ {
+			go worker(jobs, results)
+		}
+
+		baseUrl := fmt.Sprintf("http://%s.%s:%d/eth/v1/node/", beaconnode.Name, nameSpacedName.Namespace, beaconnode.Spec.RESTPort)
+		jobs <- request{name: "peers", url: fmt.Sprintf("%speer_count", baseUrl)}
+		jobs <- request{name: "isSyncing", url: fmt.Sprintf("%ssyncing", baseUrl)}
+
+		close(jobs)
+
+		var nodeStatResponseDto struct {
+			CurrentSlot int  `json:"currentSlot"`
+			TargetSlot  int  `json:"targetSlot"`
+			PeersCount  int  `json:"peersCount"`
+			Syncing     bool `json:"syncing"`
+		}
+
+		for i := 0; i < 2; i++ {
+			resp := <-results
+			if resp.err != nil {
+				c.WriteJSON(fiber.Map{
+					"error": err.Error(),
+				})
+				continue
+			}
+			switch resp.name {
+			case "peers":
+				var responseBody struct {
+					Data struct {
+						Connected string `json:"connected"`
+					} `json:"data"`
+				}
+				err = json.Unmarshal(resp.data, &responseBody)
+				if err != nil {
+					c.WriteJSON(fiber.Map{
+						"error": err.Error(),
+					})
+					break
+				}
+				nodeStatResponseDto.PeersCount, _ = strconv.Atoi(responseBody.Data.Connected)
+				break
+			case "isSyncing":
+				var responseBody struct {
+					Data struct {
+						HeadSlot     string `json:"head_slot"`
+						SyncDistance string `json:"sync_distance"`
+						IsSyncing    bool   `json:"is_syncing"`
+					} `json:"data"`
+				}
+				err = json.Unmarshal(resp.data, &responseBody)
+				if err != nil {
+					c.WriteJSON(fiber.Map{
+						"error": err.Error(),
+					})
+					break
+				}
+				nodeStatResponseDto.CurrentSlot, _ = strconv.Atoi(responseBody.Data.HeadSlot)
+				nodeStatResponseDto.Syncing = responseBody.Data.IsSyncing
+				syncingDistance, _ := strconv.Atoi(responseBody.Data.SyncDistance)
+				nodeStatResponseDto.TargetSlot = syncingDistance + nodeStatResponseDto.CurrentSlot
+				break
+			}
+		}
+		close(results)
+
+		c.WriteJSON(nodeStatResponseDto)
+
+		time.Sleep(time.Second * 3)
+	}
+}
+
+// worker is a  collection of threads for the beacon node stats
+func worker(jobs <-chan request, results chan<- result) {
+	chanRes := result{}
+	for job := range jobs {
+		chanRes.name = job.name
+
+		client := http.Client{
+			Timeout: 4 * time.Second,
+		}
+		req, err := http.NewRequest(http.MethodGet, job.url, bytes.NewReader([]byte(nil)))
+		if err != nil {
+			chanRes.err = err
+			return
+		}
+		resp, err := client.Do(req)
+		if err != nil {
+			chanRes.err = err
+			return
+		}
+
+		responseData, err := ioutil.ReadAll(resp.Body)
+		if err != nil {
+			chanRes.err = err
+			return
+		}
+		chanRes.data = responseData
+		results <- chanRes
+	}
 }
