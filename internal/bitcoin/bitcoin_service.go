@@ -6,7 +6,7 @@ import (
 	"github.com/kotalco/community-api/pkg/errors"
 	"github.com/kotalco/community-api/pkg/k8s"
 	"github.com/kotalco/community-api/pkg/logger"
-	bitcointv1alpha1 "github.com/kotalco/kotal/apis/bitcoin/v1alpha1"
+	bitcoinv1alpha1 "github.com/kotalco/kotal/apis/bitcoin/v1alpha1"
 	corev1 "k8s.io/api/core/v1"
 	apiErrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/types"
@@ -16,12 +16,12 @@ import (
 type bitcoinService struct{}
 
 type IService interface {
-	Get(types.NamespacedName) (*bitcointv1alpha1.Node, *errors.RestErr)
-	List(namespace string) (*bitcointv1alpha1.NodeList, *errors.RestErr)
+	Get(types.NamespacedName) (*bitcoinv1alpha1.Node, *errors.RestErr)
+	List(namespace string) (*bitcoinv1alpha1.NodeList, *errors.RestErr)
 	Count(namespace string) (*int, *errors.RestErr)
-	Create(dto *BitcoinDto, rpcUserSec *corev1.Secret) (node *bitcointv1alpha1.Node, err *errors.RestErr)
-	Delete(node *bitcointv1alpha1.Node) *errors.RestErr
-	Update(dto *BitcoinDto, node *bitcointv1alpha1.Node) (*bitcointv1alpha1.Node, *errors.RestErr)
+	Create(dto *BitcoinDto, rpcUserSec *corev1.Secret) (node *bitcoinv1alpha1.Node, err *errors.RestErr)
+	Delete(node *bitcoinv1alpha1.Node) *errors.RestErr
+	Update(dto *BitcoinDto, node *bitcoinv1alpha1.Node) (*bitcoinv1alpha1.Node, *errors.RestErr)
 }
 
 var (
@@ -33,9 +33,9 @@ func NewBitcoinService() IService {
 }
 
 // Get returns a single bitcoin node by name
-func (service bitcoinService) Get(namespacedName types.NamespacedName) (*bitcointv1alpha1.Node, *errors.RestErr) {
+func (service bitcoinService) Get(namespacedName types.NamespacedName) (*bitcoinv1alpha1.Node, *errors.RestErr) {
 
-	node := &bitcointv1alpha1.Node{}
+	node := &bitcoinv1alpha1.Node{}
 	if err := k8sClient.Get(context.Background(), namespacedName, node); err != nil {
 		if apiErrors.IsNotFound(err) {
 			return nil, errors.NewNotFoundError(fmt.Sprintf("node by name %s doesn't exist", namespacedName.Name))
@@ -48,8 +48,8 @@ func (service bitcoinService) Get(namespacedName types.NamespacedName) (*bitcoin
 }
 
 // List returns all bitcoin nodes
-func (service bitcoinService) List(namespace string) (*bitcointv1alpha1.NodeList, *errors.RestErr) {
-	nodes := &bitcointv1alpha1.NodeList{}
+func (service bitcoinService) List(namespace string) (*bitcoinv1alpha1.NodeList, *errors.RestErr) {
+	nodes := &bitcoinv1alpha1.NodeList{}
 	err := k8sClient.List(context.Background(), nodes, client.InNamespace(namespace))
 	if err != nil {
 		go logger.Error(service.List, err)
@@ -61,7 +61,7 @@ func (service bitcoinService) List(namespace string) (*bitcointv1alpha1.NodeList
 
 // Count returns all nodes length
 func (service bitcoinService) Count(namespace string) (*int, *errors.RestErr) {
-	nodes := &bitcointv1alpha1.NodeList{}
+	nodes := &bitcoinv1alpha1.NodeList{}
 	err := k8sClient.List(context.Background(), nodes, client.InNamespace(namespace))
 	if err != nil {
 		go logger.Error(service.Count, err)
@@ -73,12 +73,12 @@ func (service bitcoinService) Count(namespace string) (*int, *errors.RestErr) {
 }
 
 // Create creates bitcoin node from the given specs
-func (service bitcoinService) Create(dto *BitcoinDto, rpcUserSec *corev1.Secret) (node *bitcointv1alpha1.Node, err *errors.RestErr) {
-	node = &bitcointv1alpha1.Node{
+func (service bitcoinService) Create(dto *BitcoinDto, rpcUserSec *corev1.Secret) (node *bitcoinv1alpha1.Node, err *errors.RestErr) {
+	node = &bitcoinv1alpha1.Node{
 		ObjectMeta: dto.ObjectMetaFromMetadataDto(),
-		Spec: bitcointv1alpha1.NodeSpec{
+		Spec: bitcoinv1alpha1.NodeSpec{
 			Network: dto.Network,
-			RPCUsers: []bitcointv1alpha1.RPCUser{
+			RPCUsers: []bitcoinv1alpha1.RPCUser{
 				{
 					Username:           BitcoinJsonRpcDefaultUserName,
 					PasswordSecretName: BitcoinJsonRpcDefaultUserPasswordName,
@@ -100,12 +100,9 @@ func (service bitcoinService) Create(dto *BitcoinDto, rpcUserSec *corev1.Secret)
 }
 
 // Update updates a single node by name from spec
-func (service bitcoinService) Update(dto *BitcoinDto, node *bitcointv1alpha1.Node) (*bitcointv1alpha1.Node, *errors.RestErr) {
+func (service bitcoinService) Update(dto *BitcoinDto, node *bitcoinv1alpha1.Node) (*bitcoinv1alpha1.Node, *errors.RestErr) {
 	if dto.Image != "" {
 		node.Spec.Image = dto.Image
-	}
-	if dto.Network != "" {
-		node.Spec.Network = dto.Network
 	}
 	if dto.P2PPort != 0 {
 		node.Spec.P2PPort = dto.P2PPort
@@ -114,9 +111,9 @@ func (service bitcoinService) Update(dto *BitcoinDto, node *bitcointv1alpha1.Nod
 		node.Spec.RPC = *dto.RPC
 	}
 	if len(dto.RPCUsers) != 0 {
-		node.Spec.RPCUsers = make([]bitcointv1alpha1.RPCUser, 0)
+		node.Spec.RPCUsers = make([]bitcoinv1alpha1.RPCUser, 0)
 		for _, v := range dto.RPCUsers {
-			node.Spec.RPCUsers = append(node.Spec.RPCUsers, bitcointv1alpha1.RPCUser{
+			node.Spec.RPCUsers = append(node.Spec.RPCUsers, bitcoinv1alpha1.RPCUser{
 				Username:           v.Username,
 				PasswordSecretName: v.PasswordSecretName,
 			})
@@ -177,10 +174,10 @@ func (service bitcoinService) Update(dto *BitcoinDto, node *bitcointv1alpha1.Nod
 }
 
 // Delete deletes bitcoin node by name
-func (service bitcoinService) Delete(node *bitcointv1alpha1.Node) *errors.RestErr {
+func (service bitcoinService) Delete(node *bitcoinv1alpha1.Node) *errors.RestErr {
 	if err := k8sClient.Delete(context.Background(), node); err != nil {
 		go logger.Error(service.Delete, err)
-		return errors.NewInternalServerError(fmt.Sprintf("can't delte node by name %s", node.Name))
+		return errors.NewInternalServerError(fmt.Sprintf("can't delete node by name %s", node.Name))
 	}
 	return nil
 }

@@ -4,14 +4,14 @@ import (
 	"github.com/kotalco/community-api/internal/models"
 	"github.com/kotalco/community-api/pkg/k8s"
 	"github.com/kotalco/community-api/pkg/shared"
-	bitcointv1alpha1 "github.com/kotalco/kotal/apis/bitcoin/v1alpha1"
+	bitcoinv1alpha1 "github.com/kotalco/kotal/apis/bitcoin/v1alpha1"
 	sharedAPI "github.com/kotalco/kotal/apis/shared"
 )
 
 const (
-	BitcoinJsonRpcDefaultUserName           = "xhdhhddhdhdh"
-	BitcoinJsonRpcDefaultUserPasswordName   = "xhdhhddhdhdh"
-	BitcoinJsonRpcDefaultUserPasswordSecret = "xhdhhddhdhdh"
+	BitcoinJsonRpcDefaultUserName           = "kotal"
+	BitcoinJsonRpcDefaultUserPasswordName   = "kotal-rpc-user-password"
+	BitcoinJsonRpcDefaultUserPasswordSecret = "2bbf1fdeff5f5c2dbae910a7a43776ab1d829446d7bd911c4812f7eb47f224aa"
 )
 
 type RPCUser struct {
@@ -22,20 +22,20 @@ type RPCUser struct {
 type BitcoinDto struct {
 	models.Time
 	k8s.MetaDataDto
-	Image            string                          `json:"image"`
-	Network          bitcointv1alpha1.BitcoinNetwork `json:"network"`
-	P2PPort          uint                            `json:"p2pPort"`
-	RPC              *bool                           `json:"rpc"`
-	RPCPort          uint                            `json:"rpcPort"`
-	RPCUsers         []RPCUser                       `json:"rpcUsers"`
-	Wallet           *bool                           `json:"wallet"`
-	TransactionIndex *bool                           `json:"txIndex"`
+	Image            string                         `json:"image"`
+	Network          bitcoinv1alpha1.BitcoinNetwork `json:"network"`
+	P2PPort          uint                           `json:"p2pPort"`
+	RPC              *bool                          `json:"rpc"`
+	RPCPort          uint                           `json:"rpcPort"`
+	RPCUsers         []RPCUser                      `json:"rpcUsers"`
+	Wallet           *bool                          `json:"wallet"`
+	TransactionIndex *bool                          `json:"txIndex"`
 	sharedAPI.Resources
 }
 
 type BitcoinListDto []BitcoinDto
 
-func (dto BitcoinDto) FromBitcoinNode(n *bitcointv1alpha1.Node) *BitcoinDto {
+func (dto BitcoinDto) FromBitcoinNode(n *bitcoinv1alpha1.Node) *BitcoinDto {
 	dto.Name = n.Name
 	dto.Time = models.Time{CreatedAt: n.CreationTimestamp.UTC().Format(shared.JavascriptISOString)}
 	dto.Image = n.Spec.Image
@@ -61,7 +61,7 @@ func (dto BitcoinDto) FromBitcoinNode(n *bitcointv1alpha1.Node) *BitcoinDto {
 	return &dto
 }
 
-func (nodes BitcoinListDto) FromBitcoinNode(models []bitcointv1alpha1.Node) BitcoinListDto {
+func (nodes BitcoinListDto) FromBitcoinNode(models []bitcoinv1alpha1.Node) BitcoinListDto {
 	result := make(BitcoinListDto, len(models))
 	for index, model := range models {
 		result[index] = *(BitcoinDto{}.FromBitcoinNode(&model))

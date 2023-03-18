@@ -12,7 +12,7 @@ import (
 	restErrors "github.com/kotalco/community-api/pkg/errors"
 	"github.com/kotalco/community-api/pkg/k8s"
 	"github.com/kotalco/community-api/pkg/shared"
-	bitcointv1alpha1 "github.com/kotalco/kotal/apis/bitcoin/v1alpha1"
+	bitcoinv1alpha1 "github.com/kotalco/kotal/apis/bitcoin/v1alpha1"
 	"github.com/ybbus/jsonrpc/v2"
 	apiError "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/types"
@@ -44,18 +44,12 @@ var (
 )
 
 // Get returns a single bitcoin node by name
-// 1-get the node validated from ValidateNodeExist method
-// 2-marshall node to dto and format the response
 func Get(c *fiber.Ctx) error {
-	node := c.Locals("node").(*bitcointv1alpha1.Node)
+	node := c.Locals("node").(*bitcoinv1alpha1.Node)
 	return c.JSON(shared.NewResponse(new(bitcoin.BitcoinDto).FromBitcoinNode(node)))
 }
 
 // List returns all bitcoin nodes
-// 1-get the pagination qs default to 0
-// 2-call service to return node models
-// 3-make the pagination
-// 3-marshall nodes  to bitcoin dto and format the response using NewResponse
 func List(c *fiber.Ctx) error {
 	// default page to 0
 	page, _ := strconv.Atoi(c.Query("page"))
@@ -78,8 +72,6 @@ func List(c *fiber.Ctx) error {
 }
 
 // Create created bitcoin node from given specs
-// 1-call bitcoin service to create node
-// 2-marshall node to bitcoinDto and format the response
 func Create(c *fiber.Ctx) error {
 	dto := new(bitcoin.BitcoinDto)
 	if err := c.BodyParser(dto); err != nil {
@@ -95,7 +87,7 @@ func Create(c *fiber.Ctx) error {
 	//check for bitcoin json rpc default user secret
 	rpcSec, err := secretService.Get(types.NamespacedName{
 		Name:      bitcoin.BitcoinJsonRpcDefaultUserPasswordName,
-		Namespace: "default",
+		Namespace: dto.Namespace,
 	})
 	if err != nil {
 		if err.Status != http.StatusNotFound {
@@ -103,7 +95,7 @@ func Create(c *fiber.Ctx) error {
 		}
 		//create bitcoin user default secret
 		rpcSec, err = secretService.Create(&secret.SecretDto{
-			MetaDataDto: k8s.MetaDataDto{Name: bitcoin.BitcoinJsonRpcDefaultUserPasswordName, Namespace: "default"},
+			MetaDataDto: k8s.MetaDataDto{Name: bitcoin.BitcoinJsonRpcDefaultUserPasswordName, Namespace: dto.Namespace},
 			Type:        "password",
 			Data:        map[string]string{"password": bitcoin.BitcoinJsonRpcDefaultUserPasswordSecret},
 		})
@@ -120,9 +112,6 @@ func Create(c *fiber.Ctx) error {
 }
 
 // Update updates a single bitcoin node by name from spec
-// 1-get node from locals which checked and assigned by ValidateNodeExist
-// 3-call bitcoin service to update node which returns *bitcointv1alpha1.Node
-// 4-marshall node to node dto and format the response
 func Update(c *fiber.Ctx) error {
 	dto := new(bitcoin.BitcoinDto)
 	if err := c.BodyParser(dto); err != nil {
@@ -130,7 +119,7 @@ func Update(c *fiber.Ctx) error {
 		return c.Status(badReq.Status).JSON(err)
 	}
 
-	node := c.Locals("node").(*bitcointv1alpha1.Node)
+	node := c.Locals("node").(*bitcoinv1alpha1.Node)
 
 	node, err := service.Update(dto, node)
 	if err != nil {
@@ -141,9 +130,6 @@ func Update(c *fiber.Ctx) error {
 }
 
 // Count returns total number of nodes
-// 1-call bitcoin service to get exiting node list
-// 2-create X-Total-Count header with the length
-// 3-return
 func Count(c *fiber.Ctx) error {
 	length, err := service.Count(c.Locals("namespace").(string))
 	if err != nil {
@@ -157,11 +143,8 @@ func Count(c *fiber.Ctx) error {
 }
 
 // Delete a single bitcoin node by name
-// 1-get node from locals which checked and assigned by ValidateNodeExist
-// 2-call service to delete the node
-// 3-return ok if deleted with no errors
 func Delete(c *fiber.Ctx) error {
-	node := c.Locals("node").(*bitcointv1alpha1.Node)
+	node := c.Locals("node").(*bitcoinv1alpha1.Node)
 
 	err := service.Delete(node)
 	if err != nil {
@@ -186,11 +169,11 @@ func ValidateNodeExist(c *fiber.Ctx) error {
 	return c.Next()
 }
 
-// Stats returns a websocket that emits bitcoin block and peer count stats
+// Stats returns a websocket that emits bitcoin block and node count stats
 func Stats(c *websocket.Conn) {
 	defer c.Close()
 	name := c.Params("name")
-	node := &bitcointv1alpha1.Node{}
+	node := &bitcoinv1alpha1.Node{}
 	nameSpacedName := types.NamespacedName{
 		Namespace: c.Locals("namespace").(string),
 		Name:      name,
@@ -199,7 +182,7 @@ func Stats(c *websocket.Conn) {
 	if err != nil {
 		if apiError.IsNotFound(err) {
 			c.WriteJSON(fiber.Map{
-				"error": fmt.Sprintf("peer by name %s doesn't exist", name),
+				"error": fmt.Sprintf("node by name %s doesn't exist", name),
 			})
 			return
 		}
