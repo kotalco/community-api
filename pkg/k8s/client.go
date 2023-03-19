@@ -2,6 +2,7 @@ package k8s
 
 import (
 	"context"
+	bitcoinv1alpha1 "github.com/kotalco/kotal/apis/bitcoin/v1alpha1"
 	"sync"
 
 	"github.com/kotalco/community-api/pkg/configs"
@@ -47,6 +48,7 @@ func newRuntimeClient() (client.Client, error) {
 	}
 
 	clientgoscheme.AddToScheme(RunTimeScheme)
+	bitcoinv1alpha1.AddToScheme(RunTimeScheme)
 	ethereumv1alpha1.AddToScheme(RunTimeScheme)
 	ethereum2v1alpha1.AddToScheme(RunTimeScheme)
 	ipfsv1alpha1.AddToScheme(RunTimeScheme)

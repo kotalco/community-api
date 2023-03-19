@@ -3,6 +3,7 @@ package api
 import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/websocket/v2"
+	"github.com/kotalco/community-api/api/handlers/bitcoin"
 	"github.com/kotalco/community-api/api/handlers/chainlink"
 	"github.com/kotalco/community-api/api/handlers/core/secret"
 	"github.com/kotalco/community-api/api/handlers/core/storage_class"
@@ -166,5 +167,18 @@ func MapUrl(app *fiber.App, handlers ...fiber.Handler) {
 	polkadotNodesGroup.Get("/:name/metrics", websocket.New(shared.Metrics))
 	polkadotNodesGroup.Put("/:name", polkadot.ValidateNodeExist, polkadot.Update)
 	polkadotNodesGroup.Delete("/:name", polkadot.ValidateNodeExist, polkadot.Delete)
+
+	bitcoinGroup := v1.Group("bitcoin")
+	bitcoinNodesGroup := bitcoinGroup.Group("nodes")
+	bitcoinNodesGroup.Post("/", bitcoin.Create, middleware.IsDuplicated)
+	bitcoinNodesGroup.Get("/:name", bitcoin.ValidateNodeExist, bitcoin.Get)
+	bitcoinNodesGroup.Get("/", bitcoin.List)
+	bitcoinNodesGroup.Head("/", bitcoin.Count)
+	bitcoinNodesGroup.Put("/:name", bitcoin.ValidateNodeExist, bitcoin.Update)
+	bitcoinNodesGroup.Delete("/:name", bitcoin.ValidateNodeExist, bitcoin.Delete)
+	bitcoinNodesGroup.Get("/:name/logs", websocket.New(shared.Logger))
+	bitcoinNodesGroup.Get("/:name/status", websocket.New(shared.Status))
+	bitcoinNodesGroup.Get("/:name/metrics", websocket.New(shared.Metrics))
+	bitcoinNodesGroup.Get("/:name/stats", websocket.New(bitcoin.Stats))
 
 }
