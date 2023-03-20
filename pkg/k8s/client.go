@@ -14,6 +14,7 @@ import (
 	ipfsv1alpha1 "github.com/kotalco/kotal/apis/ipfs/v1alpha1"
 	nearv1alpha1 "github.com/kotalco/kotal/apis/near/v1alpha1"
 	polkadotv1alpha1 "github.com/kotalco/kotal/apis/polkadot/v1alpha1"
+	stacksv1alpha1 "github.com/kotalco/kotal/apis/stacks/v1alpha1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
@@ -56,6 +57,7 @@ func newRuntimeClient() (client.Client, error) {
 	chainlinkv1alpha1.AddToScheme(RunTimeScheme)
 	polkadotv1alpha1.AddToScheme(RunTimeScheme)
 	nearv1alpha1.AddToScheme(RunTimeScheme)
+	stacksv1alpha1.AddToScheme(RunTimeScheme)
 
 	opts := client.Options{Scheme: RunTimeScheme}
 
