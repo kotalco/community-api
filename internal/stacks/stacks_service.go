@@ -17,6 +17,7 @@ type stacksService struct{}
 
 type IService interface {
 	Get(types.NamespacedName) (*stacksv1alpha1.Node, *errors.RestErr)
+	Create(dto *StacksDto) (node *stacksv1alpha1.Node, err *errors.RestErr)
 	List(namespace string) (*stacksv1alpha1.NodeList, *errors.RestErr)
 	Count(namespace string) (*int, *errors.RestErr)
 	Delete(node *stacksv1alpha1.Node) *errors.RestErr
@@ -29,6 +30,31 @@ var (
 
 func NewStacksService() IService {
 	return stacksService{}
+}
+
+// Create creates stacks node from spec
+func (service stacksService) Create(dto *StacksDto) (*stacksv1alpha1.Node, *errors.RestErr) {
+	node := &stacksv1alpha1.Node{
+		ObjectMeta: dto.ObjectMetaFromMetadataDto(),
+		Spec: stacksv1alpha1.NodeSpec{
+			Network:                  dto.Network,
+			Image:                    dto.Image,
+			NodePrivateKeySecretName: dto.NodePrivateKeySecretName,
+			BitcoinNode:              *dto.BitcoinNode,
+		},
+	}
+
+	k8s.DefaultResources(&node.Spec.Resources)
+
+	if err := k8sClient.Create(context.Background(), node); err != nil {
+		if apiErrors.IsAlreadyExists(err) {
+			return nil, errors.NewBadRequestError(fmt.Sprintf("node by name %s is already exits", node.Name))
+		}
+		go logger.Error(service.Create, err)
+		return nil, errors.NewInternalServerError("failed to create node")
+	}
+
+	return node, nil
 }
 
 // Get returns a single stacks node by name
@@ -81,6 +107,26 @@ func (service stacksService) Update(dto *StacksDto, node *stacksv1alpha1.Node) (
 	}
 	if dto.RPCPort != 0 {
 		node.Spec.RPCPort = dto.RPCPort
+	}
+	if dto.NodePrivateKeySecretName != "" {
+		node.Spec.NodePrivateKeySecretName = dto.NodePrivateKeySecretName
+	}
+	if dto.BitcoinNode != nil {
+		if dto.BitcoinNode.Endpoint != "" {
+			node.Spec.BitcoinNode.Endpoint = dto.BitcoinNode.Endpoint
+		}
+		if dto.BitcoinNode.RpcPort != 0 {
+			node.Spec.BitcoinNode.RpcPort = dto.BitcoinNode.RpcPort
+		}
+		if dto.BitcoinNode.P2pPort != 0 {
+			node.Spec.BitcoinNode.P2pPort = dto.BitcoinNode.P2pPort
+		}
+		if dto.BitcoinNode.RpcUsername != "" {
+			node.Spec.BitcoinNode.RpcUsername = dto.BitcoinNode.RpcUsername
+		}
+		if dto.BitcoinNode.RpcPasswordSecretName != "" {
+			node.Spec.BitcoinNode.RpcPasswordSecretName = dto.BitcoinNode.RpcPasswordSecretName
+		}
 	}
 
 	if dto.CPU != "" {

@@ -184,6 +184,7 @@ func MapUrl(app *fiber.App, handlers ...fiber.Handler) {
 
 	stacksGroup := v1.Group("stacks")
 	stacksNodesGroup := stacksGroup.Group("nodes")
+	stacksNodesGroup.Post("/", stacks.Create, middleware.IsDuplicated)
 	stacksNodesGroup.Get("/:name", stacks.ValidateNodeExist, stacks.Get)
 	stacksNodesGroup.Get("/", stacks.List)
 	stacksNodesGroup.Head("/", stacks.Count)

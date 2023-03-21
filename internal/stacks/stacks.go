@@ -11,10 +11,12 @@ import (
 type StacksDto struct {
 	models.Time
 	k8s.MetaDataDto
-	Image   string                       `json:"image"`
-	Network stacksv1alpha1.StacksNetwork `json:"network"`
-	P2PPort uint                         `json:"p2pPort"`
-	RPCPort uint                         `json:"rpcPort"`
+	Image                    string                       `json:"image"`
+	Network                  stacksv1alpha1.StacksNetwork `json:"network"`
+	P2PPort                  uint                         `json:"p2pPort"`
+	RPCPort                  uint                         `json:"rpcPort"`
+	NodePrivateKeySecretName string                       `json:"nodePrivateKeySecretName"`
+	BitcoinNode              *stacksv1alpha1.BitcoinNode  `json:"bitcoinNode"`
 	sharedAPI.Resources
 }
 
@@ -27,6 +29,8 @@ func (dto StacksDto) FromStacksNode(n *stacksv1alpha1.Node) *StacksDto {
 	dto.Network = n.Spec.Network
 	dto.P2PPort = n.Spec.P2PPort
 	dto.RPCPort = n.Spec.RPCPort
+	dto.NodePrivateKeySecretName = n.Spec.NodePrivateKeySecretName
+	dto.BitcoinNode = &n.Spec.BitcoinNode
 	dto.CPU = n.Spec.CPU
 	dto.CPULimit = n.Spec.CPULimit
 	dto.Memory = n.Spec.Memory

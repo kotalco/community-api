@@ -3,10 +3,8 @@ package stacks
 import (
 	"fmt"
 	"github.com/gofiber/fiber/v2"
-	"github.com/kotalco/community-api/internal/core/secret"
 	"github.com/kotalco/community-api/internal/stacks"
 	restErrors "github.com/kotalco/community-api/pkg/errors"
-	"github.com/kotalco/community-api/pkg/k8s"
 	"github.com/kotalco/community-api/pkg/shared"
 	stacksv1alpha1 "github.com/kotalco/kotal/apis/stacks/v1alpha1"
 	"k8s.io/apimachinery/pkg/types"
@@ -20,10 +18,32 @@ const (
 )
 
 var (
-	service       = stacks.NewStacksService()
-	secretService = secret.NewSecretService()
-	k8sClient     = k8s.NewClientService()
+	service = stacks.NewStacksService()
 )
+
+// Create creates stacks node from spec
+func Create(c *fiber.Ctx) error {
+	dto := new(stacks.StacksDto)
+
+	if err := c.BodyParser(dto); err != nil {
+		badReq := restErrors.NewBadRequestError("invalid request body")
+		return c.Status(badReq.Status).JSON(badReq)
+	}
+
+	dto.Namespace = c.Locals("namespace").(string)
+
+	err := dto.MetaDataDto.Validate()
+	if err != nil {
+		return c.Status(err.Status).JSON(err)
+	}
+
+	node, err := service.Create(dto)
+	if err != nil {
+		return c.Status(err.Status).JSON(err)
+	}
+
+	return c.Status(http.StatusCreated).JSON(shared.NewResponse(new(stacks.StacksDto).FromStacksNode(node)))
+}
 
 // Get returns a single stacks node by name
 func Get(c *fiber.Ctx) error {
