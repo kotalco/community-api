@@ -111,6 +111,16 @@ func (service stacksService) Update(dto *StacksDto, node *stacksv1alpha1.Node) (
 	if dto.NodePrivateKeySecretName != "" {
 		node.Spec.NodePrivateKeySecretName = dto.NodePrivateKeySecretName
 	}
+	if dto.SeedPrivateKeySecretName != "" {
+		node.Spec.SeedPrivateKeySecretName = dto.SeedPrivateKeySecretName
+	}
+	if dto.Miner != nil {
+		node.Spec.Miner = *dto.Miner
+	}
+	if dto.MineMicroBlocks != nil {
+		node.Spec.Miner = *dto.MineMicroBlocks
+	}
+
 	if dto.BitcoinNode != nil {
 		if dto.BitcoinNode.Endpoint != "" {
 			node.Spec.BitcoinNode.Endpoint = dto.BitcoinNode.Endpoint
