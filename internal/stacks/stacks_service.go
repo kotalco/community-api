@@ -37,10 +37,9 @@ func (service stacksService) Create(dto *StacksDto) (*stacksv1alpha1.Node, *erro
 	node := &stacksv1alpha1.Node{
 		ObjectMeta: dto.ObjectMetaFromMetadataDto(),
 		Spec: stacksv1alpha1.NodeSpec{
-			Network:                  dto.Network,
-			Image:                    dto.Image,
-			NodePrivateKeySecretName: dto.NodePrivateKeySecretName,
-			BitcoinNode:              *dto.BitcoinNode,
+			Network:     dto.Network,
+			Image:       dto.Image,
+			BitcoinNode: *dto.BitcoinNode,
 		},
 	}
 

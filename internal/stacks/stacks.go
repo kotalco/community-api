@@ -13,12 +13,12 @@ type StacksDto struct {
 	k8s.MetaDataDto
 	Image                    string                       `json:"image"`
 	Network                  stacksv1alpha1.StacksNetwork `json:"network"`
-	P2PHost                  string                       `json:"p2pHost,omitempty"`
+	P2PHost                  string                       `json:"p2pHost"`
 	P2PPort                  uint                         `json:"p2pPort"`
-	RPCHost                  string                       `json:"rpcHost,omitempty"`
+	RPCHost                  string                       `json:"rpcHost"`
 	RPCPort                  uint                         `json:"rpcPort"`
 	NodePrivateKeySecretName string                       `json:"nodePrivateKeySecretName"`
-	SeedPrivateKeySecretName string                       `json:"seedPrivateKeySecretName,omitempty"`
+	SeedPrivateKeySecretName string                       `json:"seedPrivateKeySecretName"`
 	Miner                    *bool                        `json:"miner"`
 	MineMicroBlocks          *bool                        `json:"mineMicroBlocks"`
 	BitcoinNode              *stacksv1alpha1.BitcoinNode  `json:"bitcoinNode"`
