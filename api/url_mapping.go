@@ -16,6 +16,7 @@ import (
 	"github.com/kotalco/community-api/api/handlers/near"
 	"github.com/kotalco/community-api/api/handlers/polkadot"
 	"github.com/kotalco/community-api/api/handlers/shared"
+	"github.com/kotalco/community-api/api/handlers/stacks"
 	"github.com/kotalco/community-api/pkg/middleware"
 )
 
@@ -180,5 +181,17 @@ func MapUrl(app *fiber.App, handlers ...fiber.Handler) {
 	bitcoinNodesGroup.Get("/:name/status", websocket.New(shared.Status))
 	bitcoinNodesGroup.Get("/:name/metrics", websocket.New(shared.Metrics))
 	bitcoinNodesGroup.Get("/:name/stats", websocket.New(bitcoin.Stats))
+
+	stacksGroup := v1.Group("stacks")
+	stacksNodesGroup := stacksGroup.Group("nodes")
+	stacksNodesGroup.Post("/", middleware.IsDuplicated, stacks.Create)
+	stacksNodesGroup.Get("/:name", stacks.ValidateNodeExist, stacks.Get)
+	stacksNodesGroup.Get("/", stacks.List)
+	stacksNodesGroup.Head("/", stacks.Count)
+	stacksNodesGroup.Put("/:name", stacks.ValidateNodeExist, stacks.Update)
+	stacksNodesGroup.Delete("/:name", stacks.ValidateNodeExist, stacks.Delete)
+	stacksNodesGroup.Get("/:name/logs", websocket.New(shared.Logger))
+	stacksNodesGroup.Get("/:name/status", websocket.New(shared.Status))
+	stacksNodesGroup.Get("/:name/metrics", websocket.New(shared.Metrics))
 
 }
