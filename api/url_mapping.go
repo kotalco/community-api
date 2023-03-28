@@ -35,7 +35,7 @@ func MapUrl(app *fiber.App, handlers ...fiber.Handler) {
 	chainlinkGroup := v1.Group("chainlink")
 	chainlinkNodes := chainlinkGroup.Group("nodes")
 
-	chainlinkNodes.Post("/", chainlink.Create, middleware.IsDuplicated)
+	chainlinkNodes.Post("/", middleware.IsDuplicated, chainlink.Create)
 	chainlinkNodes.Head("/", chainlink.Count)
 	chainlinkNodes.Get("/", chainlink.List)
 	chainlinkNodes.Get("/:name", chainlink.ValidateNodeExist, chainlink.Get)
@@ -48,7 +48,7 @@ func MapUrl(app *fiber.App, handlers ...fiber.Handler) {
 	//ethereum group
 	ethereumGroup := v1.Group("ethereum")
 	ethereumNodes := ethereumGroup.Group("nodes")
-	ethereumNodes.Post("/", ethereum.Create, middleware.IsDuplicated)
+	ethereumNodes.Post("/", middleware.IsDuplicated, ethereum.Create)
 	ethereumNodes.Head("/", ethereum.Count)
 	ethereumNodes.Get("/", ethereum.List)
 	ethereumNodes.Get("/:name", ethereum.ValidateNodeExist, ethereum.Get)
@@ -80,7 +80,7 @@ func MapUrl(app *fiber.App, handlers ...fiber.Handler) {
 	ethereum2 := v1.Group("ethereum2")
 	//beaconnodes group
 	beaconnodesGroup := ethereum2.Group("beaconnodes")
-	beaconnodesGroup.Post("/", beacon_node.Create, middleware.IsDuplicated)
+	beaconnodesGroup.Post("/", middleware.IsDuplicated, beacon_node.Create)
 	beaconnodesGroup.Head("/", beacon_node.Count)
 	beaconnodesGroup.Get("/", beacon_node.List)
 	beaconnodesGroup.Get("/:name", beacon_node.ValidateBeaconNodeExist, beacon_node.Get)
@@ -92,7 +92,7 @@ func MapUrl(app *fiber.App, handlers ...fiber.Handler) {
 	beaconnodesGroup.Delete("/:name", beacon_node.ValidateBeaconNodeExist, beacon_node.Delete)
 	//validators group
 	validatorsGroup := ethereum2.Group("validators")
-	validatorsGroup.Post("/", validator.Create, middleware.IsDuplicated)
+	validatorsGroup.Post("/", middleware.IsDuplicated, validator.Create)
 	validatorsGroup.Head("/", validator.Count)
 	validatorsGroup.Get("/", validator.List)
 	validatorsGroup.Get("/:name", validator.ValidateValidatorExist, validator.Get)
@@ -105,7 +105,7 @@ func MapUrl(app *fiber.App, handlers ...fiber.Handler) {
 	//filecoin group
 	filecoinGroup := v1.Group("filecoin")
 	filecoinNodes := filecoinGroup.Group("nodes")
-	filecoinNodes.Post("/", filecoin.Create, middleware.IsDuplicated)
+	filecoinNodes.Post("/", middleware.IsDuplicated, filecoin.Create)
 	filecoinNodes.Head("/", filecoin.Count)
 	filecoinNodes.Get("/", filecoin.List)
 	filecoinNodes.Get("/:name", filecoin.ValidateNodeExist, filecoin.Get)
@@ -119,7 +119,7 @@ func MapUrl(app *fiber.App, handlers ...fiber.Handler) {
 	ipfsGroup := v1.Group("ipfs")
 	//ipfs peer group
 	ipfsPeersGroup := ipfsGroup.Group("peers")
-	ipfsPeersGroup.Post("/", ipfs_peer.Create, middleware.IsDuplicated)
+	ipfsPeersGroup.Post("/", middleware.IsDuplicated, ipfs_peer.Create)
 	ipfsPeersGroup.Head("/", ipfs_peer.Count)
 	ipfsPeersGroup.Get("/", ipfs_peer.List)
 	ipfsPeersGroup.Get("/:name", ipfs_peer.ValidatePeerExist, ipfs_peer.Get)
@@ -131,7 +131,7 @@ func MapUrl(app *fiber.App, handlers ...fiber.Handler) {
 	ipfsPeersGroup.Delete("/:name", ipfs_peer.ValidatePeerExist, ipfs_peer.Delete)
 	//ipfs peer group
 	clusterpeersGroup := ipfsGroup.Group("clusterpeers")
-	clusterpeersGroup.Post("/", ipfs_cluster_peer.Create, middleware.IsDuplicated)
+	clusterpeersGroup.Post("/", middleware.IsDuplicated, ipfs_cluster_peer.Create)
 	clusterpeersGroup.Head("/", ipfs_cluster_peer.Count)
 	clusterpeersGroup.Get("/", ipfs_cluster_peer.List)
 	clusterpeersGroup.Get("/:name", ipfs_cluster_peer.ValidateClusterPeerExist, ipfs_cluster_peer.Get)
@@ -144,7 +144,7 @@ func MapUrl(app *fiber.App, handlers ...fiber.Handler) {
 	//near group
 	nearGroup := v1.Group("near")
 	nearNodesGroup := nearGroup.Group("nodes")
-	nearNodesGroup.Post("/", near.Create, middleware.IsDuplicated)
+	nearNodesGroup.Post("/", middleware.IsDuplicated, near.Create)
 	nearNodesGroup.Head("/", near.Count)
 	nearNodesGroup.Get("/", near.List)
 	nearNodesGroup.Get("/:name", near.ValidateNodeExist, near.Get)
@@ -157,7 +157,7 @@ func MapUrl(app *fiber.App, handlers ...fiber.Handler) {
 
 	polkadotGroup := v1.Group("polkadot")
 	polkadotNodesGroup := polkadotGroup.Group("nodes")
-	polkadotNodesGroup.Post("/", polkadot.Create, middleware.IsDuplicated)
+	polkadotNodesGroup.Post("/", middleware.IsDuplicated, polkadot.Create)
 	polkadotNodesGroup.Head("/", polkadot.Count)
 	polkadotNodesGroup.Get("/", polkadot.List)
 	polkadotNodesGroup.Get("/:name", polkadot.ValidateNodeExist, polkadot.Get)
@@ -170,7 +170,7 @@ func MapUrl(app *fiber.App, handlers ...fiber.Handler) {
 
 	bitcoinGroup := v1.Group("bitcoin")
 	bitcoinNodesGroup := bitcoinGroup.Group("nodes")
-	bitcoinNodesGroup.Post("/", bitcoin.Create, middleware.IsDuplicated)
+	bitcoinNodesGroup.Post("/", middleware.IsDuplicated, bitcoin.Create)
 	bitcoinNodesGroup.Get("/:name", bitcoin.ValidateNodeExist, bitcoin.Get)
 	bitcoinNodesGroup.Get("/", bitcoin.List)
 	bitcoinNodesGroup.Head("/", bitcoin.Count)
