@@ -63,7 +63,7 @@ podCheck:
 		if err != nil {
 			go logger.Info("METRICS_API_ERR", err.Error())
 			c.WriteJSON(response)
-			goto podCheck
+			return
 		}
 
 		response.Cpu = metrics.Containers[0].Usage.Cpu().ScaledValue(resource.Milli)
