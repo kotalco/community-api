@@ -56,20 +56,29 @@ podCheck:
 		goto podCheck
 	}
 
+	count := 0
 	for {
+		count++
+		fmt.Println(count)
 		response := new(metricsResponseDto)
 
 		metrics, err := metricsClientset.MetricsV1beta1().PodMetricses(key.Namespace).Get(context.Background(), key.Name, metav1.GetOptions{})
 		if err != nil {
 			go logger.Info("METRICS_API_ERR", err.Error())
-			c.WriteJSON(response)
+			err := c.WriteJSON(response)
+			if err != nil {
+				return
+			}
 			goto podCheck
 		}
 
 		response.Cpu = metrics.Containers[0].Usage.Cpu().ScaledValue(resource.Milli)
 		response.Memory = metrics.Containers[0].Usage.Memory().ScaledValue(resource.Mega)
 
-		c.WriteJSON(response)
+		err = c.WriteJSON(response)
+		if err != nil {
+			return
+		}
 		time.Sleep(time.Second * 1)
 	}
 }
