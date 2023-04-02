@@ -55,6 +55,7 @@ func Metrics(c *websocket.Conn) {
 			}
 		case response := <-metricsResponse:
 			if response == nil {
+				go fetchPodStatus(podKey, stsKey, podStatus)
 				continue
 			}
 
@@ -68,10 +69,7 @@ func Metrics(c *websocket.Conn) {
 }
 
 func fetchPodStatus(podKey types.NamespacedName, stsKey types.NamespacedName, status chan error) {
-	stsCount := 0
 	for {
-		stsCount++
-		fmt.Println(stsCount)
 		pod := new(corev1.Pod)
 		err := k8sClient.Get(context.Background(), podKey, pod)
 		if err != nil {
@@ -94,14 +92,12 @@ func fetchMetrics(podKey types.NamespacedName, response chan *metricsResponseDto
 	cpuIdx := 0
 	memoryIdx := 0
 
-	metricsCount := 0
 	for range time.Tick(1 * time.Second) {
-		metricsCount++
-		fmt.Println(metricsCount)
 		metrics, err := metricsClientset.MetricsV1beta1().PodMetricses(podKey.Namespace).Get(context.Background(), podKey.Name, metav1.GetOptions{})
 		if err != nil {
 			go logger.Info("METRICS_API_ERR", err.Error())
 			response <- nil
+			time.Sleep(3 * time.Second)
 			continue
 		}
 
