@@ -220,12 +220,15 @@ func Stats(c *websocket.Conn) {
 			fmt.Println(err)
 		}
 
-		c.WriteJSON(fiber.Map{
+		err = c.WriteJSON(fiber.Map{
 			"currentBlock": syncState.CurrentBlock,
 			"highestBlock": syncState.HighestBlock,
 			"peersCount":   systemHealth.PeersCount,
 			"syncing":      systemHealth.Syncing,
 		})
+		if err != nil {
+			return
+		}
 
 		time.Sleep(time.Second)
 	}

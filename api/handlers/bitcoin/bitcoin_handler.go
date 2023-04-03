@@ -252,11 +252,13 @@ func Stats(c *websocket.Conn) {
 		}
 		close(results)
 
-		c.WriteJSON(newBitcoinResponseDto)
+		err := c.WriteJSON(newBitcoinResponseDto)
+		if err != nil {
+			return
+		}
 
 		time.Sleep(time.Second * 3)
 	}
-
 }
 
 // worker is a  collection of threads for the bitcoin stats

@@ -226,11 +226,14 @@ func Stats(c *websocket.Conn) {
 		count := new(big.Int)
 		count.SetString(strings.Replace(peerCount, "0x", "", 1), 16)
 
-		c.WriteJSON(fiber.Map{
+		intErr := c.WriteJSON(fiber.Map{
 			"currentBlock": current.String(),
 			"highestBlock": highest.String(),
 			"peersCount":   count,
 		})
+		if intErr != nil {
+			return
+		}
 
 		time.Sleep(time.Second)
 	}
