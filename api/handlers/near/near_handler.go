@@ -191,7 +191,10 @@ func Stats(c *websocket.Conn) {
 			}
 
 			msg, _ = json.Marshal(r)
-			c.WriteMessage(websocket.TextMessage, []byte(msg))
+			err := c.WriteMessage(websocket.TextMessage, []byte(msg))
+			if err != nil {
+				return
+			}
 			time.Sleep(time.Second)
 		}
 	}
@@ -252,7 +255,7 @@ func Stats(c *websocket.Conn) {
 			fmt.Println(err)
 		}
 
-		c.WriteJSON(fiber.Map{
+		err = c.WriteJSON(fiber.Map{
 			"activePeersCount":       networkInfo.ActivePeersCount,
 			"maxPeersCount":          networkInfo.MaxPeersCount,
 			"sentBytesPerSecond":     networkInfo.SentBytesPerSecond,
@@ -261,6 +264,9 @@ func Stats(c *websocket.Conn) {
 			"earliestBlockHeight":    nodeStatus.SyncInfo.EarliestBlockHeight,
 			"syncing":                nodeStatus.SyncInfo.Syncing,
 		})
+		if err != nil {
+			return
+		}
 
 		time.Sleep(time.Second)
 	}

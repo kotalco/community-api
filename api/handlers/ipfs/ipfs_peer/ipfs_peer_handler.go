@@ -283,7 +283,10 @@ func Stats(c *websocket.Conn) {
 		}
 		close(results)
 
-		c.WriteJSON(newIpfsResponse)
+		err := c.WriteJSON(newIpfsResponse)
+		if err != nil {
+			return
+		}
 
 		time.Sleep(time.Second * 3)
 	}
