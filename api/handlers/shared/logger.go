@@ -30,31 +30,39 @@ func Logger(c *websocket.Conn) {
 
 	lines := int64(100)
 
-	podLogOptions := corev1.PodLogOptions{
+	opts := corev1.PodLogOptions{
 		Follow:    true,
 		TailLines: &lines,
 	}
 
-	podLogRequest := k8s.Clientset().CoreV1().Pods(c.Locals("namespace").(string)).GetLogs(fmt.Sprintf("%s-0", c.Params("name")), &podLogOptions)
+	ns := c.Locals("namespace").(string)
+	name := fmt.Sprintf("%s-0", c.Params("name"))
+	logs := k8s.Clientset().CoreV1().Pods(ns).GetLogs(name, &opts)
 
-	stream, err := podLogRequest.Stream(context.TODO())
+	stream, err := logs.Stream(context.TODO())
+	if stream != nil {
+		defer stream.Close()
+	}
 	if err != nil {
 		c.WriteMessage(websocket.TextMessage, []byte(err.Error()))
 		return
 	}
-	defer stream.Close()
 
 	for {
 		buf := make([]byte, 1024)
+
 		numBytes, err := stream.Read(buf)
 		if err != nil {
-			break
+			return
 		}
 
 		if numBytes == 0 {
+			time.Sleep(time.Second)
 			continue
 		}
 
-		c.WriteMessage(websocket.TextMessage, buf[:numBytes])
+		if err := c.WriteMessage(websocket.TextMessage, buf[:numBytes]); err != nil {
+			return
+		}
 	}
 }
