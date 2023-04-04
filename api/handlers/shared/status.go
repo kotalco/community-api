@@ -70,23 +70,29 @@ func Status(c *websocket.Conn) {
 				err = errors.New("NotFound")
 			}
 
-			c.WriteMessage(websocket.TextMessage, []byte(err.Error()))
+			if err := c.WriteMessage(websocket.TextMessage, []byte(err.Error())); err != nil {
+				return
+			}
 
 			time.Sleep(3 * time.Second)
 			continue
 		}
 
 		phase := string(pod.Status.Phase)
+
 		if pod.DeletionTimestamp != nil {
 			phase = "Terminating"
 		}
+
 		if len(pod.Status.ContainerStatuses) != 0 {
 			if pod.Status.ContainerStatuses[0].State.Waiting != nil {
 				phase = pod.Status.ContainerStatuses[0].State.Waiting.Reason
 			}
 		}
 
-		c.WriteMessage(websocket.TextMessage, []byte(phase))
+		if err := c.WriteMessage(websocket.TextMessage, []byte(phase)); err != nil {
+			return
+		}
 
 		time.Sleep(time.Second)
 	}
