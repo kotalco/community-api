@@ -4,6 +4,12 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"net/http"
+	"os"
+	"sort"
+	"strconv"
+	"time"
+
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/websocket/v2"
 	"github.com/kotalco/community-api/internal/polkadot"
@@ -12,13 +18,10 @@ import (
 	"github.com/kotalco/community-api/pkg/shared"
 	polkadotv1alpha1 "github.com/kotalco/kotal/apis/polkadot/v1alpha1"
 	"github.com/ybbus/jsonrpc/v2"
+	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
+	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/types"
-	"net/http"
-	"os"
-	"sort"
-	"strconv"
-	"time"
 )
 
 const (
@@ -169,31 +172,54 @@ func Stats(c *websocket.Conn) {
 	}
 
 	name := c.Params("name")
-	node := &polkadotv1alpha1.Node{}
-	nameSpacedName := types.NamespacedName{
-		Namespace: c.Locals("namespace").(string),
+	ns := c.Locals("namespace").(string)
+	nodeKey := types.NamespacedName{
+		Namespace: ns,
 		Name:      name,
 	}
+	podKey := types.NamespacedName{
+		Namespace: ns,
+		Name:      fmt.Sprintf("%s-0", name),
+	}
 
-	for {
+nodeCheck:
+	// checking node is found and rpc is enabled
+	// because node can be deleted, and rpc closed
+	// during the lifetime of socket connection
+	node := &polkadotv1alpha1.Node{}
+	if err := k8sClient.Get(context.Background(), nodeKey, node); errors.IsNotFound(err) {
+		c.WriteJSON(fiber.Map{
+			"error": fmt.Sprintf("node by name %s doesn't exist", name),
+		})
+		return
+	}
 
-		err := k8sClient.Get(context.Background(), nameSpacedName, node)
-		if errors.IsNotFound(err) {
-			c.WriteJSON(fiber.Map{
-				"error": fmt.Sprintf("node by name %s doesn't exist", name),
-			})
+	if !node.Spec.RPC {
+		if err := c.WriteJSON(fiber.Map{"error": "JSON-RPC server is not enabled"}); err != nil {
 			return
 		}
+		time.Sleep(3 * time.Second)
+		goto nodeCheck
+	}
 
-		if !node.Spec.RPC {
-			c.WriteJSON(fiber.Map{
-				"error": "JSON-RPC server is not enabled",
-			})
-			time.Sleep(time.Second)
-			continue
+podCheck:
+	// check pod exist if any rpc failed
+	// if pod is not found, check if node has been deleted
+	pod := &corev1.Pod{}
+	if err := k8sClient.Get(context.Background(), podKey, pod); err != nil {
+		if apierrors.IsNotFound(err) {
+			goto nodeCheck
 		}
+	}
+	if pod.Status.Phase != corev1.PodRunning {
+		time.Sleep(3 * time.Second)
+		goto podCheck
+	}
 
-		client := jsonrpc.NewClient(fmt.Sprintf("http://%s.%s:%d", nameSpacedName.Name, nameSpacedName.Namespace, node.Spec.RPCPort))
+	endpoint := fmt.Sprintf("http://%s.%s:%d", node.Name, node.Namespace, node.Spec.RPCPort)
+	rpcClient := jsonrpc.NewClient(endpoint)
+
+	for {
 
 		type SyncState struct {
 			CurrentBlock uint `json:"currentBlock"`
@@ -202,9 +228,9 @@ func Stats(c *websocket.Conn) {
 
 		// sync state rpc call
 		syncState := &SyncState{}
-		err = client.CallFor(syncState, "system_syncState")
-		if err != nil {
-			fmt.Println(err)
+		if err := rpcClient.CallFor(syncState, "system_syncState"); err != nil {
+			time.Sleep(3 * time.Second)
+			goto podCheck
 		}
 
 		// system_health .isSyncing .peers
@@ -215,18 +241,17 @@ func Stats(c *websocket.Conn) {
 
 		// system health rpc call
 		systemHealth := &SystemHealth{}
-		err = client.CallFor(systemHealth, "system_health")
-		if err != nil {
-			fmt.Println(err)
+		if err := rpcClient.CallFor(systemHealth, "system_health"); err != nil {
+			time.Sleep(3 * time.Second)
+			goto podCheck
 		}
 
-		err = c.WriteJSON(fiber.Map{
+		if err := c.WriteJSON(fiber.Map{
 			"currentBlock": syncState.CurrentBlock,
 			"highestBlock": syncState.HighestBlock,
 			"peersCount":   systemHealth.PeersCount,
 			"syncing":      systemHealth.Syncing,
-		})
-		if err != nil {
+		}); err != nil {
 			return
 		}
 
