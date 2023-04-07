@@ -3,6 +3,8 @@ package shared
 import (
 	"context"
 	"fmt"
+	"time"
+
 	restError "github.com/kotalco/community-api/pkg/errors"
 	"github.com/kotalco/community-api/pkg/logger"
 	"github.com/kotalco/community-api/pkg/shared"
@@ -10,7 +12,6 @@ import (
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"time"
 
 	"github.com/gofiber/websocket/v2"
 	"github.com/kotalco/community-api/pkg/k8s"
@@ -62,10 +63,7 @@ podCheck:
 		metrics, err := metricsClientset.MetricsV1beta1().PodMetricses(key.Namespace).Get(context.Background(), key.Name, metav1.GetOptions{})
 		if err != nil {
 			go logger.Info("METRICS_API_ERR", err.Error())
-			err := c.WriteJSON(response)
-			if err != nil {
-				return
-			}
+			time.Sleep(3 * time.Second)
 			goto podCheck
 		}
 
