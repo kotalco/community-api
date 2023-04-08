@@ -68,7 +68,7 @@ func Status(c *websocket.Conn) {
 			// if pod is being terminated, check owner sts is found or not
 			go func() {
 				time.Sleep(3 * time.Second)
-				_, err := k8sClientset.AppsV1().StatefulSets(ns).Get(context.Background(), "my-dot-node", metav1.GetOptions{})
+				_, err := k8sClientset.AppsV1().StatefulSets(ns).Get(context.Background(), name, metav1.GetOptions{})
 				if err != nil && apierrors.IsNotFound(err) {
 					watch.Stop()
 				}
