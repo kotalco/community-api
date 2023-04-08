@@ -68,8 +68,8 @@ podCheck:
 		metrics, err := podMetrics.Get(context.Background(), key.Name, opts)
 		if err != nil {
 			go logger.Info("METRICS_API_ERR", err.Error())
-			c.WriteJSON(response)
-			return
+			time.Sleep(3 * time.Second)
+			goto podCheck
 		}
 
 		response.Cpu = metrics.Containers[0].Usage.Cpu().ScaledValue(resource.Milli)
