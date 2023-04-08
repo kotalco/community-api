@@ -30,21 +30,23 @@ type metricsResponseDto struct {
 func Metrics(c *websocket.Conn) {
 	defer c.Close()
 
-	pod := new(corev1.Pod)
+	name := c.Params("name")
+	ns := c.Locals("namespace").(string)
+	pod := &corev1.Pod{}
+
 	key := types.NamespacedName{
-		Namespace: c.Locals("namespace").(string),
-		Name:      fmt.Sprintf("%s-0", c.Params("name")),
+		Namespace: ns,
+		Name:      fmt.Sprintf("%s-0", name),
 	}
 
 	sts := &appsv1.StatefulSet{}
 	stsKey := types.NamespacedName{
-		Namespace: c.Locals("namespace").(string),
-		Name:      c.Params("name"),
+		Namespace: ns,
+		Name:      name,
 	}
 
 podCheck:
-	err := k8sClient.Get(context.Background(), key, pod)
-	if err != nil {
+	if err := k8sClient.Get(context.Background(), key, pod); err != nil {
 		go logger.Info("METRICS_POD_NOTFOUND", err.Error())
 		// is the pod error due to sts has been deleted ?
 		stsErr := k8sClient.Get(context.Background(), stsKey, sts)
@@ -57,10 +59,13 @@ podCheck:
 		goto podCheck
 	}
 
+	opts := metav1.GetOptions{}
+	podMetrics := metricsClientset.MetricsV1beta1().PodMetricses(key.Namespace)
+
 	for {
 		response := new(metricsResponseDto)
 
-		metrics, err := metricsClientset.MetricsV1beta1().PodMetricses(key.Namespace).Get(context.Background(), key.Name, metav1.GetOptions{})
+		metrics, err := podMetrics.Get(context.Background(), key.Name, opts)
 		if err != nil {
 			go logger.Info("METRICS_API_ERR", err.Error())
 			time.Sleep(3 * time.Second)
@@ -70,10 +75,10 @@ podCheck:
 		response.Cpu = metrics.Containers[0].Usage.Cpu().ScaledValue(resource.Milli)
 		response.Memory = metrics.Containers[0].Usage.Memory().ScaledValue(resource.Mega)
 
-		err = c.WriteJSON(response)
-		if err != nil {
+		if err := c.WriteJSON(response); err != nil {
 			return
 		}
-		time.Sleep(time.Second * 1)
+
+		time.Sleep(time.Second)
 	}
 }
