@@ -9,6 +9,7 @@ import (
 
 	"github.com/gofiber/websocket/v2"
 	"github.com/kotalco/community-api/pkg/k8s"
+	"github.com/kotalco/community-api/pkg/logger"
 	corev1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -50,6 +51,7 @@ func Status(c *websocket.Conn) {
 		LabelSelector: selector,
 	})
 	if err != nil {
+		go logger.Info("STATUS_STREAM", err.Error())
 		return
 	}
 
@@ -57,6 +59,7 @@ func Status(c *websocket.Conn) {
 
 		pod, ok := event.Object.(*corev1.Pod)
 		if !ok {
+			go logger.Info("STATUS_STREAM", err.Error())
 			return
 		}
 
