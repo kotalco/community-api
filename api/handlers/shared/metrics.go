@@ -3,6 +3,7 @@ package shared
 import (
 	"context"
 	"fmt"
+	"sync"
 	"time"
 
 	restError "github.com/kotalco/community-api/pkg/errors"
@@ -19,7 +20,10 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 )
 
-var metricsClientset = k8s.MetricsClientset()
+var (
+	metricsClientset = k8s.MetricsClientset()
+	metricsCache     sync.Map
+)
 
 type metricsResponseDto struct {
 	Cpu    int64 `json:"cpu"`
@@ -28,8 +32,6 @@ type metricsResponseDto struct {
 
 // Metrics returns a websocket that emits cpu and memory usage
 func Metrics(c *websocket.Conn) {
-	defer c.Close()
-
 	name := c.Params("name")
 	ns := c.Locals("namespace").(string)
 	pod := &corev1.Pod{}
@@ -43,6 +45,25 @@ func Metrics(c *websocket.Conn) {
 	stsKey := types.NamespacedName{
 		Namespace: ns,
 		Name:      name,
+	}
+
+	podCacheKey := fmt.Sprintf("%s/%s", ns, name) // use name and namespace as cache key
+	defer func() {
+		metricsCache.Delete(podCacheKey)
+		c.Close()
+	}()
+
+	for {
+		// retrieve metrics from cache if available
+		if cachedMetrics, ok := metricsCache.Load(podCacheKey); ok {
+			if err := c.WriteJSON(cachedMetrics); err != nil {
+				go logger.Info("METRICS_CACHE_ERR", err.Error())
+				break
+			}
+		} else {
+			break
+		}
+		time.Sleep(time.Second)
 	}
 
 podCheck:
@@ -79,6 +100,7 @@ podCheck:
 			return
 		}
 
+		metricsCache.Store(podCacheKey, response)
 		time.Sleep(time.Second)
 	}
 }
