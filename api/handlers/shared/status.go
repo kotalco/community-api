@@ -59,7 +59,6 @@ func Status(c *websocket.Conn) {
 
 		pod, ok := event.Object.(*corev1.Pod)
 		if !ok {
-			go logger.Info("STATUS_STREAM", err.Error())
 			return
 		}
 
