@@ -44,9 +44,12 @@ func Metrics(c *websocket.Conn) {
 			return
 		}
 
-		metrics := event.Object.(*v1beta1.PodMetrics)
-		response := new(metricsResponseDto)
+		metrics, ok := event.Object.(*v1beta1.PodMetrics)
+		if !ok {
+			return
+		}
 
+		response := new(metricsResponseDto)
 		response.Cpu = metrics.Containers[0].Usage.Cpu().ScaledValue(resource.Milli)
 		response.Memory = metrics.Containers[0].Usage.Memory().ScaledValue(resource.Mega)
 
