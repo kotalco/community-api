@@ -3,9 +3,11 @@ package shared
 import (
 	"context"
 	"fmt"
+
 	"github.com/gofiber/websocket/v2"
 	"github.com/kotalco/community-api/pkg/k8s"
 	"github.com/kotalco/community-api/pkg/logger"
+	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/metrics/pkg/apis/metrics/v1beta1"
@@ -38,9 +40,7 @@ func Metrics(c *websocket.Conn) {
 	}
 
 	for event := range watcher.ResultChan() {
-		if event.Type == "ERROR" {
-			err := event.Object.(*v1beta1.PodMetrics)
-			go logger.Info("METRICS_STREAM", fmt.Sprintf("Error watching Metrics: %v", err))
+		if event.Type == corev1.StreamTypeError {
 			return
 		}
 
