@@ -57,6 +57,10 @@ func Status(c *websocket.Conn) {
 
 	for event := range watch.ResultChan() {
 
+		if event.Type == corev1.StreamTypeError {
+			return
+		}
+
 		pod, ok := event.Object.(*corev1.Pod)
 		if !ok {
 			return
