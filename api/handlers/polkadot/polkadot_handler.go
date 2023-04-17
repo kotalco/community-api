@@ -4,12 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"net/http"
-	"os"
-	"sort"
-	"strconv"
-	"time"
-
+	wss "github.com/fasthttp/websocket"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/websocket/v2"
 	"github.com/kotalco/community-api/internal/polkadot"
@@ -17,12 +12,25 @@ import (
 	"github.com/kotalco/community-api/pkg/k8s"
 	"github.com/kotalco/community-api/pkg/shared"
 	polkadotv1alpha1 "github.com/kotalco/kotal/apis/polkadot/v1alpha1"
-	"github.com/ybbus/jsonrpc/v2"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
-	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/types"
+	"net/http"
+	"sort"
+	"strconv"
+	"time"
 )
+
+type request struct {
+	endpoint string
+	method   string
+	name     string
+}
+type result struct {
+	err  error
+	name string
+	data interface{}
+}
 
 const (
 	nameKeyword = "name"
@@ -141,36 +149,6 @@ func Stats(c *websocket.Conn) {
 		Syncing bool `json:"syncing"`
 	}
 
-	// Mock serever
-	if os.Getenv("MOCK") == "true" {
-		var currentBlock, highestBlock, peersCount uint
-		for {
-			currentBlock += 3
-			highestBlock += 32
-			peersCount += 1
-
-			r := &Result{
-				CurrentBlock: currentBlock,
-				HighestBlock: highestBlock,
-				Peers:        peersCount,
-				Syncing:      peersCount%4 != 0,
-			}
-
-			var msg []byte
-
-			if peersCount > 40 {
-				peersCount = 0
-				r = &Result{
-					Error: "JSON-RPC server is not enabled",
-				}
-			}
-
-			msg, _ = json.Marshal(r)
-			c.WriteMessage(websocket.TextMessage, []byte(msg))
-			time.Sleep(time.Second)
-		}
-	}
-
 	name := c.Params("name")
 	ns := c.Locals("namespace").(string)
 	nodeKey := types.NamespacedName{
@@ -183,8 +161,8 @@ func Stats(c *websocket.Conn) {
 	}
 
 nodeCheck:
-	// checking node is found and rpc is enabled
-	// because node can be deleted, and rpc closed
+	// checking node is found and WebSocket is enabled
+	// because node can be deleted, and WebSocket closed
 	// during the lifetime of socket connection
 	node := &polkadotv1alpha1.Node{}
 	if err := k8sClient.Get(context.Background(), nodeKey, node); errors.IsNotFound(err) {
@@ -194,8 +172,8 @@ nodeCheck:
 		return
 	}
 
-	if !node.Spec.RPC {
-		if err := c.WriteJSON(fiber.Map{"error": "JSON-RPC server is not enabled"}); err != nil {
+	if !node.Spec.WS {
+		if err := c.WriteJSON(fiber.Map{"error": "WebSocket server is not enabled"}); err != nil {
 			return
 		}
 		time.Sleep(3 * time.Second)
@@ -203,11 +181,11 @@ nodeCheck:
 	}
 
 podCheck:
-	// check pod exist if any rpc failed
+	// check pod exist if any WebSocket failed
 	// if pod is not found, check if node has been deleted
 	pod := &corev1.Pod{}
 	if err := k8sClient.Get(context.Background(), podKey, pod); err != nil {
-		if apierrors.IsNotFound(err) {
+		if errors.IsNotFound(err) {
 			goto nodeCheck
 		}
 	}
@@ -216,46 +194,87 @@ podCheck:
 		goto podCheck
 	}
 
-	endpoint := fmt.Sprintf("http://%s.%s:%d", node.Name, node.Namespace, node.Spec.RPCPort)
-	rpcClient := jsonrpc.NewClient(endpoint)
+	// Connect to the WebSocket endpoint
+	endpoint := fmt.Sprintf("ws://%s:%d", "localhost", node.Spec.WSPort)
+	wsClient, _, err := wss.DefaultDialer.Dial(endpoint, nil)
+	if err != nil {
+		c.WriteJSON(fiber.Map{"error": err.Error()})
+		return
+	}
+	defer wsClient.Close()
 
+	// Send the initial system_syncState and system_health requests
+	if err := wsClient.WriteMessage(websocket.TextMessage, []byte(`{"id":1,"jsonrpc":"2.0","method":"system_syncState","params":[]}`)); err != nil {
+		c.WriteJSON(fiber.Map{"error": err.Error()})
+		return
+	}
+	if err := wsClient.WriteMessage(websocket.TextMessage, []byte(`{"id":2,"jsonrpc":"2.0","method":"system_health","params":[]}`)); err != nil {
+		c.WriteJSON(fiber.Map{"error": err.Error()})
+		return
+	}
+
+	// Continuously listen for incoming messages
 	for {
-
-		type SyncState struct {
-			CurrentBlock uint `json:"currentBlock"`
-			HighestBlock uint `json:"highestBlock"`
-		}
-
-		// sync state rpc call
-		syncState := &SyncState{}
-		if err := rpcClient.CallFor(syncState, "system_syncState"); err != nil {
-			time.Sleep(3 * time.Second)
-			goto podCheck
-		}
-
-		// system_health .isSyncing .peers
-		type SystemHealth struct {
-			Syncing    bool `json:"isSyncing"`
-			PeersCount uint `json:"peers"`
-		}
-
-		// system health rpc call
-		systemHealth := &SystemHealth{}
-		if err := rpcClient.CallFor(systemHealth, "system_health"); err != nil {
-			time.Sleep(3 * time.Second)
-			goto podCheck
-		}
-
-		if err := c.WriteJSON(fiber.Map{
-			"currentBlock": syncState.CurrentBlock,
-			"highestBlock": syncState.HighestBlock,
-			"peersCount":   systemHealth.PeersCount,
-			"syncing":      systemHealth.Syncing,
-		}); err != nil {
+		_, message, err := wsClient.ReadMessage()
+		if err != nil {
+			c.WriteJSON(fiber.Map{"error": err.Error()})
 			return
 		}
 
-		time.Sleep(time.Second)
+		// Parse the incoming message
+		var result map[string]interface{}
+		if err := json.Unmarshal(message, &result); err != nil {
+			c.WriteJSON(fiber.Map{"error": err.Error()})
+			return
+		}
+
+		// Check if the message is a response to a system_syncState request
+		if id, ok := result["id"].(float64); ok && id == 1 {
+
+			var responseBody struct {
+				CurrentBlock uint `json:"currentBlock"`
+				HighestBlock uint `json:"highestBlock"`
+			}
+
+			result, err := json.Marshal(result["result"])
+			if err != nil {
+				c.WriteJSON(fiber.Map{"error": err.Error()})
+				return
+			}
+
+			if err := json.Unmarshal(result, &responseBody); err != nil {
+				c.WriteJSON(fiber.Map{"error": err.Error()})
+				return
+			}
+
+			// Send the current block and highest block to the client
+			if err := c.WriteJSON(fiber.Map{"currentBlock": responseBody.CurrentBlock, "highestBlock": responseBody.HighestBlock}); err != nil {
+				return
+			}
+		}
+
+		// Check if the message is a response to a system_health request
+		if id, ok := result["id"].(float64); ok && id == 2 {
+			var responseBody struct {
+				Syncing    bool `json:"isSyncing"`
+				PeersCount uint `json:"peers"`
+			}
+
+			result, err := json.Marshal(result["result"])
+			if err != nil {
+				c.WriteJSON(fiber.Map{"error": err.Error()})
+				return
+			}
+			if err := json.Unmarshal(result, &responseBody); err != nil {
+				c.WriteJSON(fiber.Map{"error": err.Error()})
+				return
+			}
+
+			// Send the peers count and syncing status to the client
+			if err := c.WriteJSON(fiber.Map{"peersCount": responseBody.PeersCount, "syncing": responseBody.Syncing}); err != nil {
+				return
+			}
+		}
 	}
 }
 
