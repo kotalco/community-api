@@ -107,17 +107,17 @@ func (service stacksService) Update(dto *StacksDto, node *stacksv1alpha1.Node) (
 	if dto.RPCPort != 0 {
 		node.Spec.RPCPort = dto.RPCPort
 	}
-	if dto.NodePrivateKeySecretName != "" {
-		node.Spec.NodePrivateKeySecretName = dto.NodePrivateKeySecretName
+	if dto.NodePrivateKeySecretName != nil {
+		node.Spec.NodePrivateKeySecretName = *dto.NodePrivateKeySecretName
 	}
-	if dto.SeedPrivateKeySecretName != "" {
-		node.Spec.SeedPrivateKeySecretName = dto.SeedPrivateKeySecretName
+	if dto.SeedPrivateKeySecretName != nil {
+		node.Spec.SeedPrivateKeySecretName = *dto.SeedPrivateKeySecretName
 	}
 	if dto.Miner != nil {
 		node.Spec.Miner = *dto.Miner
 	}
 	if dto.MineMicroBlocks != nil {
-		node.Spec.Miner = *dto.MineMicroBlocks
+		node.Spec.MineMicroblocks = *dto.MineMicroBlocks
 	}
 
 	if dto.BitcoinNode != nil {

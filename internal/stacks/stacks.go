@@ -17,8 +17,8 @@ type StacksDto struct {
 	P2PPort                  uint                         `json:"p2pPort"`
 	RPCHost                  string                       `json:"rpcHost"`
 	RPCPort                  uint                         `json:"rpcPort"`
-	NodePrivateKeySecretName string                       `json:"nodePrivateKeySecretName"`
-	SeedPrivateKeySecretName string                       `json:"seedPrivateKeySecretName"`
+	NodePrivateKeySecretName *string                      `json:"nodePrivateKeySecretName"`
+	SeedPrivateKeySecretName *string                      `json:"seedPrivateKeySecretName"`
 	Miner                    *bool                        `json:"miner"`
 	MineMicroBlocks          *bool                        `json:"mineMicroBlocks"`
 	BitcoinNode              *stacksv1alpha1.BitcoinNode  `json:"bitcoinNode"`
@@ -36,8 +36,8 @@ func (dto StacksDto) FromStacksNode(n *stacksv1alpha1.Node) *StacksDto {
 	dto.P2PPort = n.Spec.P2PPort
 	dto.RPCHost = n.Spec.RPCHost
 	dto.RPCPort = n.Spec.RPCPort
-	dto.NodePrivateKeySecretName = n.Spec.NodePrivateKeySecretName
-	dto.SeedPrivateKeySecretName = n.Spec.SeedPrivateKeySecretName
+	dto.NodePrivateKeySecretName = &n.Spec.NodePrivateKeySecretName
+	dto.SeedPrivateKeySecretName = &n.Spec.SeedPrivateKeySecretName
 	dto.Miner = &n.Spec.Miner
 	dto.MineMicroBlocks = &n.Spec.MineMicroblocks
 	dto.BitcoinNode = &n.Spec.BitcoinNode
