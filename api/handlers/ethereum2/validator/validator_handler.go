@@ -25,7 +25,7 @@ var service = validator.NewValidatorService()
 func Get(c *fiber.Ctx) error {
 	validatorNode := c.Locals("validator").(*ethereum2v1alpha1.Validator)
 
-	return c.Status(http.StatusOK).JSON(shared.NewResponse(new(validator.ValidatorDto).FromEthereum2Validator(validatorNode)))
+	return c.Status(http.StatusOK).JSON(shared.NewResponse(new(validator.ValidatorDto).FromEthereum2Validator(*validatorNode)))
 }
 
 // List returns all Ethereum 2.0 validator clients
@@ -77,7 +77,7 @@ func Create(c *fiber.Ctx) error {
 		return c.Status(err.Status).JSON(err)
 	}
 
-	return c.Status(http.StatusOK).JSON(shared.NewResponse(new(validator.ValidatorDto).FromEthereum2Validator(validatorNode)))
+	return c.Status(http.StatusOK).JSON(shared.NewResponse(new(validator.ValidatorDto).FromEthereum2Validator(*validatorNode)))
 }
 
 // Delete deletes Ethereum 2.0 validator client by name
@@ -115,7 +115,7 @@ func Update(c *fiber.Ctx) error {
 		return c.Status(err.Status).JSON(err)
 	}
 
-	return c.Status(http.StatusOK).JSON(shared.NewResponse(new(validator.ValidatorDto).FromEthereum2Validator(validatorNode)))
+	return c.Status(http.StatusOK).JSON(shared.NewResponse(new(validator.ValidatorDto).FromEthereum2Validator(*validatorNode)))
 }
 
 // Count returns total number of validators
