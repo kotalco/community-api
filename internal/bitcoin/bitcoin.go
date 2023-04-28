@@ -33,9 +33,9 @@ type BitcoinDto struct {
 	sharedAPI.Resources
 }
 
-type BitcoinListDto []BitcoinDto
+type BitcoinListDto []*BitcoinDto
 
-func (dto BitcoinDto) FromBitcoinNode(n *bitcoinv1alpha1.Node) *BitcoinDto {
+func (dto BitcoinDto) FromBitcoinNode(n bitcoinv1alpha1.Node) *BitcoinDto {
 	dto.Name = n.Name
 	dto.Time = models.Time{CreatedAt: n.CreationTimestamp.UTC().Format(shared.JavascriptISOString)}
 	dto.Image = n.Spec.Image
@@ -64,7 +64,7 @@ func (dto BitcoinDto) FromBitcoinNode(n *bitcoinv1alpha1.Node) *BitcoinDto {
 func (nodes BitcoinListDto) FromBitcoinNode(models []bitcoinv1alpha1.Node) BitcoinListDto {
 	result := make(BitcoinListDto, len(models))
 	for index, model := range models {
-		result[index] = *(BitcoinDto{}.FromBitcoinNode(&model))
+		result[index] = BitcoinDto{}.FromBitcoinNode(model)
 	}
 	return result
 }

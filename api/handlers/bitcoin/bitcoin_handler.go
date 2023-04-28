@@ -46,7 +46,7 @@ var (
 // Get returns a single bitcoin node by name
 func Get(c *fiber.Ctx) error {
 	node := c.Locals("node").(*bitcoinv1alpha1.Node)
-	return c.JSON(shared.NewResponse(new(bitcoin.BitcoinDto).FromBitcoinNode(node)))
+	return c.JSON(shared.NewResponse(new(bitcoin.BitcoinDto).FromBitcoinNode(*node)))
 }
 
 // List returns all bitcoin nodes
@@ -108,7 +108,7 @@ func Create(c *fiber.Ctx) error {
 	if err != nil {
 		return c.Status(err.Status).JSON(err)
 	}
-	return c.Status(http.StatusCreated).JSON(shared.NewResponse(new(bitcoin.BitcoinDto).FromBitcoinNode(node)))
+	return c.Status(http.StatusCreated).JSON(shared.NewResponse(new(bitcoin.BitcoinDto).FromBitcoinNode(*node)))
 }
 
 // Update updates a single bitcoin node by name from spec
@@ -126,7 +126,7 @@ func Update(c *fiber.Ctx) error {
 		return c.Status(err.Status).JSON(err)
 	}
 
-	return c.Status(http.StatusOK).JSON(shared.NewResponse(new(bitcoin.BitcoinDto).FromBitcoinNode(node)))
+	return c.Status(http.StatusOK).JSON(shared.NewResponse(new(bitcoin.BitcoinDto).FromBitcoinNode(*node)))
 }
 
 // Count returns total number of nodes
