@@ -34,7 +34,7 @@ var service = ethereum.NewEthereumService()
 func Get(c *fiber.Ctx) error {
 	node := c.Locals("node").(*ethereumv1alpha1.Node)
 
-	return c.JSON(shared.NewResponse(new(ethereum.EthereumDto).FromEthereumNode(node)))
+	return c.JSON(shared.NewResponse(new(ethereum.EthereumDto).FromEthereumNode(*node)))
 }
 
 // Create creates ethereum node from the given spec
@@ -60,7 +60,7 @@ func Create(c *fiber.Ctx) error {
 		return c.Status(err.Status).JSON(err)
 	}
 
-	return c.Status(http.StatusCreated).JSON(shared.NewResponse(new(ethereum.EthereumDto).FromEthereumNode(node)))
+	return c.Status(http.StatusCreated).JSON(shared.NewResponse(new(ethereum.EthereumDto).FromEthereumNode(*node)))
 }
 
 // Update updates a single ethereum node by name from spec
@@ -82,7 +82,7 @@ func Update(c *fiber.Ctx) error {
 		return c.Status(err.Status).JSON(err)
 	}
 
-	return c.Status(http.StatusOK).JSON(shared.NewResponse(new(ethereum.EthereumDto).FromEthereumNode(node)))
+	return c.Status(http.StatusOK).JSON(shared.NewResponse(new(ethereum.EthereumDto).FromEthereumNode(*node)))
 }
 
 // List returns all ethereum nodes
