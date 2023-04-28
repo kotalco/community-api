@@ -35,9 +35,9 @@ type ChainlinkDto struct {
 	sharedAPI.Resources
 }
 
-type ChainlinkListDto []ChainlinkDto
+type ChainlinkListDto []*ChainlinkDto
 
-func (dto ChainlinkDto) FromChainlinkNode(n *chainlinkv1alpha1.Node) *ChainlinkDto {
+func (dto ChainlinkDto) FromChainlinkNode(n chainlinkv1alpha1.Node) *ChainlinkDto {
 	dto.Name = n.Name
 	dto.Time = models.Time{CreatedAt: n.CreationTimestamp.UTC().Format(shared.JavascriptISOString)}
 	dto.EthereumChainId = n.Spec.EthereumChainId
@@ -72,7 +72,7 @@ func (dto ChainlinkDto) FromChainlinkNode(n *chainlinkv1alpha1.Node) *ChainlinkD
 func (nodes ChainlinkListDto) FromChainlinkNode(models []chainlinkv1alpha1.Node) ChainlinkListDto {
 	result := make(ChainlinkListDto, len(models))
 	for index, model := range models {
-		result[index] = *(ChainlinkDto{}.FromChainlinkNode(&model))
+		result[index] = ChainlinkDto{}.FromChainlinkNode(model)
 	}
 	return result
 }

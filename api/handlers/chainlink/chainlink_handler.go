@@ -26,7 +26,7 @@ var service = chainlink.NewChainLinkService()
 // 2-marshall node to dto and format the response
 func Get(c *fiber.Ctx) error {
 	node := c.Locals("node").(*chainlinkv1alpha1.Node)
-	return c.JSON(shared.NewResponse(new(chainlink.ChainlinkDto).FromChainlinkNode(node)))
+	return c.JSON(shared.NewResponse(new(chainlink.ChainlinkDto).FromChainlinkNode(*node)))
 }
 
 // Create creates chainlink node from the given spec
@@ -52,7 +52,7 @@ func Create(c *fiber.Ctx) error {
 		return c.Status(err.Status).JSON(err)
 	}
 
-	return c.Status(http.StatusCreated).JSON(shared.NewResponse(new(chainlink.ChainlinkDto).FromChainlinkNode(node)))
+	return c.Status(http.StatusCreated).JSON(shared.NewResponse(new(chainlink.ChainlinkDto).FromChainlinkNode(*node)))
 }
 
 // Update updates a single chainlink node by name from spec
@@ -74,7 +74,7 @@ func Update(c *fiber.Ctx) error {
 		return c.Status(err.Status).JSON(err)
 	}
 
-	return c.Status(http.StatusOK).JSON(shared.NewResponse(new(chainlink.ChainlinkDto).FromChainlinkNode(node)))
+	return c.Status(http.StatusOK).JSON(shared.NewResponse(new(chainlink.ChainlinkDto).FromChainlinkNode(*node)))
 
 }
 
