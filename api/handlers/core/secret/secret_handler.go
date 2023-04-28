@@ -1,5 +1,5 @@
 // Package secret handler is the representation layer for the secret domain
-//implements secretService for node secrets cruds
+// implements secretService for node secrets cruds
 package secret
 
 import (
@@ -27,7 +27,7 @@ var service = secret.NewSecretService()
 func Get(c *fiber.Ctx) error {
 	secretModel := c.Locals("secret").(*corev1.Secret)
 
-	return c.Status(http.StatusOK).JSON(new(secret.SecretDto).FromCoreSecret(secretModel))
+	return c.Status(http.StatusOK).JSON(new(secret.SecretDto).FromCoreSecret(*secretModel))
 }
 
 // List returns all k8s secrets
@@ -56,7 +56,7 @@ func List(c *fiber.Ctx) error {
 		if keyType == "" || secretType != "" && keyType != secretType {
 			continue
 		}
-		secretListDto = append(secretListDto, *secret.SecretDto{}.FromCoreSecret(&sec))
+		secretListDto = append(secretListDto, *secret.SecretDto{}.FromCoreSecret(sec))
 	}
 
 	return c.Status(http.StatusOK).JSON(shared.NewResponse(secretListDto))
@@ -86,7 +86,7 @@ func Create(c *fiber.Ctx) error {
 		return c.Status(err.Status).JSON(err)
 	}
 
-	return c.Status(http.StatusCreated).JSON(shared.NewResponse(new(secret.SecretDto).FromCoreSecret(secretModel)))
+	return c.Status(http.StatusCreated).JSON(shared.NewResponse(new(secret.SecretDto).FromCoreSecret(*secretModel)))
 }
 
 // Delete deletes k8s secret by name
