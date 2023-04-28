@@ -32,9 +32,9 @@ type PolkadotDto struct {
 	sharedAPI.Resources
 }
 
-type PolkadotListDto []PolkadotDto
+type PolkadotListDto []*PolkadotDto
 
-func (dto PolkadotDto) FromPolkadotNode(node *polkadotv1alpha1.Node) *PolkadotDto {
+func (dto PolkadotDto) FromPolkadotNode(node polkadotv1alpha1.Node) *PolkadotDto {
 	dto.Time = models.Time{CreatedAt: node.CreationTimestamp.UTC().Format(shared.JavascriptISOString)}
 	dto.Name = node.Name
 	dto.Network = node.Spec.Network
@@ -68,7 +68,7 @@ func (dto PolkadotDto) FromPolkadotNode(node *polkadotv1alpha1.Node) *PolkadotDt
 func (listDto PolkadotListDto) FromPolkadotNode(nodes []polkadotv1alpha1.Node) PolkadotListDto {
 	result := make(PolkadotListDto, len(nodes))
 	for index, v := range nodes {
-		result[index] = *(PolkadotDto{}.FromPolkadotNode(&v))
+		result[index] = PolkadotDto{}.FromPolkadotNode(v)
 	}
 	return result
 }
