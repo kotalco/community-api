@@ -42,13 +42,13 @@ func Create(c *fiber.Ctx) error {
 		return c.Status(err.Status).JSON(err)
 	}
 
-	return c.Status(http.StatusCreated).JSON(shared.NewResponse(new(stacks.StacksDto).FromStacksNode(node)))
+	return c.Status(http.StatusCreated).JSON(shared.NewResponse(new(stacks.StacksDto).FromStacksNode(*node)))
 }
 
 // Get returns a single stacks node by name
 func Get(c *fiber.Ctx) error {
 	node := c.Locals("node").(*stacksv1alpha1.Node)
-	return c.JSON(shared.NewResponse(new(stacks.StacksDto).FromStacksNode(node)))
+	return c.JSON(shared.NewResponse(new(stacks.StacksDto).FromStacksNode(*node)))
 }
 
 // List returns all stacks nodes
@@ -88,7 +88,7 @@ func Update(c *fiber.Ctx) error {
 		return c.Status(err.Status).JSON(err)
 	}
 
-	return c.Status(http.StatusOK).JSON(shared.NewResponse(new(stacks.StacksDto).FromStacksNode(node)))
+	return c.Status(http.StatusOK).JSON(shared.NewResponse(new(stacks.StacksDto).FromStacksNode(*node)))
 }
 
 // Count returns total number of nodes
