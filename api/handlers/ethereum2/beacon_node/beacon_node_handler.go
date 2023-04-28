@@ -46,7 +46,7 @@ var (
 func Get(c *fiber.Ctx) error {
 	node := c.Locals("node").(*ethereum2v1alpha1.BeaconNode)
 
-	return c.JSON(shared.NewResponse(new(beacon_node.BeaconNodeDto).FromEthereum2BeaconNode(node)))
+	return c.JSON(shared.NewResponse(new(beacon_node.BeaconNodeDto).FromEthereum2BeaconNode(*node)))
 }
 
 // List returns all ethereum 2.0 beacon nodes
@@ -97,7 +97,7 @@ func Create(c *fiber.Ctx) error {
 		return c.Status(err.Status).JSON(err)
 	}
 
-	return c.Status(http.StatusCreated).JSON(shared.NewResponse(new(beacon_node.BeaconNodeDto).FromEthereum2BeaconNode(node)))
+	return c.Status(http.StatusCreated).JSON(shared.NewResponse(new(beacon_node.BeaconNodeDto).FromEthereum2BeaconNode(*node)))
 }
 
 // Delete deletes ethereum 2.0 beacon node by name
@@ -135,7 +135,7 @@ func Update(c *fiber.Ctx) error {
 		return c.Status(err.Status).JSON(err)
 	}
 
-	return c.Status(http.StatusOK).JSON(shared.NewResponse(new(beacon_node.BeaconNodeDto).FromEthereum2BeaconNode(beaconnode)))
+	return c.Status(http.StatusOK).JSON(shared.NewResponse(new(beacon_node.BeaconNodeDto).FromEthereum2BeaconNode(*beaconnode)))
 }
 
 // Count returns total number of beacon nodes
