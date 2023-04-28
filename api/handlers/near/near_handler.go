@@ -36,7 +36,7 @@ var (
 func Get(c *fiber.Ctx) error {
 	node := c.Locals("node").(*nearv1alpha1.Node)
 
-	return c.Status(http.StatusOK).JSON(shared.NewResponse(new(near.NearDto).FromNEARNode(node)))
+	return c.Status(http.StatusOK).JSON(shared.NewResponse(new(near.NearDto).FromNEARNode(*node)))
 }
 
 // List returns all NEAR nodes
@@ -89,7 +89,7 @@ func Create(c *fiber.Ctx) error {
 		return c.Status(err.Status).JSON(err)
 	}
 
-	return c.Status(http.StatusCreated).JSON(shared.NewResponse(new(near.NearDto).FromNEARNode(node)))
+	return c.Status(http.StatusCreated).JSON(shared.NewResponse(new(near.NearDto).FromNEARNode(*node)))
 }
 
 // Delete deletes NEAR node by name
@@ -126,7 +126,7 @@ func Update(c *fiber.Ctx) error {
 		return c.Status(err.Status).JSON(err)
 	}
 
-	return c.Status(http.StatusOK).JSON(shared.NewResponse(new(near.NearDto).FromNEARNode(node)))
+	return c.Status(http.StatusOK).JSON(shared.NewResponse(new(near.NearDto).FromNEARNode(*node)))
 }
 
 // Count returns total number of nodes
