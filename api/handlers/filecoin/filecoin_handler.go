@@ -25,7 +25,7 @@ var service = filecoin.NewFilecoinService()
 func Get(c *fiber.Ctx) error {
 	node := c.Locals("node").(*filecoinv1alpha1.Node)
 
-	return c.Status(http.StatusOK).JSON(shared.NewResponse(new(filecoin.FilecoinDto).FromFilecoinNode(node)))
+	return c.Status(http.StatusOK).JSON(shared.NewResponse(new(filecoin.FilecoinDto).FromFilecoinNode(*node)))
 }
 
 // List returns all Filecoin nodes
@@ -77,7 +77,7 @@ func Create(c *fiber.Ctx) error {
 		return c.Status(err.Status).JSON(err)
 	}
 
-	return c.Status(http.StatusCreated).JSON(shared.NewResponse(new(filecoin.FilecoinDto).FromFilecoinNode(node)))
+	return c.Status(http.StatusCreated).JSON(shared.NewResponse(new(filecoin.FilecoinDto).FromFilecoinNode(*node)))
 }
 
 // Delete deletes Filecoin node by name
@@ -114,7 +114,7 @@ func Update(c *fiber.Ctx) error {
 		return c.Status(err.Status).JSON(err)
 	}
 
-	return c.Status(http.StatusOK).JSON(shared.NewResponse(new(filecoin.FilecoinDto).FromFilecoinNode(node)))
+	return c.Status(http.StatusOK).JSON(shared.NewResponse(new(filecoin.FilecoinDto).FromFilecoinNode(*node)))
 }
 
 // Count returns total number of nodes

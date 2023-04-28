@@ -27,10 +27,10 @@ type FilecoinDto struct {
 	sharedAPI.Resources
 }
 
-type FilecoinListDto []FilecoinDto
+type FilecoinListDto []*FilecoinDto
 
 // FromFilecoinNode creates node dto from Filecoin node
-func (dto FilecoinDto) FromFilecoinNode(node *filecoinv1alpha1.Node) *FilecoinDto {
+func (dto FilecoinDto) FromFilecoinNode(node filecoinv1alpha1.Node) *FilecoinDto {
 
 	dto.Name = node.Name
 	dto.Time = models.Time{CreatedAt: node.CreationTimestamp.UTC().Format(shared.JavascriptISOString)}
@@ -60,7 +60,7 @@ func (dto FilecoinDto) FromFilecoinNode(node *filecoinv1alpha1.Node) *FilecoinDt
 func (filecoinListDto FilecoinListDto) FromFilecoinNode(nodes []filecoinv1alpha1.Node) FilecoinListDto {
 	result := make(FilecoinListDto, len(nodes))
 	for index, v := range nodes {
-		result[index] = *(FilecoinDto{}.FromFilecoinNode(&v))
+		result[index] = FilecoinDto{}.FromFilecoinNode(v)
 	}
 	return result
 }
