@@ -23,7 +23,7 @@ var service = storage_class.NewStorageClassService()
 func Get(c *fiber.Ctx) error {
 	storageClass := c.Locals("storage_class").(*storagev1.StorageClass)
 
-	return c.Status(http.StatusOK).JSON(new(storage_class.StorageClassDto).FromCoreStorageClass(storageClass))
+	return c.Status(http.StatusOK).JSON(new(storage_class.StorageClassDto).FromCoreStorageClass(*storageClass))
 }
 
 // List returns all k8s storage classes

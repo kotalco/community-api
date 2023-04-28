@@ -12,9 +12,9 @@ type StorageClassDto struct {
 	AllowVolumeExpansion bool   `json:"allowVolumeExpansion"`
 }
 
-type StorageClassListDto []StorageClassDto
+type StorageClassListDto []*StorageClassDto
 
-func (dto StorageClassDto) FromCoreStorageClass(sc *storagev1.StorageClass) *StorageClassDto {
+func (dto StorageClassDto) FromCoreStorageClass(sc storagev1.StorageClass) *StorageClassDto {
 	dto.Name = sc.Name
 	dto.Provisioner = sc.Provisioner
 	dto.ReclaimPolicy = string(*sc.ReclaimPolicy)
@@ -26,7 +26,7 @@ func (dto StorageClassDto) FromCoreStorageClass(sc *storagev1.StorageClass) *Sto
 func (storageClassListDto StorageClassListDto) FromCoreSecret(list []storagev1.StorageClass) StorageClassListDto {
 	result := make(StorageClassListDto, len(list))
 	for index, value := range list {
-		result[index] = *(StorageClassDto{}.FromCoreStorageClass(&value))
+		result[index] = StorageClassDto{}.FromCoreStorageClass(value)
 	}
 	return result
 }
