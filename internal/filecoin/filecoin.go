@@ -27,10 +27,10 @@ type FilecoinDto struct {
 	sharedAPI.Resources
 }
 
-type FilecoinListDto []*FilecoinDto
+type FilecoinListDto []FilecoinDto
 
 // FromFilecoinNode creates node dto from Filecoin node
-func (dto FilecoinDto) FromFilecoinNode(node filecoinv1alpha1.Node) *FilecoinDto {
+func (dto FilecoinDto) FromFilecoinNode(node filecoinv1alpha1.Node) FilecoinDto {
 
 	dto.Name = node.Name
 	dto.Time = models.Time{CreatedAt: node.CreationTimestamp.UTC().Format(shared.JavascriptISOString)}
@@ -53,7 +53,7 @@ func (dto FilecoinDto) FromFilecoinNode(node filecoinv1alpha1.Node) *FilecoinDto
 	dto.StorageClass = node.Spec.StorageClass
 	dto.Image = node.Spec.Image
 
-	return &dto
+	return dto
 }
 
 // FromFilecoinNode creates node dto from Filecoin node list

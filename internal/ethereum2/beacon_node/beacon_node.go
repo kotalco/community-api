@@ -27,9 +27,9 @@ type BeaconNodeDto struct {
 	Image                   string `json:"image"`
 	sharedAPI.Resources
 }
-type BeaconNodeListDto []*BeaconNodeDto
+type BeaconNodeListDto []BeaconNodeDto
 
-func (dto BeaconNodeDto) FromEthereum2BeaconNode(node ethereum2v1alpha1.BeaconNode) *BeaconNodeDto {
+func (dto BeaconNodeDto) FromEthereum2BeaconNode(node ethereum2v1alpha1.BeaconNode) BeaconNodeDto {
 	dto.Name = node.Name
 	dto.Time = models.Time{CreatedAt: node.CreationTimestamp.UTC().Format(shared.JavascriptISOString)}
 	dto.Network = node.Spec.Network
@@ -53,7 +53,7 @@ func (dto BeaconNodeDto) FromEthereum2BeaconNode(node ethereum2v1alpha1.BeaconNo
 	dto.JWTSecretName = node.Spec.JWTSecretName
 	dto.Image = node.Spec.Image
 
-	return &dto
+	return dto
 }
 
 func (nodes BeaconNodeListDto) FromEthereum2BeaconNode(beaconnodeList []ethereum2v1alpha1.BeaconNode) BeaconNodeListDto {

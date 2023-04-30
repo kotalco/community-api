@@ -25,9 +25,9 @@ type StacksDto struct {
 	sharedAPI.Resources
 }
 
-type StacksListDto []*StacksDto
+type StacksListDto []StacksDto
 
-func (dto StacksDto) FromStacksNode(n stacksv1alpha1.Node) *StacksDto {
+func (dto StacksDto) FromStacksNode(n stacksv1alpha1.Node) StacksDto {
 	dto.Name = n.Name
 	dto.Time = models.Time{CreatedAt: n.CreationTimestamp.UTC().Format(shared.JavascriptISOString)}
 	dto.Image = n.Spec.Image
@@ -47,7 +47,7 @@ func (dto StacksDto) FromStacksNode(n stacksv1alpha1.Node) *StacksDto {
 	dto.MemoryLimit = n.Spec.MemoryLimit
 	dto.Storage = n.Spec.Storage
 	dto.StorageClass = n.Spec.StorageClass
-	return &dto
+	return dto
 }
 
 func (nodes StacksListDto) FromStacksNode(models []stacksv1alpha1.Node) StacksListDto {

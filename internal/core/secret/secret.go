@@ -14,14 +14,14 @@ type SecretDto struct {
 	Data map[string]string `json:"data,omitempty"`
 }
 
-type SecretsDto []*SecretDto
+type SecretsDto []SecretDto
 
-func (dto SecretDto) FromCoreSecret(s corev1.Secret) *SecretDto {
+func (dto SecretDto) FromCoreSecret(s corev1.Secret) SecretDto {
 	dto.Name = s.Name
 	dto.Time = models.Time{CreatedAt: s.CreationTimestamp.UTC().Format(shared.JavascriptISOString)}
 	dto.Type = s.Labels["kotal.io/key-type"]
 
-	return &dto
+	return dto
 }
 
 func (secret SecretsDto) FromCoreSecret(secrets []corev1.Secret) SecretsDto {

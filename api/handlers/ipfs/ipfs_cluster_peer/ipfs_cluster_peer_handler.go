@@ -27,7 +27,7 @@ var service = ipfs_cluster_peer.NewIpfsClusterPeerService()
 func Get(c *fiber.Ctx) error {
 	peer := c.Locals("peer").(*ipfsv1alpha1.ClusterPeer)
 
-	return c.Status(http.StatusOK).JSON(shared.NewResponse(new(ipfs_cluster_peer.ClusterPeerDto).FromIPFSClusterPeer(peer)))
+	return c.Status(http.StatusOK).JSON(shared.NewResponse(new(ipfs_cluster_peer.ClusterPeerDto).FromIPFSClusterPeer(*peer)))
 }
 
 // List returns all IPFS cluster peers
@@ -78,7 +78,7 @@ func Create(c *fiber.Ctx) error {
 		return c.Status(err.Status).JSON(err)
 	}
 
-	return c.Status(http.StatusCreated).JSON(shared.NewResponse(new(ipfs_cluster_peer.ClusterPeerDto).FromIPFSClusterPeer(peer)))
+	return c.Status(http.StatusCreated).JSON(shared.NewResponse(new(ipfs_cluster_peer.ClusterPeerDto).FromIPFSClusterPeer(*peer)))
 }
 
 // Delete deletes IPFS cluster peer by name
@@ -116,7 +116,7 @@ func Update(c *fiber.Ctx) error {
 		return c.Status(err.Status).JSON(err)
 	}
 
-	return c.Status(http.StatusOK).JSON(shared.NewResponse(*new(ipfs_cluster_peer.ClusterPeerDto).FromIPFSClusterPeer(peer)))
+	return c.Status(http.StatusOK).JSON(shared.NewResponse(new(ipfs_cluster_peer.ClusterPeerDto).FromIPFSClusterPeer(*peer)))
 }
 
 // Count returns total number of cluster peers

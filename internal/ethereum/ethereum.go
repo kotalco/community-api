@@ -45,9 +45,9 @@ type EthereumDto struct {
 	Image                    string           `json:"image"`
 	sharedAPI.Resources
 }
-type EthereumListDto []*EthereumDto
+type EthereumListDto []EthereumDto
 
-func (dto EthereumDto) FromEthereumNode(node ethereumv1alpha1.Node) *EthereumDto {
+func (dto EthereumDto) FromEthereumNode(node ethereumv1alpha1.Node) EthereumDto {
 	dto.Name = node.Name
 	dto.Time = models.Time{CreatedAt: node.CreationTimestamp.UTC().Format(shared.JavascriptISOString)}
 	dto.Network = node.Spec.Network
@@ -108,7 +108,7 @@ func (dto EthereumDto) FromEthereumNode(node ethereumv1alpha1.Node) *EthereumDto
 	}
 	dto.Bootnodes = &bootnodes
 
-	return &dto
+	return dto
 }
 
 func (nodes EthereumListDto) FromEthereumNode(models []ethereumv1alpha1.Node) EthereumListDto {

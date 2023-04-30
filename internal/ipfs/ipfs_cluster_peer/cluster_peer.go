@@ -23,7 +23,7 @@ type ClusterPeerDto struct {
 }
 type ClusterPeerListDto []ClusterPeerDto
 
-func (dto ClusterPeerDto) FromIPFSClusterPeer(peer *ipfsv1alpha1.ClusterPeer) *ClusterPeerDto {
+func (dto ClusterPeerDto) FromIPFSClusterPeer(peer ipfsv1alpha1.ClusterPeer) ClusterPeerDto {
 	dto.Name = peer.Name
 	dto.Time = models.Time{CreatedAt: peer.CreationTimestamp.UTC().Format(shared.JavascriptISOString)}
 	dto.ID = peer.Spec.ID
@@ -41,13 +41,13 @@ func (dto ClusterPeerDto) FromIPFSClusterPeer(peer *ipfsv1alpha1.ClusterPeer) *C
 	dto.StorageClass = peer.Spec.StorageClass
 	dto.Image = peer.Spec.Image
 
-	return &dto
+	return dto
 }
 
 func (clusterPeerListDto ClusterPeerListDto) FromIPFSClusterPeer(peers []ipfsv1alpha1.ClusterPeer) ClusterPeerListDto {
 	result := make(ClusterPeerListDto, len(peers))
 	for index, v := range peers {
-		result[index] = *(ClusterPeerDto{}.FromIPFSClusterPeer(&v))
+		result[index] = ClusterPeerDto{}.FromIPFSClusterPeer(v)
 	}
 	return result
 }

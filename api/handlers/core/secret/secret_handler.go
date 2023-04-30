@@ -56,7 +56,7 @@ func List(c *fiber.Ctx) error {
 		if keyType == "" || secretType != "" && keyType != secretType {
 			continue
 		}
-		secretListDto = append(secretListDto, *secret.SecretDto{}.FromCoreSecret(sec))
+		secretListDto = append(secretListDto, secret.SecretDto{}.FromCoreSecret(sec))
 	}
 
 	return c.Status(http.StatusOK).JSON(shared.NewResponse(secretListDto))
