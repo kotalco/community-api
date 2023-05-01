@@ -45,8 +45,8 @@ var (
 
 // Get returns a single bitcoin node by name
 func Get(c *fiber.Ctx) error {
-	node := c.Locals("node").(*bitcoinv1alpha1.Node)
-	return c.JSON(shared.NewResponse(new(bitcoin.BitcoinDto).FromBitcoinNode(*node)))
+	node := c.Locals("node").(bitcoinv1alpha1.Node)
+	return c.JSON(shared.NewResponse(new(bitcoin.BitcoinDto).FromBitcoinNode(node)))
 }
 
 // List returns all bitcoin nodes
@@ -119,14 +119,14 @@ func Update(c *fiber.Ctx) error {
 		return c.Status(badReq.Status).JSON(err)
 	}
 
-	node := c.Locals("node").(*bitcoinv1alpha1.Node)
+	node := c.Locals("node").(bitcoinv1alpha1.Node)
 
-	node, err := service.Update(dto, node)
+	updated, err := service.Update(dto, &node)
 	if err != nil {
 		return c.Status(err.Status).JSON(err)
 	}
 
-	return c.Status(http.StatusOK).JSON(shared.NewResponse(new(bitcoin.BitcoinDto).FromBitcoinNode(*node)))
+	return c.Status(http.StatusOK).JSON(shared.NewResponse(new(bitcoin.BitcoinDto).FromBitcoinNode(*updated)))
 }
 
 // Count returns total number of nodes
@@ -144,9 +144,9 @@ func Count(c *fiber.Ctx) error {
 
 // Delete a single bitcoin node by name
 func Delete(c *fiber.Ctx) error {
-	node := c.Locals("node").(*bitcoinv1alpha1.Node)
+	node := c.Locals("node").(bitcoinv1alpha1.Node)
 
-	err := service.Delete(node)
+	err := service.Delete(&node)
 	if err != nil {
 		return c.Status(err.Status).JSON(err)
 	}
@@ -165,7 +165,7 @@ func ValidateNodeExist(c *fiber.Ctx) error {
 		return c.Status(err.Status).JSON(err)
 	}
 
-	c.Locals("node", node)
+	c.Locals("node", *node)
 	return c.Next()
 }
 
