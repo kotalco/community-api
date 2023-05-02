@@ -34,9 +34,9 @@ var (
 // 1-get the node validated from ValidateNodeExist method
 // 2-marshall node to dto and format the response
 func Get(c *fiber.Ctx) error {
-	node := c.Locals("node").(*nearv1alpha1.Node)
+	node := c.Locals("node").(nearv1alpha1.Node)
 
-	return c.Status(http.StatusOK).JSON(shared.NewResponse(new(near.NearDto).FromNEARNode(*node)))
+	return c.Status(http.StatusOK).JSON(shared.NewResponse(new(near.NearDto).FromNEARNode(node)))
 }
 
 // List returns all NEAR nodes
@@ -84,12 +84,12 @@ func Create(c *fiber.Ctx) error {
 		return c.Status(err.Status).JSON(err)
 	}
 
-	node, err := service.Create(dto)
+	node, err := service.Create(*dto)
 	if err != nil {
 		return c.Status(err.Status).JSON(err)
 	}
 
-	return c.Status(http.StatusCreated).JSON(shared.NewResponse(new(near.NearDto).FromNEARNode(*node)))
+	return c.Status(http.StatusCreated).JSON(shared.NewResponse(new(near.NearDto).FromNEARNode(node)))
 }
 
 // Delete deletes NEAR node by name
@@ -97,9 +97,9 @@ func Create(c *fiber.Ctx) error {
 // 2-call near service to delete the node
 // 3-return ok if deleted with no errors
 func Delete(c *fiber.Ctx) error {
-	node := c.Locals("node").(*nearv1alpha1.Node)
+	node := c.Locals("node").(nearv1alpha1.Node)
 
-	err := service.Delete(node)
+	err := service.Delete(&node)
 	if err != nil {
 		return c.Status(err.Status).JSON(err)
 	}
@@ -119,14 +119,14 @@ func Update(c *fiber.Ctx) error {
 		return c.Status(badReq.Status).JSON(badReq)
 	}
 
-	node := c.Locals("node").(*nearv1alpha1.Node)
+	node := c.Locals("node").(nearv1alpha1.Node)
 
-	node, err := service.Update(dto, node)
+	err := service.Update(*dto, &node)
 	if err != nil {
 		return c.Status(err.Status).JSON(err)
 	}
 
-	return c.Status(http.StatusOK).JSON(shared.NewResponse(new(near.NearDto).FromNEARNode(*node)))
+	return c.Status(http.StatusOK).JSON(shared.NewResponse(new(near.NearDto).FromNEARNode(node)))
 }
 
 // Count returns total number of nodes
@@ -140,7 +140,7 @@ func Count(c *fiber.Ctx) error {
 	}
 
 	c.Set("Access-Control-Expose-Headers", "X-Total-Count")
-	c.Set("X-Total-Count", fmt.Sprintf("%d", *length))
+	c.Set("X-Total-Count", fmt.Sprintf("%d", length))
 
 	return c.SendStatus(http.StatusOK)
 }

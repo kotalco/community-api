@@ -85,7 +85,7 @@ func Create(c *fiber.Ctx) error {
 	}
 
 	//check for bitcoin json rpc default user secret
-	rpcSec, err := secretService.Get(types.NamespacedName{
+	_, err := secretService.Get(types.NamespacedName{
 		Name:      bitcoin.BitcoinJsonRpcDefaultUserPasswordName,
 		Namespace: dto.Namespace,
 	})
@@ -94,7 +94,7 @@ func Create(c *fiber.Ctx) error {
 			return c.Status(err.Status).JSON(err)
 		}
 		//create bitcoin user default secret
-		rpcSec, err = secretService.Create(&secret.SecretDto{
+		_, err = secretService.Create(secret.SecretDto{
 			MetaDataDto: k8s.MetaDataDto{Name: bitcoin.BitcoinJsonRpcDefaultUserPasswordName, Namespace: dto.Namespace},
 			Type:        "password",
 			Data:        map[string]string{"password": bitcoin.BitcoinJsonRpcDefaultUserPasswordSecret},
@@ -104,11 +104,11 @@ func Create(c *fiber.Ctx) error {
 		}
 	}
 
-	node, err := service.Create(dto, rpcSec)
+	node, err := service.Create(*dto)
 	if err != nil {
 		return c.Status(err.Status).JSON(err)
 	}
-	return c.Status(http.StatusCreated).JSON(shared.NewResponse(new(bitcoin.BitcoinDto).FromBitcoinNode(*node)))
+	return c.Status(http.StatusCreated).JSON(shared.NewResponse(new(bitcoin.BitcoinDto).FromBitcoinNode(node)))
 }
 
 // Update updates a single bitcoin node by name from spec
@@ -121,12 +121,12 @@ func Update(c *fiber.Ctx) error {
 
 	node := c.Locals("node").(bitcoinv1alpha1.Node)
 
-	updated, err := service.Update(dto, &node)
+	err := service.Update(*dto, &node)
 	if err != nil {
 		return c.Status(err.Status).JSON(err)
 	}
 
-	return c.Status(http.StatusOK).JSON(shared.NewResponse(new(bitcoin.BitcoinDto).FromBitcoinNode(*updated)))
+	return c.Status(http.StatusOK).JSON(shared.NewResponse(new(bitcoin.BitcoinDto).FromBitcoinNode(node)))
 }
 
 // Count returns total number of nodes
@@ -137,7 +137,7 @@ func Count(c *fiber.Ctx) error {
 	}
 
 	c.Set("Access-Control-Expose-Headers", "X-Total-Count")
-	c.Set("X-Total-Count", fmt.Sprintf("%d", *length))
+	c.Set("X-Total-Count", fmt.Sprintf("%d", length))
 
 	return c.SendStatus(http.StatusOK)
 }
@@ -165,7 +165,7 @@ func ValidateNodeExist(c *fiber.Ctx) error {
 		return c.Status(err.Status).JSON(err)
 	}
 
-	c.Locals("node", *node)
+	c.Locals("node", node)
 	return c.Next()
 }
 

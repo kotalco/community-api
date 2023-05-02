@@ -21,9 +21,9 @@ var service = storage_class.NewStorageClassService()
 // 1-get the node validated from ValidateStorageClassExist method
 // 2-marshall storageClass model and format the reponse
 func Get(c *fiber.Ctx) error {
-	storageClass := c.Locals("storage_class").(*storagev1.StorageClass)
+	storageClass := c.Locals("storage_class").(storagev1.StorageClass)
 
-	return c.Status(http.StatusOK).JSON(new(storage_class.StorageClassDto).FromCoreStorageClass(*storageClass))
+	return c.Status(http.StatusOK).JSON(new(storage_class.StorageClassDto).FromCoreStorageClass(storageClass))
 }
 
 // List returns all k8s storage classes

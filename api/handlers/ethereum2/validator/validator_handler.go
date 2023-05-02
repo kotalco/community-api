@@ -23,9 +23,9 @@ var service = validator.NewValidatorService()
 // 1-get the node validated from ValidateNodeExist method
 // 2-marshall node to dto and format the response
 func Get(c *fiber.Ctx) error {
-	validatorNode := c.Locals("validator").(*ethereum2v1alpha1.Validator)
+	validatorNode := c.Locals("validator").(ethereum2v1alpha1.Validator)
 
-	return c.Status(http.StatusOK).JSON(shared.NewResponse(new(validator.ValidatorDto).FromEthereum2Validator(*validatorNode)))
+	return c.Status(http.StatusOK).JSON(shared.NewResponse(new(validator.ValidatorDto).FromEthereum2Validator(validatorNode)))
 }
 
 // List returns all Ethereum 2.0 validator clients
@@ -72,12 +72,12 @@ func Create(c *fiber.Ctx) error {
 		return c.Status(err.Status).JSON(err)
 	}
 
-	validatorNode, err := service.Create(dto)
+	validatorNode, err := service.Create(*dto)
 	if err != nil {
 		return c.Status(err.Status).JSON(err)
 	}
 
-	return c.Status(http.StatusOK).JSON(shared.NewResponse(new(validator.ValidatorDto).FromEthereum2Validator(*validatorNode)))
+	return c.Status(http.StatusOK).JSON(shared.NewResponse(new(validator.ValidatorDto).FromEthereum2Validator(validatorNode)))
 }
 
 // Delete deletes Ethereum 2.0 validator client by name
@@ -85,9 +85,9 @@ func Create(c *fiber.Ctx) error {
 // 2-call validator service to delete the node
 // 3-return ok if deleted with no errors
 func Delete(c *fiber.Ctx) error {
-	validator := c.Locals("validator").(*ethereum2v1alpha1.Validator)
+	validatorNode := c.Locals("validator").(ethereum2v1alpha1.Validator)
 
-	err := service.Delete(validator)
+	err := service.Delete(&validatorNode)
 	if err != nil {
 		return c.Status(err.Status).JSON(err)
 	}
@@ -108,14 +108,14 @@ func Update(c *fiber.Ctx) error {
 		return c.Status(badReq.Status).JSON(err)
 	}
 
-	validatorNode := c.Locals("validator").(*ethereum2v1alpha1.Validator)
+	validatorNode := c.Locals("validator").(ethereum2v1alpha1.Validator)
 
-	validatorNode, err := service.Update(dto, validatorNode)
+	err := service.Update(*dto, &validatorNode)
 	if err != nil {
 		return c.Status(err.Status).JSON(err)
 	}
 
-	return c.Status(http.StatusOK).JSON(shared.NewResponse(new(validator.ValidatorDto).FromEthereum2Validator(*validatorNode)))
+	return c.Status(http.StatusOK).JSON(shared.NewResponse(new(validator.ValidatorDto).FromEthereum2Validator(validatorNode)))
 }
 
 // Count returns total number of validators
@@ -129,7 +129,7 @@ func Count(c *fiber.Ctx) error {
 	}
 
 	c.Set("Access-Control-Expose-Headers", "X-Total-Count")
-	c.Set("X-Total-Count", fmt.Sprintf("%d", *length))
+	c.Set("X-Total-Count", fmt.Sprintf("%d", length))
 
 	return c.SendStatus(http.StatusOK)
 }
@@ -144,12 +144,12 @@ func ValidateValidatorExist(c *fiber.Ctx) error {
 		Namespace: c.Locals("namespace").(string),
 	}
 
-	validator, err := service.Get(nameSpacedName)
+	validatorNode, err := service.Get(nameSpacedName)
 	if err != nil {
 		return c.Status(err.Status).JSON(err)
 	}
 
-	c.Locals("validator", validator)
+	c.Locals("validator", validatorNode)
 
 	return c.Next()
 

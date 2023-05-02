@@ -44,9 +44,9 @@ var (
 // 1-get the node validated from ValidateNodeExist method
 // 2-marshall node to dto and format the response
 func Get(c *fiber.Ctx) error {
-	node := c.Locals("node").(*ethereum2v1alpha1.BeaconNode)
+	node := c.Locals("node").(ethereum2v1alpha1.BeaconNode)
 
-	return c.JSON(shared.NewResponse(new(beacon_node.BeaconNodeDto).FromEthereum2BeaconNode(*node)))
+	return c.JSON(shared.NewResponse(new(beacon_node.BeaconNodeDto).FromEthereum2BeaconNode(node)))
 }
 
 // List returns all ethereum 2.0 beacon nodes
@@ -92,12 +92,12 @@ func Create(c *fiber.Ctx) error {
 		return c.Status(err.Status).JSON(err)
 	}
 
-	node, err := service.Create(dto)
+	node, err := service.Create(*dto)
 	if err != nil {
 		return c.Status(err.Status).JSON(err)
 	}
 
-	return c.Status(http.StatusCreated).JSON(shared.NewResponse(new(beacon_node.BeaconNodeDto).FromEthereum2BeaconNode(*node)))
+	return c.Status(http.StatusCreated).JSON(shared.NewResponse(new(beacon_node.BeaconNodeDto).FromEthereum2BeaconNode(node)))
 }
 
 // Delete deletes ethereum 2.0 beacon node by name
@@ -105,9 +105,9 @@ func Create(c *fiber.Ctx) error {
 // 2-call beacon node service to delete the node
 // 3-return ok if deleted with no errors
 func Delete(c *fiber.Ctx) error {
-	node := c.Locals("node").(*ethereum2v1alpha1.BeaconNode)
+	node := c.Locals("node").(ethereum2v1alpha1.BeaconNode)
 
-	err := service.Delete(node)
+	err := service.Delete(&node)
 	if err != nil {
 		return c.Status(err.Status).JSON(err)
 	}
@@ -128,14 +128,14 @@ func Update(c *fiber.Ctx) error {
 		return c.Status(badReq.Status).JSON(badReq)
 	}
 
-	beaconnode := c.Locals("node").(*ethereum2v1alpha1.BeaconNode)
+	beaconnode := c.Locals("node").(ethereum2v1alpha1.BeaconNode)
 
-	beaconnode, err := service.Update(dto, beaconnode)
+	err := service.Update(*dto, &beaconnode)
 	if err != nil {
 		return c.Status(err.Status).JSON(err)
 	}
 
-	return c.Status(http.StatusOK).JSON(shared.NewResponse(new(beacon_node.BeaconNodeDto).FromEthereum2BeaconNode(*beaconnode)))
+	return c.Status(http.StatusOK).JSON(shared.NewResponse(new(beacon_node.BeaconNodeDto).FromEthereum2BeaconNode(beaconnode)))
 }
 
 // Count returns total number of beacon nodes
@@ -149,7 +149,7 @@ func Count(c *fiber.Ctx) error {
 	}
 
 	c.Set("Access-Control-Expose-Headers", "X-Total-Count")
-	c.Set("X-Total-Count", fmt.Sprintf("%d", *length))
+	c.Set("X-Total-Count", fmt.Sprintf("%d", length))
 
 	return c.SendStatus(http.StatusOK)
 }

@@ -73,12 +73,12 @@ func Create(c *fiber.Ctx) error {
 		return c.Status(err.Status).JSON(err)
 	}
 
-	peer, err := service.Create(dto)
+	peer, err := service.Create(*dto)
 	if err != nil {
 		return c.Status(err.Status).JSON(err)
 	}
 
-	return c.Status(http.StatusCreated).JSON(shared.NewResponse(new(ipfs_cluster_peer.ClusterPeerDto).FromIPFSClusterPeer(*peer)))
+	return c.Status(http.StatusCreated).JSON(shared.NewResponse(new(ipfs_cluster_peer.ClusterPeerDto).FromIPFSClusterPeer(peer)))
 }
 
 // Delete deletes IPFS cluster peer by name
@@ -86,9 +86,9 @@ func Create(c *fiber.Ctx) error {
 // 2-call service to delete the node
 // 3-return ok if deleted with no errors
 func Delete(c *fiber.Ctx) error {
-	peer := c.Locals("peer").(*ipfsv1alpha1.ClusterPeer)
+	peer := c.Locals("peer").(ipfsv1alpha1.ClusterPeer)
 
-	err := service.Delete(peer)
+	err := service.Delete(&peer)
 	if err != nil {
 		return c.Status(err.Status).JSON(err)
 	}
@@ -109,14 +109,14 @@ func Update(c *fiber.Ctx) error {
 		return c.Status(badReq.Status).JSON(badReq)
 	}
 
-	peer := c.Locals("peer").(*ipfsv1alpha1.ClusterPeer)
+	peer := c.Locals("peer").(ipfsv1alpha1.ClusterPeer)
 
-	peer, err := service.Update(dto, peer)
+	err := service.Update(*dto, &peer)
 	if err != nil {
 		return c.Status(err.Status).JSON(err)
 	}
 
-	return c.Status(http.StatusOK).JSON(shared.NewResponse(new(ipfs_cluster_peer.ClusterPeerDto).FromIPFSClusterPeer(*peer)))
+	return c.Status(http.StatusOK).JSON(shared.NewResponse(new(ipfs_cluster_peer.ClusterPeerDto).FromIPFSClusterPeer(peer)))
 }
 
 // Count returns total number of cluster peers
@@ -130,7 +130,7 @@ func Count(c *fiber.Ctx) error {
 	}
 
 	c.Set("Access-Control-Expose-Headers", "X-Total-Count")
-	c.Set("X-Total-Count", fmt.Sprintf("%d", *length))
+	c.Set("X-Total-Count", fmt.Sprintf("%d", length))
 
 	return c.SendStatus(http.StatusOK)
 }

@@ -18,11 +18,11 @@ import (
 type secretService struct{}
 
 type IService interface {
-	Get(name types.NamespacedName) (*corev1.Secret, *errors.RestErr)
-	Create(*SecretDto) (*corev1.Secret, *errors.RestErr)
-	List(namespace string) (*corev1.SecretList, *errors.RestErr)
-	Delete(secret *corev1.Secret) *errors.RestErr
-	Count(namespace string) (*int, *errors.RestErr)
+	Get(name types.NamespacedName) (corev1.Secret, *errors.RestErr)
+	Create(SecretDto) (corev1.Secret, *errors.RestErr)
+	List(namespace string) (corev1.SecretList, *errors.RestErr)
+	Delete(*corev1.Secret) *errors.RestErr
+	Count(namespace string) (int, *errors.RestErr)
 }
 
 var (
@@ -34,22 +34,22 @@ func NewSecretService() IService {
 }
 
 // Get returns a single secret  by name
-func (service secretService) Get(namespacedName types.NamespacedName) (*corev1.Secret, *errors.RestErr) {
+func (service secretService) Get(namespacedName types.NamespacedName) (corev1.Secret, *errors.RestErr) {
 	secret := &corev1.Secret{}
 
 	if err := k8sClient.Get(context.Background(), namespacedName, secret); err != nil {
 		if apiErrors.IsNotFound(err) {
-			return nil, errors.NewNotFoundError(fmt.Sprintf("secret by name %s doesn't exist", namespacedName.Name))
+			return corev1.Secret{}, errors.NewNotFoundError(fmt.Sprintf("secret by name %s doesn't exist", namespacedName.Name))
 		}
 		go logger.Error(service.Get, err)
-		return nil, errors.NewInternalServerError(fmt.Sprintf("can't get secret by name %s", namespacedName.Name))
+		return corev1.Secret{}, errors.NewInternalServerError(fmt.Sprintf("can't get secret by name %s", namespacedName.Name))
 	}
 
-	return secret, nil
+	return *secret, nil
 }
 
 // Create creates a secret from the given spec
-func (service secretService) Create(dto *SecretDto) (*corev1.Secret, *errors.RestErr) {
+func (service secretService) Create(dto SecretDto) (corev1.Secret, *errors.RestErr) {
 	t := true
 	secret := &corev1.Secret{
 		ObjectMeta: metav1.ObjectMeta{
@@ -66,24 +66,24 @@ func (service secretService) Create(dto *SecretDto) (*corev1.Secret, *errors.Res
 
 	if err := k8sClient.Create(context.Background(), secret); err != nil {
 		if apiErrors.IsAlreadyExists(err) {
-			return nil, errors.NewBadRequestError(fmt.Sprintf("secret by name %s already exist", dto.Name))
+			return corev1.Secret{}, errors.NewBadRequestError(fmt.Sprintf("secret by name %s already exist", dto.Name))
 		}
 		go logger.Error(service.Create, err)
-		return nil, errors.NewInternalServerError("error creating secret")
+		return corev1.Secret{}, errors.NewInternalServerError("error creating secret")
 	}
-	return secret, nil
+	return *secret, nil
 }
 
 // List returns all secrets
-func (service secretService) List(namespace string) (*corev1.SecretList, *errors.RestErr) {
+func (service secretService) List(namespace string) (corev1.SecretList, *errors.RestErr) {
 	secrets := &corev1.SecretList{}
 
 	if err := k8sClient.List(context.Background(), secrets, client.InNamespace(namespace), client.HasLabels{"app.kubernetes.io/created-by"}); err != nil {
 		go logger.Error(service.List, err)
-		return nil, errors.NewInternalServerError("failed to get all secrets")
+		return corev1.SecretList{}, errors.NewInternalServerError("failed to get all secrets")
 	}
 
-	return secrets, nil
+	return *secrets, nil
 }
 
 // Delete a single secret node by name
@@ -96,13 +96,12 @@ func (service secretService) Delete(secret *corev1.Secret) *errors.RestErr {
 	return nil
 }
 
-// Delete a list of secrets
-func (service secretService) Count(namespace string) (*int, *errors.RestErr) {
+// Count counts secrets
+func (service secretService) Count(namespace string) (int, *errors.RestErr) {
 	secrets := &corev1.SecretList{}
 	if err := k8sClient.List(context.Background(), secrets, client.InNamespace(namespace), client.HasLabels{"kotal.io/key-type"}); err != nil {
 		go logger.Error(service.Count, err)
-		return nil, errors.NewInternalServerError("failed to get all secrets")
+		return 0, errors.NewInternalServerError("failed to get all secrets")
 	}
-	length := len(secrets.Items)
-	return &length, nil
+	return len(secrets.Items), nil
 }

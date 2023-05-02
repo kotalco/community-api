@@ -25,9 +25,9 @@ var service = secret.NewSecretService()
 // 1-get the node validated from ValidateSecretExist method
 // 2-marshall secretModel and format the reponse
 func Get(c *fiber.Ctx) error {
-	secretModel := c.Locals("secret").(*corev1.Secret)
+	secretModel := c.Locals("secret").(corev1.Secret)
 
-	return c.Status(http.StatusOK).JSON(new(secret.SecretDto).FromCoreSecret(*secretModel))
+	return c.Status(http.StatusOK).JSON(new(secret.SecretDto).FromCoreSecret(secretModel))
 }
 
 // List returns all k8s secrets
@@ -81,12 +81,12 @@ func Create(c *fiber.Ctx) error {
 		return c.Status(err.Status).JSON(err)
 	}
 
-	secretModel, err := service.Create(dto)
+	secretModel, err := service.Create(*dto)
 	if err != nil {
 		return c.Status(err.Status).JSON(err)
 	}
 
-	return c.Status(http.StatusCreated).JSON(shared.NewResponse(new(secret.SecretDto).FromCoreSecret(*secretModel)))
+	return c.Status(http.StatusCreated).JSON(shared.NewResponse(new(secret.SecretDto).FromCoreSecret(secretModel)))
 }
 
 // Delete deletes k8s secret by name
@@ -94,9 +94,9 @@ func Create(c *fiber.Ctx) error {
 // 2-call service to make the delete action
 // 3-return the respective response
 func Delete(c *fiber.Ctx) error {
-	secretModel := c.Locals("secret").(*corev1.Secret)
+	secretModel := c.Locals("secret").(corev1.Secret)
 
-	err := service.Delete(secretModel)
+	err := service.Delete(&secretModel)
 	if err != nil {
 		return c.Status(err.Status).JSON(err)
 	}

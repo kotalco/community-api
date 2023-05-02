@@ -18,12 +18,12 @@ import (
 type ipfsPeerService struct{}
 
 type IService interface {
-	Get(name types.NamespacedName) (*ipfsv1alpha1.Peer, *restErrors.RestErr)
-	Create(dto *PeerDto) (*ipfsv1alpha1.Peer, *restErrors.RestErr)
-	Update(*PeerDto, *ipfsv1alpha1.Peer) (*ipfsv1alpha1.Peer, *restErrors.RestErr)
-	List(namespace string) (*ipfsv1alpha1.PeerList, *restErrors.RestErr)
-	Delete(node *ipfsv1alpha1.Peer) *restErrors.RestErr
-	Count(namespace string) (*int, *restErrors.RestErr)
+	Get(name types.NamespacedName) (ipfsv1alpha1.Peer, *restErrors.RestErr)
+	Create(PeerDto) (ipfsv1alpha1.Peer, *restErrors.RestErr)
+	Update(PeerDto, *ipfsv1alpha1.Peer) *restErrors.RestErr
+	List(namespace string) (ipfsv1alpha1.PeerList, *restErrors.RestErr)
+	Delete(*ipfsv1alpha1.Peer) *restErrors.RestErr
+	Count(namespace string) (int, *restErrors.RestErr)
 }
 
 var (
@@ -35,22 +35,22 @@ func NewIpfsPeerService() IService {
 }
 
 // Get gets a single IPFS peer by name
-func (service ipfsPeerService) Get(namespacedName types.NamespacedName) (*ipfsv1alpha1.Peer, *restErrors.RestErr) {
+func (service ipfsPeerService) Get(namespacedName types.NamespacedName) (ipfsv1alpha1.Peer, *restErrors.RestErr) {
 	peer := &ipfsv1alpha1.Peer{}
 
 	if err := k8sClient.Get(context.Background(), namespacedName, peer); err != nil {
 		if apiErrors.IsNotFound(err) {
-			return nil, restErrors.NewBadRequestError(fmt.Sprintf("peer by name %s doesn't exit", namespacedName.Name))
+			return ipfsv1alpha1.Peer{}, restErrors.NewBadRequestError(fmt.Sprintf("peer by name %s doesn't exit", namespacedName.Name))
 		}
 		go logger.Error(service.Get, err)
-		return nil, restErrors.NewInternalServerError(fmt.Sprintf("can't get peer by name %s", peer.Name))
+		return ipfsv1alpha1.Peer{}, restErrors.NewInternalServerError(fmt.Sprintf("can't get peer by name %s", peer.Name))
 	}
 
-	return peer, nil
+	return *peer, nil
 }
 
 // Create creates IPFS peer from spec
-func (service ipfsPeerService) Create(dto *PeerDto) (*ipfsv1alpha1.Peer, *restErrors.RestErr) {
+func (service ipfsPeerService) Create(dto PeerDto) (ipfsv1alpha1.Peer, *restErrors.RestErr) {
 	var initProfiles []ipfsv1alpha1.Profile
 	for _, profile := range dto.InitProfiles {
 		initProfiles = append(initProfiles, ipfsv1alpha1.Profile(profile))
@@ -75,17 +75,17 @@ func (service ipfsPeerService) Create(dto *PeerDto) (*ipfsv1alpha1.Peer, *restEr
 
 	if err := k8sClient.Create(context.Background(), peer); err != nil {
 		if apiErrors.IsAlreadyExists(err) {
-			return nil, restErrors.NewNotFoundError(fmt.Sprintf("peer by name %s already exits", dto.Name))
+			return ipfsv1alpha1.Peer{}, restErrors.NewNotFoundError(fmt.Sprintf("peer by name %s already exits", dto.Name))
 		}
 		go logger.Error(service.Create, err)
-		return nil, restErrors.NewInternalServerError("failed to create peer")
+		return ipfsv1alpha1.Peer{}, restErrors.NewInternalServerError("failed to create peer")
 	}
 
-	return peer, nil
+	return *peer, nil
 }
 
 // Update updates IPFS peer by name from spec
-func (service ipfsPeerService) Update(dto *PeerDto, peer *ipfsv1alpha1.Peer) (*ipfsv1alpha1.Peer, *restErrors.RestErr) {
+func (service ipfsPeerService) Update(dto PeerDto, peer *ipfsv1alpha1.Peer) *restErrors.RestErr {
 	if dto.APIPort != 0 {
 		peer.Spec.APIPort = dto.APIPort
 	}
@@ -153,50 +153,48 @@ func (service ipfsPeerService) Update(dto *PeerDto, peer *ipfsv1alpha1.Peer) (*i
 		err := k8sClient.Get(context.Background(), key, pod)
 		if apiErrors.IsNotFound(err) {
 			go logger.Error(service.Update, err)
-			return nil, restErrors.NewBadRequestError(fmt.Sprintf("pod by name %s doesn't exit", key.Name))
+			return restErrors.NewBadRequestError(fmt.Sprintf("pod by name %s doesn't exit", key.Name))
 		}
 		podIsPending = pod.Status.Phase == corev1.PodPending
 	}
 
 	if err := k8sClient.Update(context.Background(), peer); err != nil {
 		go logger.Error(service.Update, err)
-		return nil, restErrors.NewInternalServerError(fmt.Sprintf("can't update peer by name %s", peer.Name))
+		return restErrors.NewInternalServerError(fmt.Sprintf("can't update peer by name %s", peer.Name))
 	}
 
 	if podIsPending {
 		err := k8sClient.Delete(context.Background(), pod)
 		if err != nil {
 			go logger.Error(service.Update, err)
-			return nil, restErrors.NewInternalServerError(fmt.Sprintf("can't update peer by name %s", peer.Name))
+			return restErrors.NewInternalServerError(fmt.Sprintf("can't update peer by name %s", peer.Name))
 		}
 	}
 
-	return peer, nil
+	return nil
 }
 
 // List returns all IPFS peers
-func (service ipfsPeerService) List(namespace string) (*ipfsv1alpha1.PeerList, *restErrors.RestErr) {
+func (service ipfsPeerService) List(namespace string) (ipfsv1alpha1.PeerList, *restErrors.RestErr) {
 	peers := &ipfsv1alpha1.PeerList{}
 	if err := k8sClient.List(context.Background(), peers, client.InNamespace(namespace)); err != nil {
 		go logger.Error(service.List, err)
-		return nil, restErrors.NewInternalServerError("failed to get all peers")
+		return ipfsv1alpha1.PeerList{}, restErrors.NewInternalServerError("failed to get all peers")
 	}
 
-	return peers, nil
+	return *peers, nil
 }
 
 // Count returns total number of IPFS peers
-func (service ipfsPeerService) Count(namespace string) (*int, *restErrors.RestErr) {
+func (service ipfsPeerService) Count(namespace string) (int, *restErrors.RestErr) {
 	peers := &ipfsv1alpha1.PeerList{}
 
 	if err := k8sClient.List(context.Background(), peers, client.InNamespace(namespace)); err != nil {
 		go logger.Error(service.Count, err)
-		return nil, restErrors.NewInternalServerError("failed to count all peers")
+		return 0, restErrors.NewInternalServerError("failed to count all peers")
 	}
 
-	length := len(peers.Items)
-
-	return &length, nil
+	return len(peers.Items), nil
 }
 
 // Delete deletes ethereum 2.0 IPFS peer by name
