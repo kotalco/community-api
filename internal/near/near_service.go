@@ -18,12 +18,12 @@ import (
 type nearService struct{}
 
 type IService interface {
-	Get(types.NamespacedName) (nearv1alpha1.Node, *restErrors.RestErr)
-	Create(NearDto) (nearv1alpha1.Node, *restErrors.RestErr)
-	Update(NearDto, *nearv1alpha1.Node) *restErrors.RestErr
-	List(namespace string) (nearv1alpha1.NodeList, *restErrors.RestErr)
-	Delete(*nearv1alpha1.Node) *restErrors.RestErr
-	Count(namespace string) (int, *restErrors.RestErr)
+	Get(types.NamespacedName) (nearv1alpha1.Node, restErrors.IRestErr)
+	Create(NearDto) (nearv1alpha1.Node, restErrors.IRestErr)
+	Update(NearDto, *nearv1alpha1.Node) restErrors.IRestErr
+	List(namespace string) (nearv1alpha1.NodeList, restErrors.IRestErr)
+	Delete(*nearv1alpha1.Node) restErrors.IRestErr
+	Count(namespace string) (int, restErrors.IRestErr)
 }
 
 var (
@@ -35,7 +35,7 @@ func NewNearService() IService {
 }
 
 // Get gets a single filecoin node by name
-func (service nearService) Get(namespacedName types.NamespacedName) (nearv1alpha1.Node, *restErrors.RestErr) {
+func (service nearService) Get(namespacedName types.NamespacedName) (nearv1alpha1.Node, restErrors.IRestErr) {
 	node := &nearv1alpha1.Node{}
 
 	if err := k8sClient.Get(context.Background(), namespacedName, node); err != nil {
@@ -50,7 +50,7 @@ func (service nearService) Get(namespacedName types.NamespacedName) (nearv1alpha
 }
 
 // Create creates filecoin node from spec
-func (service nearService) Create(dto NearDto) (nearv1alpha1.Node, *restErrors.RestErr) {
+func (service nearService) Create(dto NearDto) (nearv1alpha1.Node, restErrors.IRestErr) {
 	node := &nearv1alpha1.Node{
 		ObjectMeta: dto.ObjectMetaFromMetadataDto(),
 		Spec: nearv1alpha1.NodeSpec{
@@ -82,7 +82,7 @@ func (service nearService) Create(dto NearDto) (nearv1alpha1.Node, *restErrors.R
 }
 
 // Update updates filecoin node by name from spec
-func (service nearService) Update(dto NearDto, node *nearv1alpha1.Node) *restErrors.RestErr {
+func (service nearService) Update(dto NearDto, node *nearv1alpha1.Node) restErrors.IRestErr {
 
 	if dto.NodePrivateKeySecretName != "" {
 		node.Spec.NodePrivateKeySecretName = dto.NodePrivateKeySecretName
@@ -187,7 +187,7 @@ func (service nearService) Update(dto NearDto, node *nearv1alpha1.Node) *restErr
 }
 
 // List returns all filecoin nodes
-func (service nearService) List(namespace string) (nearv1alpha1.NodeList, *restErrors.RestErr) {
+func (service nearService) List(namespace string) (nearv1alpha1.NodeList, restErrors.IRestErr) {
 	nodes := &nearv1alpha1.NodeList{}
 	if err := k8sClient.List(context.Background(), nodes, client.InNamespace(namespace)); err != nil {
 		go logger.Error(service.List, err)
@@ -198,7 +198,7 @@ func (service nearService) List(namespace string) (nearv1alpha1.NodeList, *restE
 }
 
 // Count returns total number of filecoin nodes
-func (service nearService) Count(namespace string) (int, *restErrors.RestErr) {
+func (service nearService) Count(namespace string) (int, restErrors.IRestErr) {
 	nodes := &nearv1alpha1.NodeList{}
 	if err := k8sClient.List(context.Background(), nodes, client.InNamespace(namespace)); err != nil {
 		go logger.Error(service.Count, err)
@@ -209,7 +209,7 @@ func (service nearService) Count(namespace string) (int, *restErrors.RestErr) {
 }
 
 // Delete deletes ethereum 2.0 filecoin node by name
-func (service nearService) Delete(node *nearv1alpha1.Node) *restErrors.RestErr {
+func (service nearService) Delete(node *nearv1alpha1.Node) restErrors.IRestErr {
 	if err := k8sClient.Delete(context.Background(), node); err != nil {
 		go logger.Error(service.Delete, err)
 		return restErrors.NewInternalServerError(fmt.Sprintf("can't delete node by name %s", node.Name))

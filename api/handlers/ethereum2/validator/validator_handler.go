@@ -39,7 +39,7 @@ func List(c *fiber.Ctx) error {
 
 	validatorList, err := service.List(c.Locals("namespace").(string))
 	if err != nil {
-		return c.Status(err.Status).JSON(err)
+		return c.Status(err.StatusCode()).JSON(err)
 	}
 
 	c.Set("Access-Control-Expose-Headers", "X-Total-Count")
@@ -62,19 +62,19 @@ func Create(c *fiber.Ctx) error {
 
 	if err := c.BodyParser(dto); err != nil {
 		badReq := restErrors.NewBadRequestError("invalid request body")
-		return c.Status(badReq.Status).JSON(badReq)
+		return c.Status(badReq.StatusCode()).JSON(badReq)
 	}
 
 	dto.Namespace = c.Locals("namespace").(string)
 
 	err := dto.MetaDataDto.Validate()
 	if err != nil {
-		return c.Status(err.Status).JSON(err)
+		return c.Status(err.StatusCode()).JSON(err)
 	}
 
 	validatorNode, err := service.Create(*dto)
 	if err != nil {
-		return c.Status(err.Status).JSON(err)
+		return c.Status(err.StatusCode()).JSON(err)
 	}
 
 	return c.Status(http.StatusOK).JSON(shared.NewResponse(new(validator.ValidatorDto).FromEthereum2Validator(validatorNode)))
@@ -89,7 +89,7 @@ func Delete(c *fiber.Ctx) error {
 
 	err := service.Delete(&validatorNode)
 	if err != nil {
-		return c.Status(err.Status).JSON(err)
+		return c.Status(err.StatusCode()).JSON(err)
 	}
 
 	return c.SendStatus(http.StatusNoContent)
@@ -105,14 +105,14 @@ func Update(c *fiber.Ctx) error {
 
 	if err := c.BodyParser(dto); err != nil {
 		badReq := restErrors.NewBadRequestError("invalid request body")
-		return c.Status(badReq.Status).JSON(err)
+		return c.Status(badReq.StatusCode()).JSON(badReq)
 	}
 
 	validatorNode := c.Locals("validator").(ethereum2v1alpha1.Validator)
 
 	err := service.Update(*dto, &validatorNode)
 	if err != nil {
-		return c.Status(err.Status).JSON(err)
+		return c.Status(err.StatusCode()).JSON(err)
 	}
 
 	return c.Status(http.StatusOK).JSON(shared.NewResponse(new(validator.ValidatorDto).FromEthereum2Validator(validatorNode)))
@@ -125,7 +125,7 @@ func Update(c *fiber.Ctx) error {
 func Count(c *fiber.Ctx) error {
 	length, err := service.Count(c.Locals("namespace").(string))
 	if err != nil {
-		return c.Status(err.Status).JSON(err)
+		return c.Status(err.StatusCode()).JSON(err)
 	}
 
 	c.Set("Access-Control-Expose-Headers", "X-Total-Count")
@@ -146,7 +146,7 @@ func ValidateValidatorExist(c *fiber.Ctx) error {
 
 	validatorNode, err := service.Get(nameSpacedName)
 	if err != nil {
-		return c.Status(err.Status).JSON(err)
+		return c.Status(err.StatusCode()).JSON(err)
 	}
 
 	c.Locals("validator", validatorNode)

@@ -3,7 +3,7 @@ package bitcoin
 import (
 	"context"
 	"fmt"
-	"github.com/kotalco/community-api/pkg/errors"
+	restErrors "github.com/kotalco/community-api/pkg/errors"
 	"github.com/kotalco/community-api/pkg/k8s"
 	"github.com/kotalco/community-api/pkg/logger"
 	bitcoinv1alpha1 "github.com/kotalco/kotal/apis/bitcoin/v1alpha1"
@@ -16,12 +16,12 @@ import (
 type bitcoinService struct{}
 
 type IService interface {
-	Get(types.NamespacedName) (bitcoinv1alpha1.Node, *errors.RestErr)
-	List(namespace string) (bitcoinv1alpha1.NodeList, *errors.RestErr)
-	Count(namespace string) (int, *errors.RestErr)
-	Create(BitcoinDto) (bitcoinv1alpha1.Node, *errors.RestErr)
-	Delete(*bitcoinv1alpha1.Node) *errors.RestErr
-	Update(BitcoinDto, *bitcoinv1alpha1.Node) *errors.RestErr
+	Get(types.NamespacedName) (bitcoinv1alpha1.Node, restErrors.IRestErr)
+	List(namespace string) (bitcoinv1alpha1.NodeList, restErrors.IRestErr)
+	Count(namespace string) (int, restErrors.IRestErr)
+	Create(BitcoinDto) (bitcoinv1alpha1.Node, restErrors.IRestErr)
+	Delete(*bitcoinv1alpha1.Node) restErrors.IRestErr
+	Update(BitcoinDto, *bitcoinv1alpha1.Node) restErrors.IRestErr
 }
 
 var (
@@ -33,39 +33,39 @@ func NewBitcoinService() IService {
 }
 
 // Get returns a single bitcoin node by name
-func (service bitcoinService) Get(namespacedName types.NamespacedName) (bitcoinv1alpha1.Node, *errors.RestErr) {
+func (service bitcoinService) Get(namespacedName types.NamespacedName) (bitcoinv1alpha1.Node, restErrors.IRestErr) {
 
 	node := &bitcoinv1alpha1.Node{}
 	if err := k8sClient.Get(context.Background(), namespacedName, node); err != nil {
 		if apiErrors.IsNotFound(err) {
-			return bitcoinv1alpha1.Node{}, errors.NewNotFoundError(fmt.Sprintf("node by name %s doesn't exist", namespacedName.Name))
+			return bitcoinv1alpha1.Node{}, restErrors.NewNotFoundError(fmt.Sprintf("node by name %s doesn't exist", namespacedName.Name))
 		}
 		go logger.Error(service.Get, err)
-		return bitcoinv1alpha1.Node{}, errors.NewInternalServerError(fmt.Sprintf("can't get node by name %s", namespacedName.Name))
+		return bitcoinv1alpha1.Node{}, restErrors.NewInternalServerError(fmt.Sprintf("can't get node by name %s", namespacedName.Name))
 	}
 
 	return *node, nil
 }
 
 // List returns all bitcoin nodes
-func (service bitcoinService) List(namespace string) (bitcoinv1alpha1.NodeList, *errors.RestErr) {
+func (service bitcoinService) List(namespace string) (bitcoinv1alpha1.NodeList, restErrors.IRestErr) {
 	nodes := &bitcoinv1alpha1.NodeList{}
 	err := k8sClient.List(context.Background(), nodes, client.InNamespace(namespace))
 	if err != nil {
 		go logger.Error(service.List, err)
-		return bitcoinv1alpha1.NodeList{}, errors.NewInternalServerError("failed to get all nodes")
+		return bitcoinv1alpha1.NodeList{}, restErrors.NewInternalServerError("failed to get all nodes")
 	}
 
 	return *nodes, nil
 }
 
 // Count returns all nodes length
-func (service bitcoinService) Count(namespace string) (int, *errors.RestErr) {
+func (service bitcoinService) Count(namespace string) (int, restErrors.IRestErr) {
 	nodes := &bitcoinv1alpha1.NodeList{}
 	err := k8sClient.List(context.Background(), nodes, client.InNamespace(namespace))
 	if err != nil {
 		go logger.Error(service.Count, err)
-		return 0, errors.NewInternalServerError("failed to get all nodes")
+		return 0, restErrors.NewInternalServerError("failed to get all nodes")
 	}
 
 	length := len(nodes.Items)
@@ -73,7 +73,7 @@ func (service bitcoinService) Count(namespace string) (int, *errors.RestErr) {
 }
 
 // Create creates bitcoin node from the given specs
-func (service bitcoinService) Create(dto BitcoinDto) (node bitcoinv1alpha1.Node, err *errors.RestErr) {
+func (service bitcoinService) Create(dto BitcoinDto) (node bitcoinv1alpha1.Node, err restErrors.IRestErr) {
 	node = bitcoinv1alpha1.Node{
 		ObjectMeta: dto.ObjectMetaFromMetadataDto(),
 		Spec: bitcoinv1alpha1.NodeSpec{
@@ -91,16 +91,16 @@ func (service bitcoinService) Create(dto BitcoinDto) (node bitcoinv1alpha1.Node,
 
 	if err := k8sClient.Create(context.Background(), &node); err != nil {
 		if apiErrors.IsAlreadyExists(err) {
-			return bitcoinv1alpha1.Node{}, errors.NewBadRequestError(fmt.Sprintf("node by name %s already exist", node.Name))
+			return bitcoinv1alpha1.Node{}, restErrors.NewBadRequestError(fmt.Sprintf("node by name %s already exist", node.Name))
 		}
 		go logger.Error(service.Create, err)
-		return bitcoinv1alpha1.Node{}, errors.NewInternalServerError("failed to create node")
+		return bitcoinv1alpha1.Node{}, restErrors.NewInternalServerError("failed to create node")
 	}
 	return node, nil
 }
 
 // Update updates a single node by name from spec
-func (service bitcoinService) Update(dto BitcoinDto, node *bitcoinv1alpha1.Node) *errors.RestErr {
+func (service bitcoinService) Update(dto BitcoinDto, node *bitcoinv1alpha1.Node) restErrors.IRestErr {
 	if dto.Image != "" {
 		node.Spec.Image = dto.Image
 	}
@@ -152,21 +152,21 @@ func (service bitcoinService) Update(dto BitcoinDto, node *bitcoinv1alpha1.Node)
 		err := k8sClient.Get(context.Background(), key, pod)
 		if apiErrors.IsNotFound(err) {
 			go logger.Error(service.Update, err)
-			return errors.NewBadRequestError(fmt.Sprintf("pod by name %s doesn't exit", key.Name))
+			return restErrors.NewBadRequestError(fmt.Sprintf("pod by name %s doesn't exit", key.Name))
 		}
 		podIsPending = pod.Status.Phase == corev1.PodPending
 	}
 
 	if err := k8sClient.Update(context.Background(), node); err != nil {
 		go logger.Error(service.Update, err)
-		return errors.NewInternalServerError(fmt.Sprintf("can't update node by name %s", node.Name))
+		return restErrors.NewInternalServerError(fmt.Sprintf("can't update node by name %s", node.Name))
 	}
 
 	if podIsPending {
 		err := k8sClient.Delete(context.Background(), pod)
 		if err != nil {
 			go logger.Error(service.Update, err)
-			return errors.NewInternalServerError(fmt.Sprintf("can't update node by name %s", node.Name))
+			return restErrors.NewInternalServerError(fmt.Sprintf("can't update node by name %s", node.Name))
 		}
 	}
 
@@ -174,10 +174,10 @@ func (service bitcoinService) Update(dto BitcoinDto, node *bitcoinv1alpha1.Node)
 }
 
 // Delete deletes bitcoin node by name
-func (service bitcoinService) Delete(node *bitcoinv1alpha1.Node) *errors.RestErr {
+func (service bitcoinService) Delete(node *bitcoinv1alpha1.Node) restErrors.IRestErr {
 	if err := k8sClient.Delete(context.Background(), node); err != nil {
 		go logger.Error(service.Delete, err)
-		return errors.NewInternalServerError(fmt.Sprintf("can't delete node by name %s", node.Name))
+		return restErrors.NewInternalServerError(fmt.Sprintf("can't delete node by name %s", node.Name))
 	}
 	return nil
 }

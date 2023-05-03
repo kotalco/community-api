@@ -18,12 +18,12 @@ import (
 type filecoinService struct{}
 
 type IService interface {
-	Get(types.NamespacedName) (filecoinv1alpha1.Node, *restErrors.RestErr)
-	Create(FilecoinDto) (filecoinv1alpha1.Node, *restErrors.RestErr)
-	Update(FilecoinDto, *filecoinv1alpha1.Node) *restErrors.RestErr
-	List(namespace string) (filecoinv1alpha1.NodeList, *restErrors.RestErr)
-	Delete(*filecoinv1alpha1.Node) *restErrors.RestErr
-	Count(namespace string) (int, *restErrors.RestErr)
+	Get(types.NamespacedName) (filecoinv1alpha1.Node, restErrors.IRestErr)
+	Create(FilecoinDto) (filecoinv1alpha1.Node, restErrors.IRestErr)
+	Update(FilecoinDto, *filecoinv1alpha1.Node) restErrors.IRestErr
+	List(namespace string) (filecoinv1alpha1.NodeList, restErrors.IRestErr)
+	Delete(*filecoinv1alpha1.Node) restErrors.IRestErr
+	Count(namespace string) (int, restErrors.IRestErr)
 }
 
 var (
@@ -35,7 +35,7 @@ func NewFilecoinService() IService {
 }
 
 // Get gets a single filecoin node by name
-func (service filecoinService) Get(namespacedName types.NamespacedName) (filecoinv1alpha1.Node, *restErrors.RestErr) {
+func (service filecoinService) Get(namespacedName types.NamespacedName) (filecoinv1alpha1.Node, restErrors.IRestErr) {
 	node := &filecoinv1alpha1.Node{}
 
 	if err := k8sClient.Get(context.Background(), namespacedName, node); err != nil {
@@ -50,7 +50,7 @@ func (service filecoinService) Get(namespacedName types.NamespacedName) (filecoi
 }
 
 // Create creates filecoin node from spec
-func (service filecoinService) Create(dto FilecoinDto) (filecoinv1alpha1.Node, *restErrors.RestErr) {
+func (service filecoinService) Create(dto FilecoinDto) (filecoinv1alpha1.Node, restErrors.IRestErr) {
 	node := &filecoinv1alpha1.Node{
 		ObjectMeta: dto.ObjectMetaFromMetadataDto(),
 		Spec: filecoinv1alpha1.NodeSpec{
@@ -80,7 +80,7 @@ func (service filecoinService) Create(dto FilecoinDto) (filecoinv1alpha1.Node, *
 }
 
 // Update updates filecoin node by name from spec
-func (service filecoinService) Update(dto FilecoinDto, node *filecoinv1alpha1.Node) *restErrors.RestErr {
+func (service filecoinService) Update(dto FilecoinDto, node *filecoinv1alpha1.Node) restErrors.IRestErr {
 	if dto.API != nil {
 		node.Spec.API = *dto.API
 	}
@@ -176,7 +176,7 @@ func (service filecoinService) Update(dto FilecoinDto, node *filecoinv1alpha1.No
 }
 
 // List returns all filecoin nodes
-func (service filecoinService) List(namespace string) (filecoinv1alpha1.NodeList, *restErrors.RestErr) {
+func (service filecoinService) List(namespace string) (filecoinv1alpha1.NodeList, restErrors.IRestErr) {
 	nodes := &filecoinv1alpha1.NodeList{}
 	if err := k8sClient.List(context.Background(), nodes, client.InNamespace(namespace)); err != nil {
 		go logger.Error(service.List, err)
@@ -186,7 +186,7 @@ func (service filecoinService) List(namespace string) (filecoinv1alpha1.NodeList
 }
 
 // Count returns total number of filecoin nodes
-func (service filecoinService) Count(namespace string) (int, *restErrors.RestErr) {
+func (service filecoinService) Count(namespace string) (int, restErrors.IRestErr) {
 
 	nodes := &filecoinv1alpha1.NodeList{}
 	if err := k8sClient.List(context.Background(), nodes, client.InNamespace(namespace)); err != nil {
@@ -198,7 +198,7 @@ func (service filecoinService) Count(namespace string) (int, *restErrors.RestErr
 }
 
 // Delete deletes ethereum 2.0 filecoin node by name
-func (service filecoinService) Delete(node *filecoinv1alpha1.Node) *restErrors.RestErr {
+func (service filecoinService) Delete(node *filecoinv1alpha1.Node) restErrors.IRestErr {
 	if err := k8sClient.Delete(context.Background(), node); err != nil {
 		go logger.Error(service.Delete, err)
 		return restErrors.NewInternalServerError(fmt.Sprintf("can't delte node by name %s", node.Name))

@@ -37,7 +37,7 @@ func List(c *fiber.Ctx) error {
 
 	storageClassList, err := service.List()
 	if err != nil {
-		return c.Status(err.Status).JSON(err)
+		return c.Status(err.StatusCode()).JSON(err)
 	}
 
 	start, end := shared.Page(uint(len(storageClassList.Items)), uint(page), uint(limit))
@@ -76,7 +76,7 @@ func Update(c *fiber.Ctx) error {
 func ValidateStorageClassExist(c *fiber.Ctx) error {
 	storageClass, err := service.Get(c.Params(nameKeyword))
 	if err != nil {
-		return c.Status(err.Status).JSON(err)
+		return c.Status(err.StatusCode()).JSON(err)
 	}
 
 	c.Locals("storage_class", storageClass)

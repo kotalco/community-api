@@ -42,7 +42,7 @@ func List(c *fiber.Ctx) error {
 
 	secrets, err := service.List(c.Locals("namespace").(string))
 	if err != nil {
-		return c.Status(err.Status).JSON(err)
+		return c.Status(err.StatusCode()).JSON(err)
 	}
 
 	start, end := shared.Page(uint(len(secrets.Items)), uint(page), uint(limit))
@@ -71,19 +71,19 @@ func Create(c *fiber.Ctx) error {
 	dto := new(secret.SecretDto)
 	if err := c.BodyParser(dto); err != nil {
 		badReq := restErrors.NewBadRequestError("invalid request body")
-		return c.Status(badReq.Status).JSON(err)
+		return c.Status(badReq.StatusCode()).JSON(badReq)
 	}
 
 	dto.Namespace = c.Locals("namespace").(string)
 
 	err := dto.MetaDataDto.Validate()
 	if err != nil {
-		return c.Status(err.Status).JSON(err)
+		return c.Status(err.StatusCode()).JSON(err)
 	}
 
 	secretModel, err := service.Create(*dto)
 	if err != nil {
-		return c.Status(err.Status).JSON(err)
+		return c.Status(err.StatusCode()).JSON(err)
 	}
 
 	return c.Status(http.StatusCreated).JSON(shared.NewResponse(new(secret.SecretDto).FromCoreSecret(secretModel)))
@@ -98,7 +98,7 @@ func Delete(c *fiber.Ctx) error {
 
 	err := service.Delete(&secretModel)
 	if err != nil {
-		return c.Status(err.Status).JSON(err)
+		return c.Status(err.StatusCode()).JSON(err)
 	}
 
 	return c.SendStatus(http.StatusNoContent)
@@ -115,7 +115,7 @@ func Update(c *fiber.Ctx) error {
 func Count(c *fiber.Ctx) error {
 	length, err := service.Count(c.Locals("namespace").(string))
 	if err != nil {
-		return c.Status(err.Status).JSON(err)
+		return c.Status(err.StatusCode()).JSON(err)
 	}
 
 	c.Set("Access-Control-Expose-Headers", "X-Total-Count")
@@ -136,7 +136,7 @@ func ValidateSecretExist(c *fiber.Ctx) error {
 
 	secretModel, err := service.Get(nameSpacedName)
 	if err != nil {
-		return c.Status(err.Status).JSON(err)
+		return c.Status(err.StatusCode()).JSON(err)
 	}
 
 	c.Locals("secret", secretModel)

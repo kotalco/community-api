@@ -41,7 +41,7 @@ func List(c *fiber.Ctx) error {
 
 	peers, err := service.List(c.Locals("namespace").(string))
 	if err != nil {
-		return c.Status(err.Status).JSON(err)
+		return c.Status(err.StatusCode()).JSON(err)
 	}
 
 	c.Set("Access-Control-Expose-Headers", "X-Total-Count")
@@ -63,19 +63,19 @@ func Create(c *fiber.Ctx) error {
 	dto := new(ipfs_cluster_peer.ClusterPeerDto)
 	if err := c.BodyParser(dto); err != nil {
 		badReq := restErrors.NewBadRequestError("invalid request body")
-		return c.Status(badReq.Status).JSON(badReq)
+		return c.Status(badReq.StatusCode()).JSON(badReq)
 	}
 
 	dto.Namespace = c.Locals("namespace").(string)
 
 	err := dto.MetaDataDto.Validate()
 	if err != nil {
-		return c.Status(err.Status).JSON(err)
+		return c.Status(err.StatusCode()).JSON(err)
 	}
 
 	peer, err := service.Create(*dto)
 	if err != nil {
-		return c.Status(err.Status).JSON(err)
+		return c.Status(err.StatusCode()).JSON(err)
 	}
 
 	return c.Status(http.StatusCreated).JSON(shared.NewResponse(new(ipfs_cluster_peer.ClusterPeerDto).FromIPFSClusterPeer(peer)))
@@ -90,7 +90,7 @@ func Delete(c *fiber.Ctx) error {
 
 	err := service.Delete(&peer)
 	if err != nil {
-		return c.Status(err.Status).JSON(err)
+		return c.Status(err.StatusCode()).JSON(err)
 	}
 
 	return c.SendStatus(http.StatusNoContent)
@@ -106,14 +106,14 @@ func Update(c *fiber.Ctx) error {
 
 	if err := c.BodyParser(dto); err != nil {
 		badReq := restErrors.NewBadRequestError("invalid request body")
-		return c.Status(badReq.Status).JSON(badReq)
+		return c.Status(badReq.StatusCode()).JSON(badReq)
 	}
 
 	peer := c.Locals("peer").(ipfsv1alpha1.ClusterPeer)
 
 	err := service.Update(*dto, &peer)
 	if err != nil {
-		return c.Status(err.Status).JSON(err)
+		return c.Status(err.StatusCode()).JSON(err)
 	}
 
 	return c.Status(http.StatusOK).JSON(shared.NewResponse(new(ipfs_cluster_peer.ClusterPeerDto).FromIPFSClusterPeer(peer)))
@@ -126,7 +126,7 @@ func Update(c *fiber.Ctx) error {
 func Count(c *fiber.Ctx) error {
 	length, err := service.Count(c.Locals("namespace").(string))
 	if err != nil {
-		return c.Status(err.Status).JSON(err)
+		return c.Status(err.StatusCode()).JSON(err)
 	}
 
 	c.Set("Access-Control-Expose-Headers", "X-Total-Count")
@@ -147,7 +147,7 @@ func ValidateClusterPeerExist(c *fiber.Ctx) error {
 
 	peer, err := service.Get(nameSpacedName)
 	if err != nil {
-		return c.Status(err.Status).JSON(err)
+		return c.Status(err.StatusCode()).JSON(err)
 	}
 
 	c.Locals("peer", peer)

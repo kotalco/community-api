@@ -3,7 +3,7 @@ package stacks
 import (
 	"context"
 	"fmt"
-	"github.com/kotalco/community-api/pkg/errors"
+	restErrors "github.com/kotalco/community-api/pkg/errors"
 	"github.com/kotalco/community-api/pkg/k8s"
 	"github.com/kotalco/community-api/pkg/logger"
 	stacksv1alpha1 "github.com/kotalco/kotal/apis/stacks/v1alpha1"
@@ -16,12 +16,12 @@ import (
 type stacksService struct{}
 
 type IService interface {
-	Get(types.NamespacedName) (stacksv1alpha1.Node, *errors.RestErr)
-	Create(StacksDto) (stacksv1alpha1.Node, *errors.RestErr)
-	List(namespace string) (stacksv1alpha1.NodeList, *errors.RestErr)
-	Count(namespace string) (int, *errors.RestErr)
-	Delete(*stacksv1alpha1.Node) *errors.RestErr
-	Update(StacksDto, *stacksv1alpha1.Node) *errors.RestErr
+	Get(types.NamespacedName) (stacksv1alpha1.Node, restErrors.IRestErr)
+	Create(StacksDto) (stacksv1alpha1.Node, restErrors.IRestErr)
+	List(namespace string) (stacksv1alpha1.NodeList, restErrors.IRestErr)
+	Count(namespace string) (int, restErrors.IRestErr)
+	Delete(*stacksv1alpha1.Node) restErrors.IRestErr
+	Update(StacksDto, *stacksv1alpha1.Node) restErrors.IRestErr
 }
 
 var (
@@ -33,7 +33,7 @@ func NewStacksService() IService {
 }
 
 // Create creates stacks node from spec
-func (service stacksService) Create(dto StacksDto) (stacksv1alpha1.Node, *errors.RestErr) {
+func (service stacksService) Create(dto StacksDto) (stacksv1alpha1.Node, restErrors.IRestErr) {
 	node := &stacksv1alpha1.Node{
 		ObjectMeta: dto.ObjectMetaFromMetadataDto(),
 		Spec: stacksv1alpha1.NodeSpec{
@@ -47,56 +47,56 @@ func (service stacksService) Create(dto StacksDto) (stacksv1alpha1.Node, *errors
 
 	if err := k8sClient.Create(context.Background(), node); err != nil {
 		if apiErrors.IsAlreadyExists(err) {
-			return stacksv1alpha1.Node{}, errors.NewBadRequestError(fmt.Sprintf("node by name %s is already exits", node.Name))
+			return stacksv1alpha1.Node{}, restErrors.NewBadRequestError(fmt.Sprintf("node by name %s is already exits", node.Name))
 		}
 		go logger.Error(service.Create, err)
-		return stacksv1alpha1.Node{}, errors.NewInternalServerError("failed to create node")
+		return stacksv1alpha1.Node{}, restErrors.NewInternalServerError("failed to create node")
 	}
 
 	return *node, nil
 }
 
 // Get returns a single stacks node by name
-func (service stacksService) Get(namespacedName types.NamespacedName) (stacksv1alpha1.Node, *errors.RestErr) {
+func (service stacksService) Get(namespacedName types.NamespacedName) (stacksv1alpha1.Node, restErrors.IRestErr) {
 
 	node := &stacksv1alpha1.Node{}
 	if err := k8sClient.Get(context.Background(), namespacedName, node); err != nil {
 		if apiErrors.IsNotFound(err) {
-			return stacksv1alpha1.Node{}, errors.NewNotFoundError(fmt.Sprintf("node by name %s doesn't exist", namespacedName.Name))
+			return stacksv1alpha1.Node{}, restErrors.NewNotFoundError(fmt.Sprintf("node by name %s doesn't exist", namespacedName.Name))
 		}
 		go logger.Error(service.Get, err)
-		return stacksv1alpha1.Node{}, errors.NewInternalServerError(fmt.Sprintf("can't get node by name %s", namespacedName.Name))
+		return stacksv1alpha1.Node{}, restErrors.NewInternalServerError(fmt.Sprintf("can't get node by name %s", namespacedName.Name))
 	}
 
 	return *node, nil
 }
 
 // List returns all stacks nodes
-func (service stacksService) List(namespace string) (stacksv1alpha1.NodeList, *errors.RestErr) {
+func (service stacksService) List(namespace string) (stacksv1alpha1.NodeList, restErrors.IRestErr) {
 	nodes := &stacksv1alpha1.NodeList{}
 	err := k8sClient.List(context.Background(), nodes, client.InNamespace(namespace))
 	if err != nil {
 		go logger.Error(service.List, err)
-		return stacksv1alpha1.NodeList{}, errors.NewInternalServerError("failed to get all nodes")
+		return stacksv1alpha1.NodeList{}, restErrors.NewInternalServerError("failed to get all nodes")
 	}
 
 	return *nodes, nil
 }
 
 // Count returns all nodes length
-func (service stacksService) Count(namespace string) (int, *errors.RestErr) {
+func (service stacksService) Count(namespace string) (int, restErrors.IRestErr) {
 	nodes := &stacksv1alpha1.NodeList{}
 	err := k8sClient.List(context.Background(), nodes, client.InNamespace(namespace))
 	if err != nil {
 		go logger.Error(service.Count, err)
-		return 0, errors.NewInternalServerError("failed to get all nodes")
+		return 0, restErrors.NewInternalServerError("failed to get all nodes")
 	}
 
 	return len(nodes.Items), nil
 }
 
 // Update updates a single node by name from spec
-func (service stacksService) Update(dto StacksDto, node *stacksv1alpha1.Node) *errors.RestErr {
+func (service stacksService) Update(dto StacksDto, node *stacksv1alpha1.Node) restErrors.IRestErr {
 	if dto.Image != "" {
 		node.Spec.Image = dto.Image
 	}
@@ -163,21 +163,21 @@ func (service stacksService) Update(dto StacksDto, node *stacksv1alpha1.Node) *e
 		err := k8sClient.Get(context.Background(), key, pod)
 		if apiErrors.IsNotFound(err) {
 			go logger.Error(service.Update, err)
-			return errors.NewBadRequestError(fmt.Sprintf("pod by name %s doesn't exit", key.Name))
+			return restErrors.NewBadRequestError(fmt.Sprintf("pod by name %s doesn't exit", key.Name))
 		}
 		podIsPending = pod.Status.Phase == corev1.PodPending
 	}
 
 	if err := k8sClient.Update(context.Background(), node); err != nil {
 		go logger.Error(service.Update, err)
-		return errors.NewInternalServerError(fmt.Sprintf("can't update node by name %s", node.Name))
+		return restErrors.NewInternalServerError(fmt.Sprintf("can't update node by name %s", node.Name))
 	}
 
 	if podIsPending {
 		err := k8sClient.Delete(context.Background(), pod)
 		if err != nil {
 			go logger.Error(service.Update, err)
-			return errors.NewInternalServerError(fmt.Sprintf("can't update node by name %s", node.Name))
+			return restErrors.NewInternalServerError(fmt.Sprintf("can't update node by name %s", node.Name))
 		}
 	}
 
@@ -185,10 +185,10 @@ func (service stacksService) Update(dto StacksDto, node *stacksv1alpha1.Node) *e
 }
 
 // Delete deletes stacks node by name
-func (service stacksService) Delete(node *stacksv1alpha1.Node) *errors.RestErr {
+func (service stacksService) Delete(node *stacksv1alpha1.Node) restErrors.IRestErr {
 	if err := k8sClient.Delete(context.Background(), node); err != nil {
 		go logger.Error(service.Delete, err)
-		return errors.NewInternalServerError(fmt.Sprintf("can't delete node by name %s", node.Name))
+		return restErrors.NewInternalServerError(fmt.Sprintf("can't delete node by name %s", node.Name))
 	}
 	return nil
 }

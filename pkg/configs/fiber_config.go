@@ -24,5 +24,5 @@ var defaultErrorHandler = func(c *fiber.Ctx, err error) error {
 
 	internalErr := restErrors.NewInternalServerError("some thing went wrong...")
 
-	return c.Status(internalErr.Status).JSON(internalErr)
+	return c.Status(internalErr.StatusCode()).JSON(internalErr)
 }

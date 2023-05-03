@@ -37,19 +37,19 @@ func Create(c *fiber.Ctx) error {
 	dto := new(chainlink.ChainlinkDto)
 	if err := c.BodyParser(dto); err != nil {
 		badReqErr := restErrors.NewBadRequestError("invalid request body")
-		return c.Status(badReqErr.Status).JSON(badReqErr)
+		return c.Status(badReqErr.StatusCode()).JSON(badReqErr)
 	}
 
 	dto.Namespace = c.Locals("namespace").(string)
 
 	err := dto.MetaDataDto.Validate()
 	if err != nil {
-		return c.Status(err.Status).JSON(err)
+		return c.Status(err.StatusCode()).JSON(err)
 	}
 
 	node, err := service.Create(dto)
 	if err != nil {
-		return c.Status(err.Status).JSON(err)
+		return c.Status(err.StatusCode()).JSON(err)
 	}
 
 	return c.Status(http.StatusCreated).JSON(shared.NewResponse(new(chainlink.ChainlinkDto).FromChainlinkNode(node)))
@@ -64,14 +64,14 @@ func Update(c *fiber.Ctx) error {
 	dto := new(chainlink.ChainlinkDto)
 	if err := c.BodyParser(dto); err != nil {
 		badReq := restErrors.NewBadRequestError("invalid request body")
-		return c.Status(badReq.Status).JSON(err)
+		return c.Status(badReq.StatusCode()).JSON(badReq)
 	}
 
 	node := c.Locals("node").(chainlinkv1alpha1.Node)
 
 	err := service.Update(dto, &node)
 	if err != nil {
-		return c.Status(err.Status).JSON(err)
+		return c.Status(err.StatusCode()).JSON(err)
 	}
 
 	return c.Status(http.StatusOK).JSON(shared.NewResponse(new(chainlink.ChainlinkDto).FromChainlinkNode(node)))
@@ -90,7 +90,7 @@ func List(c *fiber.Ctx) error {
 
 	nodeList, err := service.List(c.Locals("namespace").(string))
 	if err != nil {
-		return c.Status(err.Status).JSON(err)
+		return c.Status(err.StatusCode()).JSON(err)
 	}
 
 	start, end := shared.Page(uint(len(nodeList.Items)), uint(page), uint(limit))
@@ -113,7 +113,7 @@ func Delete(c *fiber.Ctx) error {
 
 	err := service.Delete(&node)
 	if err != nil {
-		return c.Status(err.Status).JSON(err)
+		return c.Status(err.StatusCode()).JSON(err)
 	}
 
 	return c.SendStatus(http.StatusNoContent)
@@ -126,7 +126,7 @@ func Delete(c *fiber.Ctx) error {
 func Count(c *fiber.Ctx) error {
 	length, err := service.Count(c.Locals("namespace").(string))
 	if err != nil {
-		return c.Status(err.Status).JSON(err)
+		return c.Status(err.StatusCode()).JSON(err)
 	}
 
 	c.Set("Access-Control-Expose-Headers", "X-Total-Count")
@@ -147,7 +147,7 @@ func ValidateNodeExist(c *fiber.Ctx) error {
 
 	node, err := service.Get(nameSpacedName)
 	if err != nil {
-		return c.Status(err.Status).JSON(err)
+		return c.Status(err.StatusCode()).JSON(err)
 	}
 
 	c.Locals("node", node)

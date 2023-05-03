@@ -5,7 +5,7 @@ package ethereum
 import (
 	"context"
 	"fmt"
-	"github.com/kotalco/community-api/pkg/errors"
+	restErrors "github.com/kotalco/community-api/pkg/errors"
 	"github.com/kotalco/community-api/pkg/k8s"
 	"github.com/kotalco/community-api/pkg/logger"
 	ethereumv1alpha1 "github.com/kotalco/kotal/apis/ethereum/v1alpha1"
@@ -20,12 +20,12 @@ import (
 type ethereumService struct{}
 
 type IService interface {
-	Get(types.NamespacedName) (ethereumv1alpha1.Node, *errors.RestErr)
-	Create(EthereumDto) (ethereumv1alpha1.Node, *errors.RestErr)
-	Update(EthereumDto, *ethereumv1alpha1.Node) *errors.RestErr
-	List(namespace string) (ethereumv1alpha1.NodeList, *errors.RestErr)
-	Delete(*ethereumv1alpha1.Node) *errors.RestErr
-	Count(namespace string) (int, *errors.RestErr)
+	Get(types.NamespacedName) (ethereumv1alpha1.Node, restErrors.IRestErr)
+	Create(EthereumDto) (ethereumv1alpha1.Node, restErrors.IRestErr)
+	Update(EthereumDto, *ethereumv1alpha1.Node) restErrors.IRestErr
+	List(namespace string) (ethereumv1alpha1.NodeList, restErrors.IRestErr)
+	Delete(*ethereumv1alpha1.Node) restErrors.IRestErr
+	Count(namespace string) (int, restErrors.IRestErr)
 }
 
 var (
@@ -37,22 +37,22 @@ func NewEthereumService() IService {
 }
 
 // Get returns a single ethereum node by name
-func (service ethereumService) Get(namespacedName types.NamespacedName) (ethereumv1alpha1.Node, *errors.RestErr) {
+func (service ethereumService) Get(namespacedName types.NamespacedName) (ethereumv1alpha1.Node, restErrors.IRestErr) {
 	node := &ethereumv1alpha1.Node{}
 
 	if err := k8sClient.Get(context.Background(), namespacedName, node); err != nil {
 		if apiErrors.IsNotFound(err) {
-			return ethereumv1alpha1.Node{}, errors.NewNotFoundError(fmt.Sprintf("node by name %s doesn't exist", namespacedName.Name))
+			return ethereumv1alpha1.Node{}, restErrors.NewNotFoundError(fmt.Sprintf("node by name %s doesn't exist", namespacedName.Name))
 		}
 		go logger.Error(service.Get, err)
-		return ethereumv1alpha1.Node{}, errors.NewInternalServerError(fmt.Sprintf("can't get node by name %s", namespacedName.Name))
+		return ethereumv1alpha1.Node{}, restErrors.NewInternalServerError(fmt.Sprintf("can't get node by name %s", namespacedName.Name))
 	}
 
 	return *node, nil
 }
 
 // Create creates ethereum node from the given spec
-func (service ethereumService) Create(dto EthereumDto) (ethereumv1alpha1.Node, *errors.RestErr) {
+func (service ethereumService) Create(dto EthereumDto) (ethereumv1alpha1.Node, restErrors.IRestErr) {
 	node := &ethereumv1alpha1.Node{
 		ObjectMeta: dto.ObjectMetaFromMetadataDto(),
 		Spec: ethereumv1alpha1.NodeSpec{
@@ -76,17 +76,17 @@ func (service ethereumService) Create(dto EthereumDto) (ethereumv1alpha1.Node, *
 	err := k8sClient.Create(context.Background(), node)
 	if err != nil {
 		if apiErrors.IsAlreadyExists(err) {
-			return ethereumv1alpha1.Node{}, errors.NewBadRequestError(fmt.Sprintf("node by name %s already exist", node.Name))
+			return ethereumv1alpha1.Node{}, restErrors.NewBadRequestError(fmt.Sprintf("node by name %s already exist", node.Name))
 		}
 		go logger.Error(service.Create, err)
-		return ethereumv1alpha1.Node{}, errors.NewInternalServerError("failed to create node")
+		return ethereumv1alpha1.Node{}, restErrors.NewInternalServerError("failed to create node")
 	}
 
 	return *node, nil
 }
 
 // Update updates a single ethereum node by name from spec
-func (service ethereumService) Update(dto EthereumDto, node *ethereumv1alpha1.Node) *errors.RestErr {
+func (service ethereumService) Update(dto EthereumDto, node *ethereumv1alpha1.Node) restErrors.IRestErr {
 
 	if dto.Logging != "" {
 		node.Spec.Logging = sharedAPI.VerbosityLevel(dto.Logging)
@@ -222,21 +222,21 @@ func (service ethereumService) Update(dto EthereumDto, node *ethereumv1alpha1.No
 		err := k8sClient.Get(context.Background(), key, pod)
 		if apiErrors.IsNotFound(err) {
 			go logger.Error(service.Update, err)
-			return errors.NewBadRequestError(fmt.Sprintf("pod by name %s doesn't exit", key.Name))
+			return restErrors.NewBadRequestError(fmt.Sprintf("pod by name %s doesn't exit", key.Name))
 		}
 		podIsPending = pod.Status.Phase == corev1.PodPending
 	}
 
 	if err := k8sClient.Update(context.Background(), node); err != nil {
 		go logger.Error(service.Update, err)
-		return errors.NewInternalServerError(fmt.Sprintf("can't update node by name %s", node.Name))
+		return restErrors.NewInternalServerError(fmt.Sprintf("can't update node by name %s", node.Name))
 	}
 
 	if podIsPending {
 		err := k8sClient.Delete(context.Background(), pod)
 		if err != nil {
 			go logger.Error(service.Update, err)
-			return errors.NewInternalServerError(fmt.Sprintf("can't update node by name %s", node.Name))
+			return restErrors.NewInternalServerError(fmt.Sprintf("can't update node by name %s", node.Name))
 		}
 	}
 
@@ -244,20 +244,20 @@ func (service ethereumService) Update(dto EthereumDto, node *ethereumv1alpha1.No
 }
 
 // List returns all ethereum nodes
-func (service ethereumService) List(namespace string) (ethereumv1alpha1.NodeList, *errors.RestErr) {
+func (service ethereumService) List(namespace string) (ethereumv1alpha1.NodeList, restErrors.IRestErr) {
 	nodes := &ethereumv1alpha1.NodeList{}
 
 	err := k8sClient.List(context.Background(), nodes, client.InNamespace(namespace))
 	if err != nil {
 		go logger.Error(service.List, err)
-		return ethereumv1alpha1.NodeList{}, errors.NewInternalServerError("failed to get all nodes")
+		return ethereumv1alpha1.NodeList{}, restErrors.NewInternalServerError("failed to get all nodes")
 	}
 
 	return *nodes, nil
 }
 
 // Count returns the length of ethereum nodes
-func (service ethereumService) Count(namespace string) (int, *errors.RestErr) {
+func (service ethereumService) Count(namespace string) (int, restErrors.IRestErr) {
 	nodes, err := service.List(namespace)
 	if err != nil {
 		return 0, err
@@ -267,12 +267,12 @@ func (service ethereumService) Count(namespace string) (int, *errors.RestErr) {
 }
 
 // Delete a single ethereum node by name
-func (service ethereumService) Delete(node *ethereumv1alpha1.Node) *errors.RestErr {
+func (service ethereumService) Delete(node *ethereumv1alpha1.Node) restErrors.IRestErr {
 	err := k8sClient.Delete(context.Background(), node)
 
 	if err != nil {
 		go logger.Error(service.Delete, err)
-		return errors.NewInternalServerError(fmt.Sprintf("can't delete node by name %s", node.Name))
+		return restErrors.NewInternalServerError(fmt.Sprintf("can't delete node by name %s", node.Name))
 	}
 
 	return nil
