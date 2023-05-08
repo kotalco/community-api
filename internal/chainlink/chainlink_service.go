@@ -21,8 +21,8 @@ type chainlinkService struct{}
 
 type IService interface {
 	Get(types.NamespacedName) (chainlinkv1alpha1.Node, restErrors.IRestErr)
-	Create(*ChainlinkDto) (chainlinkv1alpha1.Node, restErrors.IRestErr)
-	Update(*ChainlinkDto, *chainlinkv1alpha1.Node) restErrors.IRestErr
+	Create(ChainlinkDto) (chainlinkv1alpha1.Node, restErrors.IRestErr)
+	Update(ChainlinkDto, *chainlinkv1alpha1.Node) restErrors.IRestErr
 	List(namespace string) (chainlinkv1alpha1.NodeList, restErrors.IRestErr)
 	Count(namespace string) (int, restErrors.IRestErr)
 	Delete(*chainlinkv1alpha1.Node) restErrors.IRestErr
@@ -52,7 +52,7 @@ func (service chainlinkService) Get(namespacedName types.NamespacedName) (chainl
 }
 
 // Create creates chainlink node from the given spec
-func (service chainlinkService) Create(dto *ChainlinkDto) (chainlinkv1alpha1.Node, restErrors.IRestErr) {
+func (service chainlinkService) Create(dto ChainlinkDto) (chainlinkv1alpha1.Node, restErrors.IRestErr) {
 	node := &chainlinkv1alpha1.Node{
 		ObjectMeta: dto.ObjectMetaFromMetadataDto(),
 		Spec: chainlinkv1alpha1.NodeSpec{
@@ -88,7 +88,7 @@ func (service chainlinkService) Create(dto *ChainlinkDto) (chainlinkv1alpha1.Nod
 }
 
 // Update updates a single chainlink node by name from spec
-func (service chainlinkService) Update(dto *ChainlinkDto, node *chainlinkv1alpha1.Node) restErrors.IRestErr {
+func (service chainlinkService) Update(dto ChainlinkDto, node *chainlinkv1alpha1.Node) restErrors.IRestErr {
 
 	if dto.EthereumWSEndpoint != "" {
 		node.Spec.EthereumWSEndpoint = dto.EthereumWSEndpoint

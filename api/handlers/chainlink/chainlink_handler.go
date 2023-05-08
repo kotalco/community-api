@@ -47,7 +47,7 @@ func Create(c *fiber.Ctx) error {
 		return c.Status(err.StatusCode()).JSON(err)
 	}
 
-	node, err := service.Create(dto)
+	node, err := service.Create(*dto)
 	if err != nil {
 		return c.Status(err.StatusCode()).JSON(err)
 	}
@@ -69,7 +69,7 @@ func Update(c *fiber.Ctx) error {
 
 	node := c.Locals("node").(chainlinkv1alpha1.Node)
 
-	err := service.Update(dto, &node)
+	err := service.Update(*dto, &node)
 	if err != nil {
 		return c.Status(err.StatusCode()).JSON(err)
 	}
