@@ -25,9 +25,9 @@ var service = ipfs_cluster_peer.NewIpfsClusterPeerService()
 // 1-get the node validated from ValidateClusterPeerExist method
 // 2-marshall node to dto and format the response
 func Get(c *fiber.Ctx) error {
-	peer := c.Locals("peer").(*ipfsv1alpha1.ClusterPeer)
+	peer := c.Locals("peer").(ipfsv1alpha1.ClusterPeer)
 
-	return c.Status(http.StatusOK).JSON(shared.NewResponse(new(ipfs_cluster_peer.ClusterPeerDto).FromIPFSClusterPeer(*peer)))
+	return c.Status(http.StatusOK).JSON(shared.NewResponse(new(ipfs_cluster_peer.ClusterPeerDto).FromIPFSClusterPeer(peer)))
 }
 
 // List returns all IPFS cluster peers

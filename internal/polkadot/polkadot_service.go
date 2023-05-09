@@ -34,31 +34,29 @@ func NewPolkadotService() IService {
 	return polkadtoService{}
 }
 
-// Get gets a single filecoin node by name
-func (service polkadtoService) Get(namespacedName types.NamespacedName) (polkadotv1alpha1.Node, restErrors.IRestErr) {
-	node := &polkadotv1alpha1.Node{}
-
-	if err := k8sClient.Get(context.Background(), namespacedName, node); err != nil {
+// Get gets a single polkadot node by name
+func (service polkadtoService) Get(namespacedName types.NamespacedName) (node polkadotv1alpha1.Node, restErr restErrors.IRestErr) {
+	if err := k8sClient.Get(context.Background(), namespacedName, &node); err != nil {
 		if apiErrors.IsNotFound(err) {
-			return polkadotv1alpha1.Node{}, restErrors.NewNotFoundError(fmt.Sprintf("node by name %s doesn't exits", namespacedName.Name))
+			restErr = restErrors.NewNotFoundError(fmt.Sprintf("node by name %s doesn't exits", namespacedName.Name))
+			return
 		}
 		go logger.Error(service.Get, err)
-		return polkadotv1alpha1.Node{}, restErrors.NewInternalServerError(fmt.Sprintf("can't get node by name %s", namespacedName.Name))
+		restErr = restErrors.NewInternalServerError(fmt.Sprintf("can't get node by name %s", namespacedName.Name))
+		return
 	}
 
-	return *node, nil
+	return
 }
 
-// Create creates filecoin node from spec
-func (service polkadtoService) Create(dto PolkadotDto) (polkadotv1alpha1.Node, restErrors.IRestErr) {
-	node := &polkadotv1alpha1.Node{
-		ObjectMeta: dto.ObjectMetaFromMetadataDto(),
-		Spec: polkadotv1alpha1.NodeSpec{
-			Network: dto.Network,
-			RPC:     true,
-			Pruning: dto.Pruning,
-			Image:   dto.Image,
-		},
+// Create creates polkadot node from spec
+func (service polkadtoService) Create(dto PolkadotDto) (node polkadotv1alpha1.Node, restErr restErrors.IRestErr) {
+	node.ObjectMeta = dto.ObjectMetaFromMetadataDto()
+	node.Spec = polkadotv1alpha1.NodeSpec{
+		Network: dto.Network,
+		RPC:     true,
+		Pruning: dto.Pruning,
+		Image:   dto.Image,
 	}
 
 	k8s.DefaultResources(&node.Spec.Resources)
@@ -67,19 +65,21 @@ func (service polkadtoService) Create(dto PolkadotDto) (polkadotv1alpha1.Node, r
 		node.Default()
 	}
 
-	if err := k8sClient.Create(context.Background(), node); err != nil {
+	if err := k8sClient.Create(context.Background(), &node); err != nil {
 		if apiErrors.IsAlreadyExists(err) {
-			return polkadotv1alpha1.Node{}, restErrors.NewBadRequestError(fmt.Sprintf("node by name %s is already exits", node.Name))
+			restErr = restErrors.NewBadRequestError(fmt.Sprintf("node by name %s is already exits", node.Name))
+			return
 		}
 		go logger.Error(service.Create, err)
-		return polkadotv1alpha1.Node{}, restErrors.NewInternalServerError("failed to create node")
+		restErr = restErrors.NewInternalServerError("failed to create node")
+		return
 	}
 
-	return *node, nil
+	return
 }
 
-// Update updates filecoin node by name from spec
-func (service polkadtoService) Update(dto PolkadotDto, node *polkadotv1alpha1.Node) restErrors.IRestErr {
+// Update updates polkadot node by name from spec
+func (service polkadtoService) Update(dto PolkadotDto, node *polkadotv1alpha1.Node) (restErr restErrors.IRestErr) {
 	if dto.NodePrivateKeySecretName != "" {
 		node.Spec.NodePrivateKeySecretName = dto.NodePrivateKeySecretName
 	}
@@ -181,54 +181,59 @@ func (service polkadtoService) Update(dto PolkadotDto, node *polkadotv1alpha1.No
 		err := k8sClient.Get(context.Background(), key, pod)
 		if apiErrors.IsNotFound(err) {
 			go logger.Error(service.Update, err)
-			return restErrors.NewBadRequestError(fmt.Sprintf("pod by name %s doesn't exit", key.Name))
+			restErr = restErrors.NewBadRequestError(fmt.Sprintf("pod by name %s doesn't exit", key.Name))
+			return
 		}
 		podIsPending = pod.Status.Phase == corev1.PodPending
 	}
 
 	if err := k8sClient.Update(context.Background(), node); err != nil {
 		go logger.Error(service.Update, err)
-		return restErrors.NewInternalServerError(fmt.Sprintf("can't update node by name %s", node.Name))
+		restErr = restErrors.NewInternalServerError(fmt.Sprintf("can't update node by name %s", node.Name))
+		return
 	}
 
 	if podIsPending {
 		err := k8sClient.Delete(context.Background(), pod)
 		if err != nil {
 			go logger.Error(service.Update, err)
-			return restErrors.NewInternalServerError(fmt.Sprintf("can't update node by name %s", node.Name))
+			restErr = restErrors.NewInternalServerError(fmt.Sprintf("can't update node by name %s", node.Name))
+			return
 		}
 	}
-	return nil
+	return
 }
 
-// List returns all filecoin nodes
-func (service polkadtoService) List(namespace string) (polkadotv1alpha1.NodeList, restErrors.IRestErr) {
-	nodes := &polkadotv1alpha1.NodeList{}
-	if err := k8sClient.List(context.Background(), nodes, client.InNamespace(namespace)); err != nil {
+// List returns all polkadot nodes
+func (service polkadtoService) List(namespace string) (list polkadotv1alpha1.NodeList, restErr restErrors.IRestErr) {
+	if err := k8sClient.List(context.Background(), &list, client.InNamespace(namespace)); err != nil {
 		go logger.Error(service.List, err)
-		return polkadotv1alpha1.NodeList{}, restErrors.NewInternalServerError("failed to get all nodes")
+		restErr = restErrors.NewInternalServerError("failed to get all nodes")
+		return
 	}
 
-	return *nodes, nil
+	return
 }
 
-// Count returns total number of filecoin nodes
-func (service polkadtoService) Count(namespace string) (int, restErrors.IRestErr) {
+// Count returns total number of polkadot nodes
+func (service polkadtoService) Count(namespace string) (count int, restErr restErrors.IRestErr) {
 	nodes := &polkadotv1alpha1.NodeList{}
 	if err := k8sClient.List(context.Background(), nodes, client.InNamespace(namespace)); err != nil {
 		go logger.Error(service.Count, err)
-		return 0, restErrors.NewInternalServerError("failed to count all nodes")
+		restErr = restErrors.NewInternalServerError("failed to count all nodes")
+		return
 	}
 
 	return len(nodes.Items), nil
 }
 
-// Delete deletes ethereum 2.0 filecoin node by name
-func (service polkadtoService) Delete(node *polkadotv1alpha1.Node) restErrors.IRestErr {
+// Delete deletes polkadot node by name
+func (service polkadtoService) Delete(node *polkadotv1alpha1.Node) (restErr restErrors.IRestErr) {
 	if err := k8sClient.Delete(context.Background(), node); err != nil {
 		go logger.Error(service.Delete, err)
-		return restErrors.NewInternalServerError(fmt.Sprintf("can't delte node by name %s", node.Name))
+		restErr = restErrors.NewInternalServerError(fmt.Sprintf("can't delte node by name %s", node.Name))
+		return
 	}
 
-	return nil
+	return
 }

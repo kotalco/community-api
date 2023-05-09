@@ -33,52 +33,51 @@ func NewStorageClassService() IService {
 }
 
 // Get returns a single storage class  by name
-func (service storageClassService) Get(name string) (storagev1.StorageClass, restErrors.IRestErr) {
-	storageClass := &storagev1.StorageClass{}
+func (service storageClassService) Get(name string) (storageClass storagev1.StorageClass, restErr restErrors.IRestErr) {
 	key := types.NamespacedName{Name: name}
-	if err := k8sClient.Get(context.Background(), key, storageClass); err != nil {
+	if err := k8sClient.Get(context.Background(), key, &storageClass); err != nil {
 		if apiErrors.IsNotFound(err) {
-			return storagev1.StorageClass{}, restErrors.NewNotFoundError(fmt.Sprintf("storage class by name %s doens't exit", key.Name))
+			restErr = restErrors.NewNotFoundError(fmt.Sprintf("storage class by name %s doens't exit", key.Name))
+			return
 		}
 		go logger.Error(service.Get, err)
-		return storagev1.StorageClass{}, restErrors.NewInternalServerError(fmt.Sprintf("can't get storage class by name %s", key.Name))
+		restErr = restErrors.NewInternalServerError(fmt.Sprintf("can't get storage class by name %s", key.Name))
+		return
 	}
 
-	return *storageClass, nil
+	return
 }
 
 // Create creates a storage class from the given spec
 // todo
-func (service storageClassService) Create(dto StorageClassDto) (storagev1.StorageClass, restErrors.IRestErr) {
-	return storagev1.StorageClass{}, nil
+func (service storageClassService) Create(dto StorageClassDto) (storageClass storagev1.StorageClass, restErr restErrors.IRestErr) {
+	return
 }
 
 // Update creates a storage class from the given spec
 // todo
-func (service storageClassService) Update(dto StorageClassDto, storageClass *storagev1.StorageClass) restErrors.IRestErr {
-	return nil
+func (service storageClassService) Update(dto StorageClassDto, storageClass *storagev1.StorageClass) (restErr restErrors.IRestErr) {
+	return
 }
 
 // List returns all storage classes
-func (service storageClassService) List() (storagev1.StorageClassList, restErrors.IRestErr) {
-	storageClasses := &storagev1.StorageClassList{}
-
-	if err := k8sClient.List(context.Background(), storageClasses); err != nil {
+func (service storageClassService) List() (list storagev1.StorageClassList, restErr restErrors.IRestErr) {
+	if err := k8sClient.List(context.Background(), &list); err != nil {
 		go logger.Error(service.List, err)
-		return storagev1.StorageClassList{}, restErrors.NewInternalServerError("failed to get storage class list")
+		restErr = restErrors.NewInternalServerError("failed to get storage class list")
+		return
 	}
-
-	return *storageClasses, nil
+	return
 }
 
 // Delete a single storage node by name
 // todo
-func (service storageClassService) Delete(storageClass *storagev1.StorageClass) restErrors.IRestErr {
-	return nil
+func (service storageClassService) Delete(storageClass *storagev1.StorageClass) (restErr restErrors.IRestErr) {
+	return
 }
 
 // Count a list of storage classes
 // todo
-func (service storageClassService) Count() (int, restErrors.IRestErr) {
-	return 0, nil
+func (service storageClassService) Count() (count int, restErr restErrors.IRestErr) {
+	return
 }
