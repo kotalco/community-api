@@ -23,14 +23,14 @@ func IsDuplicated(c *fiber.Ctx) error {
 
 		if record != nil { //check if record already exist , return conflict if true
 			conflictErr := restError.NewConflictError(fmt.Sprintf("resource %s already exists!", name))
-			return c.Status(conflictErr.Status).JSON(conflictErr)
+			return c.Status(conflictErr.StatusCode()).JSON(conflictErr)
 		}
 
 		if err != nil { //check if err code is notFound , pass if true, throw if any other erros
-			if err.Status == http.StatusNotFound {
+			if err.StatusCode() == http.StatusNotFound {
 				return c.Next()
 			} else {
-				return c.Status(err.Status).JSON(err)
+				return c.Status(err.StatusCode()).JSON(err)
 			}
 		}
 	}

@@ -29,7 +29,7 @@ type BeaconNodeDto struct {
 }
 type BeaconNodeListDto []BeaconNodeDto
 
-func (dto BeaconNodeDto) FromEthereum2BeaconNode(node *ethereum2v1alpha1.BeaconNode) *BeaconNodeDto {
+func (dto BeaconNodeDto) FromEthereum2BeaconNode(node ethereum2v1alpha1.BeaconNode) BeaconNodeDto {
 	dto.Name = node.Name
 	dto.Time = models.Time{CreatedAt: node.CreationTimestamp.UTC().Format(shared.JavascriptISOString)}
 	dto.Network = node.Spec.Network
@@ -53,13 +53,13 @@ func (dto BeaconNodeDto) FromEthereum2BeaconNode(node *ethereum2v1alpha1.BeaconN
 	dto.JWTSecretName = node.Spec.JWTSecretName
 	dto.Image = node.Spec.Image
 
-	return &dto
+	return dto
 }
 
 func (nodes BeaconNodeListDto) FromEthereum2BeaconNode(beaconnodeList []ethereum2v1alpha1.BeaconNode) BeaconNodeListDto {
 	result := make(BeaconNodeListDto, len(beaconnodeList))
 	for index, v := range beaconnodeList {
-		result[index] = *(BeaconNodeDto{}.FromEthereum2BeaconNode(&v))
+		result[index] = BeaconNodeDto{}.FromEthereum2BeaconNode(v)
 	}
 	return result
 }

@@ -18,12 +18,12 @@ import (
 type filecoinService struct{}
 
 type IService interface {
-	Get(types.NamespacedName) (*filecoinv1alpha1.Node, *restErrors.RestErr)
-	Create(dto *FilecoinDto) (*filecoinv1alpha1.Node, *restErrors.RestErr)
-	Update(*FilecoinDto, *filecoinv1alpha1.Node) (*filecoinv1alpha1.Node, *restErrors.RestErr)
-	List(namespace string) (*filecoinv1alpha1.NodeList, *restErrors.RestErr)
-	Delete(node *filecoinv1alpha1.Node) *restErrors.RestErr
-	Count(namespace string) (*int, *restErrors.RestErr)
+	Get(types.NamespacedName) (filecoinv1alpha1.Node, restErrors.IRestErr)
+	Create(FilecoinDto) (filecoinv1alpha1.Node, restErrors.IRestErr)
+	Update(FilecoinDto, *filecoinv1alpha1.Node) restErrors.IRestErr
+	List(namespace string) (filecoinv1alpha1.NodeList, restErrors.IRestErr)
+	Delete(*filecoinv1alpha1.Node) restErrors.IRestErr
+	Count(namespace string) (int, restErrors.IRestErr)
 }
 
 var (
@@ -35,30 +35,28 @@ func NewFilecoinService() IService {
 }
 
 // Get gets a single filecoin node by name
-func (service filecoinService) Get(namespacedName types.NamespacedName) (*filecoinv1alpha1.Node, *restErrors.RestErr) {
-	node := &filecoinv1alpha1.Node{}
-
-	if err := k8sClient.Get(context.Background(), namespacedName, node); err != nil {
+func (service filecoinService) Get(namespacedName types.NamespacedName) (node filecoinv1alpha1.Node, restErr restErrors.IRestErr) {
+	if err := k8sClient.Get(context.Background(), namespacedName, &node); err != nil {
 		if apiErrors.IsNotFound(err) {
-			return nil, restErrors.NewNotFoundError(fmt.Sprintf("node by name %s doesn't exit", namespacedName.Name))
+			restErr = restErrors.NewNotFoundError(fmt.Sprintf("node by name %s doesn't exit", namespacedName.Name))
+			return
 		}
 		go logger.Error(service.Get, err)
-		return nil, restErrors.NewInternalServerError(fmt.Sprintf("can't get node by name %s", namespacedName.Name))
+		restErr = restErrors.NewInternalServerError(fmt.Sprintf("can't get node by name %s", namespacedName.Name))
+		return
 	}
 
-	return node, nil
+	return
 }
 
 // Create creates filecoin node from spec
-func (service filecoinService) Create(dto *FilecoinDto) (*filecoinv1alpha1.Node, *restErrors.RestErr) {
-	node := &filecoinv1alpha1.Node{
-		ObjectMeta: dto.ObjectMetaFromMetadataDto(),
-		Spec: filecoinv1alpha1.NodeSpec{
-			Network: filecoinv1alpha1.FilecoinNetwork(dto.Network),
-			Image:   dto.Image,
-			Resources: sharedAPIs.Resources{
-				StorageClass: dto.StorageClass,
-			},
+func (service filecoinService) Create(dto FilecoinDto) (node filecoinv1alpha1.Node, restErr restErrors.IRestErr) {
+	node.ObjectMeta = dto.ObjectMetaFromMetadataDto()
+	node.Spec = filecoinv1alpha1.NodeSpec{
+		Network: filecoinv1alpha1.FilecoinNetwork(dto.Network),
+		Image:   dto.Image,
+		Resources: sharedAPIs.Resources{
+			StorageClass: dto.StorageClass,
 		},
 	}
 
@@ -68,19 +66,21 @@ func (service filecoinService) Create(dto *FilecoinDto) (*filecoinv1alpha1.Node,
 		node.Default()
 	}
 
-	if err := k8sClient.Create(context.Background(), node); err != nil {
+	if err := k8sClient.Create(context.Background(), &node); err != nil {
 		if apiErrors.IsAlreadyExists(err) {
-			return nil, restErrors.NewBadRequestError(fmt.Sprintf("node by name %+v already exits", dto))
+			restErr = restErrors.NewBadRequestError(fmt.Sprintf("node by name %+v already exits", dto))
+			return
 		}
 		go logger.Error(service.Create, err)
-		return nil, restErrors.NewInternalServerError("failed to create node")
+		restErr = restErrors.NewInternalServerError("failed to create node")
+		return
 	}
 
-	return node, nil
+	return
 }
 
 // Update updates filecoin node by name from spec
-func (service filecoinService) Update(dto *FilecoinDto, node *filecoinv1alpha1.Node) (*filecoinv1alpha1.Node, *restErrors.RestErr) {
+func (service filecoinService) Update(dto FilecoinDto, node *filecoinv1alpha1.Node) (restErr restErrors.IRestErr) {
 	if dto.API != nil {
 		node.Spec.API = *dto.API
 	}
@@ -154,55 +154,58 @@ func (service filecoinService) Update(dto *FilecoinDto, node *filecoinv1alpha1.N
 		err := k8sClient.Get(context.Background(), key, pod)
 		if apiErrors.IsNotFound(err) {
 			go logger.Error(service.Update, err)
-			return nil, restErrors.NewBadRequestError(fmt.Sprintf("pod by name %s doesn't exit", key.Name))
+			restErr = restErrors.NewBadRequestError(fmt.Sprintf("pod by name %s doesn't exit", key.Name))
+			return
 		}
 		podIsPending = pod.Status.Phase == corev1.PodPending
 	}
 
 	if err := k8sClient.Update(context.Background(), node); err != nil {
 		go logger.Error(service.Update, err)
-		return nil, restErrors.NewInternalServerError(fmt.Sprintf("can't update node by name %s", node.Name))
+		restErr = restErrors.NewInternalServerError(fmt.Sprintf("can't update node by name %s", node.Name))
+		return
 	}
 
 	if podIsPending {
 		err := k8sClient.Delete(context.Background(), pod)
 		if err != nil {
 			go logger.Error(service.Update, err)
-			return nil, restErrors.NewInternalServerError(fmt.Sprintf("can't update node by name %s", node.Name))
+			restErr = restErrors.NewInternalServerError(fmt.Sprintf("can't update node by name %s", node.Name))
+			return
 		}
 	}
 
-	return node, nil
+	return
 }
 
 // List returns all filecoin nodes
-func (service filecoinService) List(namespace string) (*filecoinv1alpha1.NodeList, *restErrors.RestErr) {
-	nodes := &filecoinv1alpha1.NodeList{}
-	if err := k8sClient.List(context.Background(), nodes, client.InNamespace(namespace)); err != nil {
+func (service filecoinService) List(namespace string) (list filecoinv1alpha1.NodeList, restErr restErrors.IRestErr) {
+	if err := k8sClient.List(context.Background(), &list, client.InNamespace(namespace)); err != nil {
 		go logger.Error(service.List, err)
-		return nil, restErrors.NewInternalServerError("failed to get all nodes")
+		restErr = restErrors.NewInternalServerError("failed to get all nodes")
+		return
 	}
-	return nodes, nil
+	return
 }
 
 // Count returns total number of filecoin nodes
-func (service filecoinService) Count(namespace string) (*int, *restErrors.RestErr) {
-
+func (service filecoinService) Count(namespace string) (count int, restErr restErrors.IRestErr) {
 	nodes := &filecoinv1alpha1.NodeList{}
 	if err := k8sClient.List(context.Background(), nodes, client.InNamespace(namespace)); err != nil {
 		go logger.Error(service.Count, err)
-		return nil, restErrors.NewInternalServerError("failed to count filecoin nodes")
+		restErr = restErrors.NewInternalServerError("failed to count filecoin nodes")
+		return
 	}
 
-	length := len(nodes.Items)
-	return &length, nil
+	return len(nodes.Items), nil
 }
 
 // Delete deletes ethereum 2.0 filecoin node by name
-func (service filecoinService) Delete(node *filecoinv1alpha1.Node) *restErrors.RestErr {
+func (service filecoinService) Delete(node *filecoinv1alpha1.Node) (restErr restErrors.IRestErr) {
 	if err := k8sClient.Delete(context.Background(), node); err != nil {
 		go logger.Error(service.Delete, err)
-		return restErrors.NewInternalServerError(fmt.Sprintf("can't delte node by name %s", node.Name))
+		restErr = restErrors.NewInternalServerError(fmt.Sprintf("can't delte node by name %s", node.Name))
+		return
 	}
 	return nil
 }

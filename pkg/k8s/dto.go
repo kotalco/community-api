@@ -21,7 +21,7 @@ func (metaDto *MetaDataDto) ObjectMetaFromMetadataDto() metav1.ObjectMeta {
 	}
 }
 
-func (dto *MetaDataDto) Validate() *restErrors.RestErr {
+func (dto *MetaDataDto) Validate() restErrors.IRestErr {
 	newValidator := validator.New()
 	err := newValidator.RegisterValidation("regexp", func(fl validator.FieldLevel) bool {
 		re := regexp.MustCompile("^([a-z]|[0-9])([a-z]|[0-9]|-)+([a-z]|[0-9])$")

@@ -45,7 +45,7 @@ var (
 
 // Get returns a single bitcoin node by name
 func Get(c *fiber.Ctx) error {
-	node := c.Locals("node").(*bitcoinv1alpha1.Node)
+	node := c.Locals("node").(bitcoinv1alpha1.Node)
 	return c.JSON(shared.NewResponse(new(bitcoin.BitcoinDto).FromBitcoinNode(node)))
 }
 
@@ -57,7 +57,7 @@ func List(c *fiber.Ctx) error {
 
 	nodeList, err := service.List(c.Locals("namespace").(string))
 	if err != nil {
-		return c.Status(err.Status).JSON(err)
+		return c.Status(err.StatusCode()).JSON(err)
 	}
 
 	start, end := shared.Page(uint(len(nodeList.Items)), uint(page), uint(limit))
@@ -76,37 +76,37 @@ func Create(c *fiber.Ctx) error {
 	dto := new(bitcoin.BitcoinDto)
 	if err := c.BodyParser(dto); err != nil {
 		badReqErr := restErrors.NewBadRequestError("invalid request body")
-		return c.Status(badReqErr.Status).JSON(badReqErr)
+		return c.Status(badReqErr.StatusCode()).JSON(badReqErr)
 	}
 
 	dto.Namespace = c.Locals("namespace").(string)
 	if err := dto.MetaDataDto.Validate(); err != nil {
-		return c.Status(err.Status).JSON(err)
+		return c.Status(err.StatusCode()).JSON(err)
 	}
 
 	//check for bitcoin json rpc default user secret
-	rpcSec, err := secretService.Get(types.NamespacedName{
+	_, err := secretService.Get(types.NamespacedName{
 		Name:      bitcoin.BitcoinJsonRpcDefaultUserPasswordName,
 		Namespace: dto.Namespace,
 	})
 	if err != nil {
-		if err.Status != http.StatusNotFound {
-			return c.Status(err.Status).JSON(err)
+		if err.StatusCode() != http.StatusNotFound {
+			return c.Status(err.StatusCode()).JSON(err)
 		}
 		//create bitcoin user default secret
-		rpcSec, err = secretService.Create(&secret.SecretDto{
+		_, err = secretService.Create(secret.SecretDto{
 			MetaDataDto: k8s.MetaDataDto{Name: bitcoin.BitcoinJsonRpcDefaultUserPasswordName, Namespace: dto.Namespace},
 			Type:        "password",
 			Data:        map[string]string{"password": bitcoin.BitcoinJsonRpcDefaultUserPasswordSecret},
 		})
 		if err != nil {
-			return c.Status(err.Status).JSON(err)
+			return c.Status(err.StatusCode()).JSON(err)
 		}
 	}
 
-	node, err := service.Create(dto, rpcSec)
+	node, err := service.Create(*dto)
 	if err != nil {
-		return c.Status(err.Status).JSON(err)
+		return c.Status(err.StatusCode()).JSON(err)
 	}
 	return c.Status(http.StatusCreated).JSON(shared.NewResponse(new(bitcoin.BitcoinDto).FromBitcoinNode(node)))
 }
@@ -116,14 +116,14 @@ func Update(c *fiber.Ctx) error {
 	dto := new(bitcoin.BitcoinDto)
 	if err := c.BodyParser(dto); err != nil {
 		badReq := restErrors.NewBadRequestError("invalid request body")
-		return c.Status(badReq.Status).JSON(err)
+		return c.Status(badReq.StatusCode()).JSON(badReq)
 	}
 
-	node := c.Locals("node").(*bitcoinv1alpha1.Node)
+	node := c.Locals("node").(bitcoinv1alpha1.Node)
 
-	node, err := service.Update(dto, node)
+	err := service.Update(*dto, &node)
 	if err != nil {
-		return c.Status(err.Status).JSON(err)
+		return c.Status(err.StatusCode()).JSON(err)
 	}
 
 	return c.Status(http.StatusOK).JSON(shared.NewResponse(new(bitcoin.BitcoinDto).FromBitcoinNode(node)))
@@ -133,22 +133,22 @@ func Update(c *fiber.Ctx) error {
 func Count(c *fiber.Ctx) error {
 	length, err := service.Count(c.Locals("namespace").(string))
 	if err != nil {
-		return c.Status(err.Status).JSON(err)
+		return c.Status(err.StatusCode()).JSON(err)
 	}
 
 	c.Set("Access-Control-Expose-Headers", "X-Total-Count")
-	c.Set("X-Total-Count", fmt.Sprintf("%d", *length))
+	c.Set("X-Total-Count", fmt.Sprintf("%d", length))
 
 	return c.SendStatus(http.StatusOK)
 }
 
 // Delete a single bitcoin node by name
 func Delete(c *fiber.Ctx) error {
-	node := c.Locals("node").(*bitcoinv1alpha1.Node)
+	node := c.Locals("node").(bitcoinv1alpha1.Node)
 
-	err := service.Delete(node)
+	err := service.Delete(&node)
 	if err != nil {
-		return c.Status(err.Status).JSON(err)
+		return c.Status(err.StatusCode()).JSON(err)
 	}
 
 	return c.SendStatus(http.StatusNoContent)
@@ -162,7 +162,7 @@ func ValidateNodeExist(c *fiber.Ctx) error {
 
 	node, err := service.Get(nameSpacedName)
 	if err != nil {
-		return c.Status(err.Status).JSON(err)
+		return c.Status(err.StatusCode()).JSON(err)
 	}
 
 	c.Locals("node", node)

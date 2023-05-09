@@ -5,7 +5,7 @@ package beacon_node
 import (
 	"context"
 	"fmt"
-	"github.com/kotalco/community-api/pkg/errors"
+	restErrors "github.com/kotalco/community-api/pkg/errors"
 	"github.com/kotalco/community-api/pkg/k8s"
 	"github.com/kotalco/community-api/pkg/logger"
 	ethereum2v1alpha1 "github.com/kotalco/kotal/apis/ethereum2/v1alpha1"
@@ -20,12 +20,12 @@ import (
 type beaconNodeService struct{}
 
 type IService interface {
-	Get(types.NamespacedName) (*ethereum2v1alpha1.BeaconNode, *errors.RestErr)
-	Create(dto *BeaconNodeDto) (*ethereum2v1alpha1.BeaconNode, *errors.RestErr)
-	Update(*BeaconNodeDto, *ethereum2v1alpha1.BeaconNode) (*ethereum2v1alpha1.BeaconNode, *errors.RestErr)
-	List(namespace string) (*ethereum2v1alpha1.BeaconNodeList, *errors.RestErr)
-	Delete(node *ethereum2v1alpha1.BeaconNode) *errors.RestErr
-	Count(namespace string) (*int, *errors.RestErr)
+	Get(types.NamespacedName) (ethereum2v1alpha1.BeaconNode, restErrors.IRestErr)
+	Create(dto BeaconNodeDto) (ethereum2v1alpha1.BeaconNode, restErrors.IRestErr)
+	Update(BeaconNodeDto, *ethereum2v1alpha1.BeaconNode) restErrors.IRestErr
+	List(namespace string) (ethereum2v1alpha1.BeaconNodeList, restErrors.IRestErr)
+	Delete(*ethereum2v1alpha1.BeaconNode) restErrors.IRestErr
+	Count(namespace string) (int, restErrors.IRestErr)
 }
 
 var (
@@ -37,58 +37,58 @@ func NewBeaconNodeService() IService {
 }
 
 // Get gets a single ethereum 2.0 beacon node by name
-func (service beaconNodeService) Get(namespacedNamed types.NamespacedName) (*ethereum2v1alpha1.BeaconNode, *errors.RestErr) {
-	node := &ethereum2v1alpha1.BeaconNode{}
-
-	if err := k8sClient.Get(context.Background(), namespacedNamed, node); err != nil {
+func (service beaconNodeService) Get(namespacedNamed types.NamespacedName) (node ethereum2v1alpha1.BeaconNode, restErr restErrors.IRestErr) {
+	if err := k8sClient.Get(context.Background(), namespacedNamed, &node); err != nil {
 		if apiErrors.IsNotFound(err) {
-			return nil, errors.NewNotFoundError(fmt.Sprintf("beacon node by name %s doesn't exist", namespacedNamed.Name))
+			restErr = restErrors.NewNotFoundError(fmt.Sprintf("beacon node by name %s doesn't exist", namespacedNamed.Name))
+			return
 		}
 		go logger.Error(service.Get, err)
-		return nil, errors.NewInternalServerError(fmt.Sprintf("can't get beacon node by name %s", namespacedNamed.Name))
+		restErr = restErrors.NewInternalServerError(fmt.Sprintf("can't get beacon node by name %s", namespacedNamed.Name))
+		return
 	}
 
-	return node, nil
+	return
 }
 
 // Create creates ethereum 2.0 beacon node from spec
-func (service beaconNodeService) Create(dto *BeaconNodeDto) (*ethereum2v1alpha1.BeaconNode, *errors.RestErr) {
+func (service beaconNodeService) Create(dto BeaconNodeDto) (node ethereum2v1alpha1.BeaconNode, restErr restErrors.IRestErr) {
 	client := ethereum2v1alpha1.Ethereum2Client(dto.Client)
 
-	beaconnode := &ethereum2v1alpha1.BeaconNode{
-		ObjectMeta: dto.ObjectMetaFromMetadataDto(),
-		Spec: ethereum2v1alpha1.BeaconNodeSpec{
-			Network:                 dto.Network,
-			Client:                  client,
-			RPC:                     client == ethereum2v1alpha1.PrysmClient,
-			ExecutionEngineEndpoint: dto.ExecutionEngineEndpoint,
-			JWTSecretName:           dto.JWTSecretName,
-			Image:                   dto.Image,
-			Resources: sharedAPIs.Resources{
-				StorageClass: dto.StorageClass,
-			},
+	node.ObjectMeta = dto.ObjectMetaFromMetadataDto()
+	node.Spec = ethereum2v1alpha1.BeaconNodeSpec{
+		Network:                 dto.Network,
+		Client:                  client,
+		RPC:                     client == ethereum2v1alpha1.PrysmClient,
+		ExecutionEngineEndpoint: dto.ExecutionEngineEndpoint,
+		JWTSecretName:           dto.JWTSecretName,
+		Image:                   dto.Image,
+		Resources: sharedAPIs.Resources{
+			StorageClass: dto.StorageClass,
 		},
 	}
 
-	k8s.DefaultResources(&beaconnode.Spec.Resources)
+	k8s.DefaultResources(&node.Spec.Resources)
 
 	if os.Getenv("MOCK") == "true" {
-		beaconnode.Default()
+		node.Default()
 	}
 
-	if err := k8sClient.Create(context.Background(), beaconnode); err != nil {
+	if err := k8sClient.Create(context.Background(), &node); err != nil {
 		if apiErrors.IsAlreadyExists(err) {
-			return nil, errors.NewBadRequestError(fmt.Sprintf("beacon node by name %s already exist", dto.Name))
+			restErr = restErrors.NewBadRequestError(fmt.Sprintf("beacon node by name %s already exist", dto.Name))
+			return
 		}
 		go logger.Error(service.Create, err)
-		return nil, errors.NewInternalServerError("failed to create beacon node")
+		restErr = restErrors.NewInternalServerError("failed to create beacon node")
+		return
 	}
 
-	return beaconnode, nil
+	return
 }
 
 // Update updates ethereum 2.0 beacon node by name from spec
-func (service beaconNodeService) Update(dto *BeaconNodeDto, node *ethereum2v1alpha1.BeaconNode) (*ethereum2v1alpha1.BeaconNode, *errors.RestErr) {
+func (service beaconNodeService) Update(dto BeaconNodeDto, node *ethereum2v1alpha1.BeaconNode) (restErr restErrors.IRestErr) {
 	if dto.REST != nil {
 		rest := *dto.REST
 		if rest {
@@ -167,59 +167,61 @@ func (service beaconNodeService) Update(dto *BeaconNodeDto, node *ethereum2v1alp
 		err := k8sClient.Get(context.Background(), key, pod)
 		if apiErrors.IsNotFound(err) {
 			go logger.Error(service.Update, err)
-			return nil, errors.NewBadRequestError(fmt.Sprintf("pod by name %s doesn't exit", key.Name))
+			restErr = restErrors.NewBadRequestError(fmt.Sprintf("pod by name %s doesn't exit", key.Name))
+			return
 		}
 		podIsPending = pod.Status.Phase == corev1.PodPending
 	}
 
 	if err := k8sClient.Update(context.Background(), node); err != nil {
 		go logger.Error(service.Update, err)
-		return nil, errors.NewInternalServerError(fmt.Sprintf("can't update node by name %s", node.Name))
+		restErr = restErrors.NewInternalServerError(fmt.Sprintf("can't update node by name %s", node.Name))
+		return
 	}
 
 	if podIsPending {
 		err := k8sClient.Delete(context.Background(), pod)
 		if err != nil {
 			go logger.Error(service.Update, err)
-			return nil, errors.NewInternalServerError(fmt.Sprintf("can't update node by name %s", node.Name))
+			restErr = restErrors.NewInternalServerError(fmt.Sprintf("can't update node by name %s", node.Name))
+			return
 		}
 	}
 
-	return node, nil
+	return
 }
 
 // List returns all ethereum 2.0 beacon nodes
-func (service beaconNodeService) List(namespace string) (*ethereum2v1alpha1.BeaconNodeList, *errors.RestErr) {
-	nodes := &ethereum2v1alpha1.BeaconNodeList{}
-
-	if err := k8sClient.List(context.Background(), nodes, client.InNamespace(namespace)); err != nil {
+func (service beaconNodeService) List(namespace string) (list ethereum2v1alpha1.BeaconNodeList, restErr restErrors.IRestErr) {
+	if err := k8sClient.List(context.Background(), &list, client.InNamespace(namespace)); err != nil {
 		go logger.Error(service.List, err)
-		return nil, errors.NewInternalServerError("failed to get all beacon nodes")
+		restErr = restErrors.NewInternalServerError("failed to get all beacon nodes")
+		return
 	}
 
-	return nodes, nil
+	return
 }
 
 // Count returns total number of beacon nodes
-func (service beaconNodeService) Count(namespace string) (*int, *errors.RestErr) {
+func (service beaconNodeService) Count(namespace string) (count int, restErr restErrors.IRestErr) {
 	nodes, err := service.List(namespace)
 	if err != nil {
-		return nil, err
+		restErr = restErrors.NewInternalServerError("failed to count all nodes")
+		return
 	}
 
-	length := len(nodes.Items)
-
-	return &length, nil
+	return len(nodes.Items), nil
 }
 
 // Delete deletes ethereum 2.0 beacon node by name
-func (service beaconNodeService) Delete(node *ethereum2v1alpha1.BeaconNode) *errors.RestErr {
+func (service beaconNodeService) Delete(node *ethereum2v1alpha1.BeaconNode) (restErr restErrors.IRestErr) {
 	err := k8sClient.Delete(context.Background(), node)
 
 	if err != nil {
 		go logger.Error(service.Delete, err)
-		return errors.NewInternalServerError(fmt.Sprintf("can't delete node by name %s", node.Name))
+		restErr = restErrors.NewInternalServerError(fmt.Sprintf("can't delete node by name %s", node.Name))
+		return
 	}
 
-	return nil
+	return
 }

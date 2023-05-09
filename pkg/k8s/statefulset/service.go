@@ -14,7 +14,7 @@ import (
 var k8sClient = k8s.NewClientService()
 
 type IStatefulSet interface {
-	Get(namespacedName types.NamespacedName) (*appsv1.StatefulSet, *restError.RestErr)
+	Get(namespacedName types.NamespacedName) (*appsv1.StatefulSet, restError.IRestErr)
 }
 
 type statefulset struct {
@@ -24,7 +24,7 @@ func NewService() IStatefulSet {
 	return &statefulset{}
 }
 
-func (s *statefulset) Get(namespacedName types.NamespacedName) (*appsv1.StatefulSet, *restError.RestErr) {
+func (s *statefulset) Get(namespacedName types.NamespacedName) (*appsv1.StatefulSet, restError.IRestErr) {
 	record := &appsv1.StatefulSet{}
 
 	err := k8sClient.Get(context.Background(), namespacedName, record)

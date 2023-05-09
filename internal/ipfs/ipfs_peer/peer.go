@@ -29,7 +29,7 @@ type PeerDto struct {
 type PeerListDto []PeerDto
 
 // FromIPFSPeer creates peer model from IPFS peer
-func (dto PeerDto) FromIPFSPeer(peer *ipfsv1alpha1.Peer) *PeerDto {
+func (dto PeerDto) FromIPFSPeer(peer ipfsv1alpha1.Peer) PeerDto {
 	var profiles, initProfiles []string
 
 	// init profiles
@@ -61,13 +61,13 @@ func (dto PeerDto) FromIPFSPeer(peer *ipfsv1alpha1.Peer) *PeerDto {
 	dto.Gateway = &peer.Spec.Gateway
 	dto.Image = peer.Spec.Image
 
-	return &dto
+	return dto
 }
 
 func (peerListDto PeerListDto) FromIPFSPeer(peers []ipfsv1alpha1.Peer) PeerListDto {
 	result := make(PeerListDto, len(peers))
 	for index, v := range peers {
-		result[index] = *(PeerDto{}.FromIPFSPeer(&v))
+		result[index] = PeerDto{}.FromIPFSPeer(v)
 	}
 	return result
 }

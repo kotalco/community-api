@@ -32,7 +32,7 @@ var service = ethereum.NewEthereumService()
 // 1-get the node validated from ValidateNodeExist method
 // 2-marshall node to dto and format the response
 func Get(c *fiber.Ctx) error {
-	node := c.Locals("node").(*ethereumv1alpha1.Node)
+	node := c.Locals("node").(ethereumv1alpha1.Node)
 
 	return c.JSON(shared.NewResponse(new(ethereum.EthereumDto).FromEthereumNode(node)))
 }
@@ -45,19 +45,19 @@ func Create(c *fiber.Ctx) error {
 	dto := new(ethereum.EthereumDto)
 	if err := c.BodyParser(dto); err != nil {
 		badReq := restErrors.NewBadRequestError("invalid request body")
-		return c.Status(badReq.Status).JSON(badReq)
+		return c.Status(badReq.StatusCode()).JSON(badReq)
 	}
 
 	dto.Namespace = c.Locals("namespace").(string)
 
 	err := dto.MetaDataDto.Validate()
 	if err != nil {
-		return c.Status(err.Status).JSON(err)
+		return c.Status(err.StatusCode()).JSON(err)
 	}
 
-	node, err := service.Create(dto)
+	node, err := service.Create(*dto)
 	if err != nil {
-		return c.Status(err.Status).JSON(err)
+		return c.Status(err.StatusCode()).JSON(err)
 	}
 
 	return c.Status(http.StatusCreated).JSON(shared.NewResponse(new(ethereum.EthereumDto).FromEthereumNode(node)))
@@ -72,14 +72,14 @@ func Update(c *fiber.Ctx) error {
 	dto := new(ethereum.EthereumDto)
 	if err := c.BodyParser(dto); err != nil {
 		badReq := restErrors.NewBadRequestError("invalid request body")
-		return c.Status(badReq.Status).JSON(badReq)
+		return c.Status(badReq.StatusCode()).JSON(badReq)
 	}
 
-	node := c.Locals("node").(*ethereumv1alpha1.Node)
+	node := c.Locals("node").(ethereumv1alpha1.Node)
 
-	node, err := service.Update(dto, node)
+	err := service.Update(*dto, &node)
 	if err != nil {
-		return c.Status(err.Status).JSON(err)
+		return c.Status(err.StatusCode()).JSON(err)
 	}
 
 	return c.Status(http.StatusOK).JSON(shared.NewResponse(new(ethereum.EthereumDto).FromEthereumNode(node)))
@@ -97,7 +97,7 @@ func List(c *fiber.Ctx) error {
 	nodes, err := service.List(c.Locals("namespace").(string))
 
 	if err != nil {
-		return c.Status(err.Status).JSON(err)
+		return c.Status(err.StatusCode()).JSON(err)
 	}
 
 	c.Set("Access-Control-Expose-Headers", "X-Total-Count")
@@ -116,11 +116,11 @@ func List(c *fiber.Ctx) error {
 // 2-call ethereum service to delete the node
 // 3-return ok if deleted with no errors
 func Delete(c *fiber.Ctx) error {
-	node := c.Locals("node").(*ethereumv1alpha1.Node)
+	node := c.Locals("node").(ethereumv1alpha1.Node)
 
-	err := service.Delete(node)
+	err := service.Delete(&node)
 	if err != nil {
-		return c.Status(err.Status).JSON(err)
+		return c.Status(err.StatusCode()).JSON(err)
 	}
 
 	return c.SendStatus(http.StatusNoContent)
@@ -133,11 +133,11 @@ func Delete(c *fiber.Ctx) error {
 func Count(c *fiber.Ctx) error {
 	length, err := service.Count(c.Locals("namespace").(string))
 	if err != nil {
-		return c.Status(err.Status).JSON(err)
+		return c.Status(err.StatusCode()).JSON(err)
 	}
 
 	c.Set("Access-Control-Expose-Headers", "X-Total-Count")
-	c.Set("X-Total-Count", fmt.Sprintf("%d", *length))
+	c.Set("X-Total-Count", fmt.Sprintf("%d", length))
 
 	return c.SendStatus(http.StatusOK)
 }
@@ -251,7 +251,7 @@ func ValidateNodeExist(c *fiber.Ctx) error {
 
 	node, err := service.Get(nameSpacedName)
 	if err != nil {
-		return c.Status(err.Status).JSON(err)
+		return c.Status(err.StatusCode()).JSON(err)
 	}
 
 	c.Locals("node", node)

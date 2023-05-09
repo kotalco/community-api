@@ -27,7 +27,7 @@ type KeystoreDto struct {
 
 type ValidatorListDto []ValidatorDto
 
-func (dto ValidatorDto) FromEthereum2Validator(validator *ethereum2v1alpha1.Validator) *ValidatorDto {
+func (dto ValidatorDto) FromEthereum2Validator(validator ethereum2v1alpha1.Validator) ValidatorDto {
 	keystores := []KeystoreDto{}
 	for _, keystore := range validator.Spec.Keystores {
 		keystores = append(keystores, KeystoreDto{
@@ -51,13 +51,13 @@ func (dto ValidatorDto) FromEthereum2Validator(validator *ethereum2v1alpha1.Vali
 	dto.WalletPasswordSecretName = validator.Spec.WalletPasswordSecret
 	dto.Image = validator.Spec.Image
 
-	return &dto
+	return dto
 }
 
 func (validatorListDto ValidatorListDto) FromEthereum2Validator(validators []ethereum2v1alpha1.Validator) ValidatorListDto {
 	result := make(ValidatorListDto, len(validators))
 	for index, v := range validators {
-		result[index] = *(ValidatorDto{}.FromEthereum2Validator(&v))
+		result[index] = ValidatorDto{}.FromEthereum2Validator(v)
 	}
 	return result
 }

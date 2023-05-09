@@ -5,7 +5,7 @@ package chainlink
 import (
 	"context"
 	"fmt"
-	"github.com/kotalco/community-api/pkg/errors"
+	restErrors "github.com/kotalco/community-api/pkg/errors"
 	"github.com/kotalco/community-api/pkg/k8s"
 	"github.com/kotalco/community-api/pkg/logger"
 	chainlinkv1alpha1 "github.com/kotalco/kotal/apis/chainlink/v1alpha1"
@@ -20,12 +20,12 @@ import (
 type chainlinkService struct{}
 
 type IService interface {
-	Get(types.NamespacedName) (*chainlinkv1alpha1.Node, *errors.RestErr)
-	Create(*ChainlinkDto) (*chainlinkv1alpha1.Node, *errors.RestErr)
-	Update(*ChainlinkDto, *chainlinkv1alpha1.Node) (*chainlinkv1alpha1.Node, *errors.RestErr)
-	List(namespace string) (*chainlinkv1alpha1.NodeList, *errors.RestErr)
-	Count(namespace string) (*int, *errors.RestErr)
-	Delete(node *chainlinkv1alpha1.Node) *errors.RestErr
+	Get(types.NamespacedName) (chainlinkv1alpha1.Node, restErrors.IRestErr)
+	Create(ChainlinkDto) (chainlinkv1alpha1.Node, restErrors.IRestErr)
+	Update(ChainlinkDto, *chainlinkv1alpha1.Node) restErrors.IRestErr
+	List(namespace string) (chainlinkv1alpha1.NodeList, restErrors.IRestErr)
+	Count(namespace string) (int, restErrors.IRestErr)
+	Delete(*chainlinkv1alpha1.Node) restErrors.IRestErr
 }
 
 var (
@@ -37,35 +37,34 @@ func NewChainLinkService() IService {
 }
 
 // Get returns a single chainlink node by name
-func (service chainlinkService) Get(namespacedName types.NamespacedName) (*chainlinkv1alpha1.Node, *errors.RestErr) {
-	node := &chainlinkv1alpha1.Node{}
-	if err := k8sClient.Get(context.Background(), namespacedName, node); err != nil {
+func (service chainlinkService) Get(namespacedName types.NamespacedName) (node chainlinkv1alpha1.Node, restErr restErrors.IRestErr) {
+	if err := k8sClient.Get(context.Background(), namespacedName, &node); err != nil {
 		if apiErrors.IsNotFound(err) {
-			return nil, errors.NewNotFoundError(fmt.Sprintf("node by name %s doesn't exist", namespacedName.Name))
+			restErr = restErrors.NewNotFoundError(fmt.Sprintf("node by name %s doesn't exist", namespacedName.Name))
+			return
 		}
 		go logger.Error(service.Get, err)
-		return nil, errors.NewInternalServerError(fmt.Sprintf("can't get node by name %s", namespacedName.Name))
+		restErr = restErrors.NewInternalServerError(fmt.Sprintf("can't get node by name %s", namespacedName.Name))
+		return
 	}
 
-	return node, nil
-
+	return
 }
 
 // Create creates chainlink node from the given spec
-func (service chainlinkService) Create(dto *ChainlinkDto) (*chainlinkv1alpha1.Node, *errors.RestErr) {
-	node := &chainlinkv1alpha1.Node{
-		ObjectMeta: dto.ObjectMetaFromMetadataDto(),
-		Spec: chainlinkv1alpha1.NodeSpec{
-			EthereumChainId:            dto.EthereumChainId,
-			LinkContractAddress:        dto.LinkContractAddress,
-			EthereumWSEndpoint:         dto.EthereumWSEndpoint,
-			DatabaseURL:                dto.DatabaseURL,
-			KeystorePasswordSecretName: dto.KeystorePasswordSecretName,
-			Image:                      dto.Image,
-			APICredentials: chainlinkv1alpha1.APICredentials{
-				Email:              dto.APICredentials.Email,
-				PasswordSecretName: dto.APICredentials.PasswordSecretName,
-			},
+func (service chainlinkService) Create(dto ChainlinkDto) (node chainlinkv1alpha1.Node, restErr restErrors.IRestErr) {
+
+	node.ObjectMeta = dto.ObjectMetaFromMetadataDto()
+	node.Spec = chainlinkv1alpha1.NodeSpec{
+		EthereumChainId:            dto.EthereumChainId,
+		LinkContractAddress:        dto.LinkContractAddress,
+		EthereumWSEndpoint:         dto.EthereumWSEndpoint,
+		DatabaseURL:                dto.DatabaseURL,
+		KeystorePasswordSecretName: dto.KeystorePasswordSecretName,
+		Image:                      dto.Image,
+		APICredentials: chainlinkv1alpha1.APICredentials{
+			Email:              dto.APICredentials.Email,
+			PasswordSecretName: dto.APICredentials.PasswordSecretName,
 		},
 	}
 
@@ -75,20 +74,22 @@ func (service chainlinkService) Create(dto *ChainlinkDto) (*chainlinkv1alpha1.No
 		node.Default()
 	}
 
-	err := k8sClient.Create(context.Background(), node)
+	err := k8sClient.Create(context.Background(), &node)
 	if err != nil {
 		if apiErrors.IsAlreadyExists(err) {
-			return nil, errors.NewBadRequestError(fmt.Sprintf("node by name %s already exist", node.Name))
+			restErr = restErrors.NewBadRequestError(fmt.Sprintf("node by name %s already exist", node.Name))
+			return
 		}
 		go logger.Error(service.Create, err)
-		return nil, errors.NewInternalServerError("failed to create node")
+		restErr = restErrors.NewInternalServerError("failed to create node")
+		return
 	}
 
-	return node, nil
+	return
 }
 
 // Update updates a single chainlink node by name from spec
-func (service chainlinkService) Update(dto *ChainlinkDto, node *chainlinkv1alpha1.Node) (*chainlinkv1alpha1.Node, *errors.RestErr) {
+func (service chainlinkService) Update(dto ChainlinkDto, node *chainlinkv1alpha1.Node) (restErr restErrors.IRestErr) {
 
 	if dto.EthereumWSEndpoint != "" {
 		node.Spec.EthereumWSEndpoint = dto.EthereumWSEndpoint
@@ -175,60 +176,62 @@ func (service chainlinkService) Update(dto *ChainlinkDto, node *chainlinkv1alpha
 		err := k8sClient.Get(context.Background(), key, pod)
 		if apiErrors.IsNotFound(err) {
 			go logger.Error(service.Update, err)
-			return nil, errors.NewBadRequestError(fmt.Sprintf("pod by name %s doesn't exit", key.Name))
+			restErr = restErrors.NewBadRequestError(fmt.Sprintf("pod by name %s doesn't exit", key.Name))
+			return
 		}
 		podIsPending = pod.Status.Phase == corev1.PodPending
 	}
 
 	if err := k8sClient.Update(context.Background(), node); err != nil {
 		go logger.Error(service.Update, err)
-		return nil, errors.NewInternalServerError(fmt.Sprintf("can't update node by name %s", node.Name))
+		restErr = restErrors.NewInternalServerError(fmt.Sprintf("can't update node by name %s", node.Name))
+		return
 	}
 
 	if podIsPending {
 		err := k8sClient.Delete(context.Background(), pod)
 		if err != nil {
 			go logger.Error(service.Update, err)
-			return nil, errors.NewInternalServerError(fmt.Sprintf("can't update node by name %s", node.Name))
+			restErr = restErrors.NewInternalServerError(fmt.Sprintf("can't update node by name %s", node.Name))
+			return
 		}
 	}
 
-	return node, nil
+	return
 }
 
 // List returns all chainlink nodes
-func (service chainlinkService) List(namespace string) (*chainlinkv1alpha1.NodeList, *errors.RestErr) {
-	nodes := &chainlinkv1alpha1.NodeList{}
-	err := k8sClient.List(context.Background(), nodes, client.InNamespace(namespace))
+func (service chainlinkService) List(namespace string) (list chainlinkv1alpha1.NodeList, restErr restErrors.IRestErr) {
+	err := k8sClient.List(context.Background(), &list, client.InNamespace(namespace))
 	if err != nil {
 		go logger.Error(service.List, err)
-		return nil, errors.NewInternalServerError("failed to get all nodes")
+		restErr = restErrors.NewInternalServerError("failed to get all nodes")
+		return
 	}
 
-	return nodes, nil
+	return
 }
 
 // Count returns all nodes length
-func (service chainlinkService) Count(namespace string) (*int, *errors.RestErr) {
+func (service chainlinkService) Count(namespace string) (count int, restErr restErrors.IRestErr) {
 	nodes := &chainlinkv1alpha1.NodeList{}
 	err := k8sClient.List(context.Background(), nodes, client.InNamespace(namespace))
 	if err != nil {
 		go logger.Error(service.Count, err)
-		return nil, errors.NewInternalServerError("failed to get all nodes")
+		restErr = restErrors.NewInternalServerError("failed to count all nodes")
+		return
 	}
 
-	length := len(nodes.Items)
-	return &length, nil
+	return len(nodes.Items), nil
 }
 
 // Delete a single chainlink node by name
-func (service chainlinkService) Delete(node *chainlinkv1alpha1.Node) *errors.RestErr {
+func (service chainlinkService) Delete(node *chainlinkv1alpha1.Node) (restErr restErrors.IRestErr) {
 	err := k8sClient.Delete(context.Background(), node)
 
 	if err != nil {
 		go logger.Error(service.Delete, err)
-		return errors.NewInternalServerError(fmt.Sprintf("can't delete node by name %s", node.Name))
+		restErr = restErrors.NewInternalServerError(fmt.Sprintf("can't delete node by name %s", node.Name))
 	}
-
-	return nil
+	return
 }

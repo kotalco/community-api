@@ -33,7 +33,7 @@ type NearDto struct {
 type NearListDto []NearDto
 
 // FromNEARNode creates node model from NEAR node
-func (dto NearDto) FromNEARNode(node *nearv1alpha1.Node) *NearDto {
+func (dto NearDto) FromNEARNode(node nearv1alpha1.Node) NearDto {
 	dto.Name = node.Name
 	dto.Time = models.Time{CreatedAt: node.CreationTimestamp.UTC().Format(shared.JavascriptISOString)}
 	dto.Network = string(node.Spec.Network)
@@ -58,13 +58,13 @@ func (dto NearDto) FromNEARNode(node *nearv1alpha1.Node) *NearDto {
 	dto.StorageClass = node.Spec.StorageClass
 	dto.Image = node.Spec.Image
 
-	return &dto
+	return dto
 }
 
 func (listDto NearListDto) FromNEARNode(nodes []nearv1alpha1.Node) NearListDto {
 	result := make(NearListDto, len(nodes))
 	for index, v := range nodes {
-		result[index] = *(NearDto{}.FromNEARNode(&v))
+		result[index] = NearDto{}.FromNEARNode(v)
 	}
 	return result
 }

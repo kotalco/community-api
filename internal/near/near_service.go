@@ -18,12 +18,12 @@ import (
 type nearService struct{}
 
 type IService interface {
-	Get(types.NamespacedName) (*nearv1alpha1.Node, *restErrors.RestErr)
-	Create(dto *NearDto) (*nearv1alpha1.Node, *restErrors.RestErr)
-	Update(*NearDto, *nearv1alpha1.Node) (*nearv1alpha1.Node, *restErrors.RestErr)
-	List(namespace string) (*nearv1alpha1.NodeList, *restErrors.RestErr)
-	Delete(node *nearv1alpha1.Node) *restErrors.RestErr
-	Count(namespace string) (*int, *restErrors.RestErr)
+	Get(types.NamespacedName) (nearv1alpha1.Node, restErrors.IRestErr)
+	Create(NearDto) (nearv1alpha1.Node, restErrors.IRestErr)
+	Update(NearDto, *nearv1alpha1.Node) restErrors.IRestErr
+	List(namespace string) (nearv1alpha1.NodeList, restErrors.IRestErr)
+	Delete(*nearv1alpha1.Node) restErrors.IRestErr
+	Count(namespace string) (int, restErrors.IRestErr)
 }
 
 var (
@@ -34,33 +34,31 @@ func NewNearService() IService {
 	return nearService{}
 }
 
-// Get gets a single filecoin node by name
-func (service nearService) Get(namespacedName types.NamespacedName) (*nearv1alpha1.Node, *restErrors.RestErr) {
-	node := &nearv1alpha1.Node{}
-
-	if err := k8sClient.Get(context.Background(), namespacedName, node); err != nil {
+// Get gets a single near node by name
+func (service nearService) Get(namespacedName types.NamespacedName) (node nearv1alpha1.Node, restErr restErrors.IRestErr) {
+	if err := k8sClient.Get(context.Background(), namespacedName, &node); err != nil {
 		if apiErrors.IsNotFound(err) {
-			return nil, restErrors.NewBadRequestError(fmt.Sprintf("node by name %s doesn't exit", namespacedName))
+			restErr = restErrors.NewBadRequestError(fmt.Sprintf("node by name %s doesn't exit", namespacedName))
+			return
 		}
 		go logger.Error(service.Get, err)
-		return nil, restErrors.NewInternalServerError(fmt.Sprintf("can't get node by name %s", namespacedName))
+		restErr = restErrors.NewInternalServerError(fmt.Sprintf("can't get node by name %s", namespacedName))
+		return
 	}
 
-	return node, nil
+	return
 }
 
-// Create creates filecoin node from spec
-func (service nearService) Create(dto *NearDto) (*nearv1alpha1.Node, *restErrors.RestErr) {
-	node := &nearv1alpha1.Node{
-		ObjectMeta: dto.ObjectMetaFromMetadataDto(),
-		Spec: nearv1alpha1.NodeSpec{
-			Network: dto.Network,
-			Archive: dto.Archive,
-			RPC:     true,
-			Image:   dto.Image,
-			Resources: sharedAPIs.Resources{
-				StorageClass: dto.StorageClass,
-			},
+// Create creates near node from spec
+func (service nearService) Create(dto NearDto) (node nearv1alpha1.Node, restErr restErrors.IRestErr) {
+	node.ObjectMeta = dto.ObjectMetaFromMetadataDto()
+	node.Spec = nearv1alpha1.NodeSpec{
+		Network: dto.Network,
+		Archive: dto.Archive,
+		RPC:     true,
+		Image:   dto.Image,
+		Resources: sharedAPIs.Resources{
+			StorageClass: dto.StorageClass,
 		},
 	}
 
@@ -70,19 +68,21 @@ func (service nearService) Create(dto *NearDto) (*nearv1alpha1.Node, *restErrors
 		node.Default()
 	}
 
-	if err := k8sClient.Create(context.Background(), node); err != nil {
+	if err := k8sClient.Create(context.Background(), &node); err != nil {
 		if apiErrors.IsAlreadyExists(err) {
-			return nil, restErrors.NewNotFoundError(fmt.Sprintf("node by name %s already exits", node.Name))
+			restErr = restErrors.NewNotFoundError(fmt.Sprintf("node by name %s already exits", node.Name))
+			return
 		}
 		go logger.Error(service.Create, err)
-		return nil, restErrors.NewInternalServerError("failed to create node")
+		restErr = restErrors.NewInternalServerError("failed to create node")
+		return
 	}
 
-	return node, nil
+	return
 }
 
-// Update updates filecoin node by name from spec
-func (service nearService) Update(dto *NearDto, node *nearv1alpha1.Node) (*nearv1alpha1.Node, *restErrors.RestErr) {
+// Update updates near node by name from spec
+func (service nearService) Update(dto NearDto, node *nearv1alpha1.Node) (restErr restErrors.IRestErr) {
 
 	if dto.NodePrivateKeySecretName != "" {
 		node.Spec.NodePrivateKeySecretName = dto.NodePrivateKeySecretName
@@ -165,57 +165,60 @@ func (service nearService) Update(dto *NearDto, node *nearv1alpha1.Node) (*nearv
 		err := k8sClient.Get(context.Background(), key, pod)
 		if apiErrors.IsNotFound(err) {
 			go logger.Error(service.Update, err)
-			return nil, restErrors.NewBadRequestError(fmt.Sprintf("pod by name %s doesn't exit", key.Name))
+			restErr = restErrors.NewBadRequestError(fmt.Sprintf("pod by name %s doesn't exit", key.Name))
+			return
 		}
 		podIsPending = pod.Status.Phase == corev1.PodPending
 	}
 
 	if err := k8sClient.Update(context.Background(), node); err != nil {
 		go logger.Error(service.Update, err)
-		return nil, restErrors.NewInternalServerError(fmt.Sprintf("can't update node by name %s", node.Name))
+		restErr = restErrors.NewInternalServerError(fmt.Sprintf("can't update node by name %s", node.Name))
+		return
 	}
 
 	if podIsPending {
 		err := k8sClient.Delete(context.Background(), pod)
 		if err != nil {
 			go logger.Error(service.Update, err)
-			return nil, restErrors.NewInternalServerError(fmt.Sprintf("can't update node by name %s", node.Name))
+			restErr = restErrors.NewInternalServerError(fmt.Sprintf("can't update node by name %s", node.Name))
+			return
 		}
 	}
 
-	return node, nil
+	return
 }
 
-// List returns all filecoin nodes
-func (service nearService) List(namespace string) (*nearv1alpha1.NodeList, *restErrors.RestErr) {
-	nodes := &nearv1alpha1.NodeList{}
-	if err := k8sClient.List(context.Background(), nodes, client.InNamespace(namespace)); err != nil {
+// List returns all near nodes
+func (service nearService) List(namespace string) (list nearv1alpha1.NodeList, restErr restErrors.IRestErr) {
+	if err := k8sClient.List(context.Background(), &list, client.InNamespace(namespace)); err != nil {
 		go logger.Error(service.List, err)
-		return nil, restErrors.NewInternalServerError("failed to get all nodes")
+		restErr = restErrors.NewInternalServerError("failed to get all nodes")
+		return
 	}
 
-	return nodes, nil
+	return
 }
 
-// Count returns total number of filecoin nodes
-func (service nearService) Count(namespace string) (*int, *restErrors.RestErr) {
+// Count returns total number of near nodes
+func (service nearService) Count(namespace string) (count int, restErr restErrors.IRestErr) {
 	nodes := &nearv1alpha1.NodeList{}
 	if err := k8sClient.List(context.Background(), nodes, client.InNamespace(namespace)); err != nil {
 		go logger.Error(service.Count, err)
-		return nil, restErrors.NewInternalServerError("failed to count all nodes")
+		restErr = restErrors.NewInternalServerError("failed to count all nodes")
+		return
 	}
 
-	length := len(nodes.Items)
-
-	return &length, nil
+	return len(nodes.Items), nil
 }
 
-// Delete deletes ethereum 2.0 filecoin node by name
-func (service nearService) Delete(node *nearv1alpha1.Node) *restErrors.RestErr {
+// Delete deletes ethereum 2.0 near node by name
+func (service nearService) Delete(node *nearv1alpha1.Node) (restErr restErrors.IRestErr) {
 	if err := k8sClient.Delete(context.Background(), node); err != nil {
 		go logger.Error(service.Delete, err)
-		return restErrors.NewInternalServerError(fmt.Sprintf("can't delete node by name %s", node.Name))
+		restErr = restErrors.NewInternalServerError(fmt.Sprintf("can't delete node by name %s", node.Name))
+		return
 	}
 
-	return nil
+	return
 }

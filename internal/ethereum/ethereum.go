@@ -47,7 +47,7 @@ type EthereumDto struct {
 }
 type EthereumListDto []EthereumDto
 
-func (dto EthereumDto) FromEthereumNode(node *ethereumv1alpha1.Node) *EthereumDto {
+func (dto EthereumDto) FromEthereumNode(node ethereumv1alpha1.Node) EthereumDto {
 	dto.Name = node.Name
 	dto.Time = models.Time{CreatedAt: node.CreationTimestamp.UTC().Format(shared.JavascriptISOString)}
 	dto.Network = node.Spec.Network
@@ -108,13 +108,13 @@ func (dto EthereumDto) FromEthereumNode(node *ethereumv1alpha1.Node) *EthereumDt
 	}
 	dto.Bootnodes = &bootnodes
 
-	return &dto
+	return dto
 }
 
 func (nodes EthereumListDto) FromEthereumNode(models []ethereumv1alpha1.Node) EthereumListDto {
 	result := make(EthereumListDto, len(models))
 	for index, v := range models {
-		result[index] = *(EthereumDto{}.FromEthereumNode(&v))
+		result[index] = EthereumDto{}.FromEthereumNode(v)
 	}
 	return result
 }
