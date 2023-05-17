@@ -7,6 +7,7 @@ import (
 
 	"github.com/kotalco/community-api/pkg/configs"
 	"github.com/kotalco/community-api/pkg/logger"
+	aptosv1alpha1 "github.com/kotalco/kotal/apis/aptos/v1alpha1"
 	chainlinkv1alpha1 "github.com/kotalco/kotal/apis/chainlink/v1alpha1"
 	ethereumv1alpha1 "github.com/kotalco/kotal/apis/ethereum/v1alpha1"
 	ethereum2v1alpha1 "github.com/kotalco/kotal/apis/ethereum2/v1alpha1"
@@ -58,6 +59,7 @@ func newRuntimeClient() (client.Client, error) {
 	polkadotv1alpha1.AddToScheme(RunTimeScheme)
 	nearv1alpha1.AddToScheme(RunTimeScheme)
 	stacksv1alpha1.AddToScheme(RunTimeScheme)
+	aptosv1alpha1.AddToScheme(RunTimeScheme)
 
 	opts := client.Options{Scheme: RunTimeScheme}
 
