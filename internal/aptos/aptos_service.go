@@ -114,6 +114,9 @@ func (service aptosService) Update(dto AptosDto, node *aptosv1alpha1.Node) (rest
 	if dto.P2PPort != 0 {
 		node.Spec.P2PPort = dto.P2PPort
 	}
+	if dto.MetricsPort != 0 {
+		node.Spec.MetricsPort = dto.MetricsPort
+	}
 
 	if dto.CPU != "" {
 		node.Spec.CPU = dto.CPU
