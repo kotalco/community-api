@@ -100,10 +100,6 @@ func (service nearService) Update(dto NearDto, node *nearv1alpha1.Node) (restErr
 		node.Spec.P2PPort = dto.P2PPort
 	}
 
-	if dto.P2PHost != "" {
-		node.Spec.P2PHost = dto.P2PHost
-	}
-
 	if dto.RPC != nil {
 		node.Spec.RPC = *dto.RPC
 	}
@@ -111,17 +107,10 @@ func (service nearService) Update(dto NearDto, node *nearv1alpha1.Node) (restErr
 		if dto.RPCPort != 0 {
 			node.Spec.RPCPort = dto.RPCPort
 		}
-		if dto.RPCHost != "" {
-			node.Spec.RPCHost = dto.RPCHost
-		}
 	}
 
 	if dto.PrometheusPort != 0 {
 		node.Spec.PrometheusPort = dto.PrometheusPort
-	}
-
-	if dto.PrometheusHost != "" {
-		node.Spec.PrometheusHost = dto.PrometheusHost
 	}
 
 	if dto.TelemetryURL != "" {

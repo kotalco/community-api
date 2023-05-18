@@ -15,11 +15,9 @@ type FilecoinDto struct {
 	Network            string `json:"network"`
 	API                *bool  `json:"api"`
 	APIPort            uint   `json:"apiPort"`
-	APIHost            string `json:"apiHost"`
 	APIRequestTimeout  uint   `json:"apiRequestTimeout"`
 	DisableMetadataLog *bool  `json:"disableMetadataLog"`
 	P2PPort            uint   `json:"p2pPort"`
-	P2PHost            string `json:"p2pHost"`
 	IPFSPeerEndpoint   string `json:"ipfsPeerEndpoint"`
 	IPFSOnlineMode     *bool  `json:"ipfsOnlineMode"`
 	IPFSForRetrieval   *bool  `json:"ipfsForRetrieval"`
@@ -37,11 +35,9 @@ func (dto FilecoinDto) FromFilecoinNode(node filecoinv1alpha1.Node) FilecoinDto 
 	dto.Network = string(node.Spec.Network)
 	dto.API = &node.Spec.API
 	dto.APIPort = node.Spec.APIPort
-	dto.APIHost = node.Spec.APIHost
 	dto.APIRequestTimeout = node.Spec.APIRequestTimeout
 	dto.DisableMetadataLog = &node.Spec.DisableMetadataLog
 	dto.P2PPort = node.Spec.P2PPort
-	dto.P2PHost = node.Spec.P2PHost
 	dto.IPFSPeerEndpoint = node.Spec.IPFSPeerEndpoint
 	dto.IPFSOnlineMode = &node.Spec.IPFSOnlineMode
 	dto.IPFSForRetrieval = &node.Spec.IPFSForRetrieval

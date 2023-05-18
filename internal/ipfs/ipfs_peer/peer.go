@@ -15,9 +15,7 @@ type PeerDto struct {
 	k8s.MetaDataDto
 	InitProfiles []string `json:"initProfiles"`
 	APIPort      uint     `json:"apiPort"`
-	APIHost      string   `json:"apiHost"`
 	GatewayPort  uint     `json:"gatewayPort"`
-	GatewayHost  string   `json:"gatewayHost"`
 	Routing      string   `json:"routing"`
 	Profiles     []string `json:"profiles"`
 	API          *bool    `json:"api"`
@@ -45,9 +43,7 @@ func (dto PeerDto) FromIPFSPeer(peer ipfsv1alpha1.Peer) PeerDto {
 	dto.Name = peer.Name
 	dto.Time = models.Time{CreatedAt: peer.CreationTimestamp.UTC().Format(shared.JavascriptISOString)}
 	dto.APIPort = peer.Spec.APIPort
-	dto.APIHost = peer.Spec.APIHost
 	dto.GatewayPort = peer.Spec.GatewayPort
-	dto.GatewayHost = peer.Spec.GatewayHost
 	dto.Routing = string(peer.Spec.Routing)
 	dto.Profiles = profiles
 	dto.InitProfiles = initProfiles
