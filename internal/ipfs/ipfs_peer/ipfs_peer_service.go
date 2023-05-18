@@ -90,16 +90,8 @@ func (service ipfsPeerService) Update(dto PeerDto, peer *ipfsv1alpha1.Peer) (res
 		peer.Spec.APIPort = dto.APIPort
 	}
 
-	if dto.APIHost != "" {
-		peer.Spec.APIHost = dto.APIHost
-	}
-
 	if dto.GatewayPort != 0 {
 		peer.Spec.GatewayPort = dto.GatewayPort
-	}
-
-	if dto.GatewayHost != "" {
-		peer.Spec.GatewayHost = dto.GatewayHost
 	}
 
 	if dto.Routing != "" {

@@ -89,10 +89,6 @@ func (service filecoinService) Update(dto FilecoinDto, node *filecoinv1alpha1.No
 		node.Spec.APIPort = dto.APIPort
 	}
 
-	if dto.APIHost != "" {
-		node.Spec.APIHost = dto.APIHost
-	}
-
 	if dto.APIRequestTimeout != 0 {
 		node.Spec.APIRequestTimeout = dto.APIRequestTimeout
 	}
@@ -103,10 +99,6 @@ func (service filecoinService) Update(dto FilecoinDto, node *filecoinv1alpha1.No
 
 	if dto.P2PPort != 0 {
 		node.Spec.P2PPort = dto.P2PPort
-	}
-
-	if dto.P2PHost != "" {
-		node.Spec.P2PHost = dto.P2PHost
 	}
 
 	if dto.IPFSPeerEndpoint != "" {

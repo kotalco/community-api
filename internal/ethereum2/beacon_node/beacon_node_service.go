@@ -92,9 +92,6 @@ func (service beaconNodeService) Update(dto BeaconNodeDto, node *ethereum2v1alph
 	if dto.REST != nil {
 		rest := *dto.REST
 		if rest {
-			if dto.RESTHost != "" {
-				node.Spec.RESTHost = dto.RESTHost
-			}
 			if dto.RESTPort != 0 {
 				node.Spec.RESTPort = dto.RESTPort
 			}
@@ -105,9 +102,6 @@ func (service beaconNodeService) Update(dto BeaconNodeDto, node *ethereum2v1alph
 	if dto.RPC != nil {
 		rpc := *dto.RPC
 		if rpc {
-			if dto.RPCHost != "" {
-				node.Spec.RPCHost = dto.RPCHost
-			}
 			if dto.RPCPort != 0 {
 				node.Spec.RPCPort = dto.RPCPort
 			}
@@ -118,9 +112,6 @@ func (service beaconNodeService) Update(dto BeaconNodeDto, node *ethereum2v1alph
 	if dto.GRPC != nil {
 		grpc := *dto.GRPC
 		if grpc {
-			if dto.GRPCHost != "" {
-				node.Spec.GRPCHost = dto.GRPCHost
-			}
 			if dto.GRPCPort != 0 {
 				node.Spec.GRPCPort = dto.GRPCPort
 			}

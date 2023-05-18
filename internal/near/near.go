@@ -18,12 +18,9 @@ type NearDto struct {
 	ValidatorSecretName      string    `json:"validatorSecretName"`
 	MinPeers                 uint      `json:"minPeers"`
 	P2PPort                  uint      `json:"p2pPort"`
-	P2PHost                  string    `json:"p2pHost"`
 	RPC                      *bool     `json:"rpc"`
 	RPCPort                  uint      `json:"rpcPort"`
-	RPCHost                  string    `json:"rpcHost"`
 	PrometheusPort           uint      `json:"prometheusPort"`
-	PrometheusHost           string    `json:"prometheusHost"`
 	TelemetryURL             string    `json:"telemetryURL"`
 	Bootnodes                *[]string `json:"bootnodes"`
 	Image                    string    `json:"image"`
@@ -42,12 +39,9 @@ func (dto NearDto) FromNEARNode(node nearv1alpha1.Node) NearDto {
 	dto.ValidatorSecretName = node.Spec.ValidatorSecretName
 	dto.MinPeers = node.Spec.MinPeers
 	dto.P2PPort = node.Spec.P2PPort
-	dto.P2PHost = node.Spec.P2PHost
 	dto.RPC = &node.Spec.RPC
 	dto.RPCPort = node.Spec.RPCPort
-	dto.RPCHost = node.Spec.RPCHost
 	dto.PrometheusPort = node.Spec.PrometheusPort
-	dto.PrometheusHost = node.Spec.PrometheusHost
 	dto.TelemetryURL = node.Spec.TelemetryURL
 	dto.Bootnodes = &node.Spec.Bootnodes
 	dto.CPU = node.Spec.CPU

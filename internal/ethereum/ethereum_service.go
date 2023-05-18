@@ -106,7 +106,7 @@ func (service ethereumService) Update(dto EthereumDto, node *ethereumv1alpha1.No
 	}
 	if node.Spec.Miner {
 		if dto.Coinbase != "" {
-			node.Spec.Coinbase = ethereumv1alpha1.EthereumAddress(dto.Coinbase)
+			node.Spec.Coinbase = sharedAPI.EthereumAddress(dto.Coinbase)
 		}
 		if dto.Import != nil {
 			node.Spec.Import = &ethereumv1alpha1.ImportedAccount{
