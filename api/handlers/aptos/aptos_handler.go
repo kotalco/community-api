@@ -243,7 +243,7 @@ func worker(jobs <-chan request, results chan<- result) {
 		chanRes.name = job.name
 
 		client := http.Client{
-			Timeout: 4 * time.Second,
+			Timeout: 20 * time.Second,
 		}
 		req, err := http.NewRequest(http.MethodGet, job.url, bytes.NewReader([]byte(nil)))
 		if err != nil {
