@@ -159,7 +159,7 @@ func Stats(c *websocket.Conn) {
 	client := http.Client{
 		Timeout: 4 * time.Second,
 	}
-	baseUrl := fmt.Sprintf("http://%s:%d/v1", "localhost", node.Spec.APIPort)
+	baseUrl := fmt.Sprintf("http://%s.%s:%d", nameSpacedName.Name, nameSpacedName.Namespace, node.Spec.API)
 
 	for {
 
