@@ -17,6 +17,7 @@ type AptosDto struct {
 	NodePrivateKeySecretName string                     `json:"nodePrivateKeySecretName"`
 	API                      *bool                      `json:"api"`
 	APIPort                  uint                       `json:"apiPort"`
+	MetricsPort              uint                       `json:"metricsPort"`
 	P2PPort                  uint                       `json:"p2pPort"`
 	sharedAPI.Resources
 }
@@ -33,6 +34,7 @@ func (dto AptosDto) FromAptosNode(n aptosv1alpha1.Node) AptosDto {
 	dto.API = &n.Spec.API
 	dto.APIPort = n.Spec.APIPort
 	dto.P2PPort = n.Spec.P2PPort
+	dto.MetricsPort = n.Spec.MetricsPort
 	dto.CPU = n.Spec.CPU
 	dto.CPULimit = n.Spec.CPULimit
 	dto.Memory = n.Spec.Memory
