@@ -18,8 +18,19 @@ import (
 	"net/http"
 	"sort"
 	"strconv"
+	"strings"
 	"time"
 )
+
+type request struct {
+	url  string
+	name string
+}
+type result struct {
+	err  error
+	name string
+	data []byte
+}
 
 const (
 	nameKeyword = "name"
@@ -121,13 +132,9 @@ func Delete(c *fiber.Ctx) error {
 	return c.SendStatus(http.StatusNoContent)
 }
 
-// Stats returns a websocket stats
+// Stats returns a websocket that emits aptos stats
 func Stats(c *websocket.Conn) {
 	defer c.Close()
-
-	type Result struct {
-		CurrentBlock string `json:"currentBlock,omitempty"`
-	}
 
 	name := c.Params("name")
 	node := &aptosv1alpha1.Node{}
@@ -155,52 +162,107 @@ func Stats(c *websocket.Conn) {
 		})
 		return
 	}
-
-	client := http.Client{
-		Timeout: 4 * time.Second,
-	}
-	baseUrl := fmt.Sprintf("http://%s.%s:%d/v1", nameSpacedName.Name, nameSpacedName.Namespace, node.Spec.APIPort)
+	reqCount := 2
 
 	for {
+		jobs := make(chan request, reqCount)
+		results := make(chan result, reqCount)
 
-		req, err := http.NewRequest(http.MethodGet, baseUrl, bytes.NewReader([]byte(nil)))
+		for i := 0; i < reqCount; i++ {
+			go worker(jobs, results)
+		}
+
+		jobs <- request{name: "ledgerInfo", url: fmt.Sprintf("http://%s.%s:%d/v1", node.Name, nameSpacedName.Namespace, node.Spec.APIPort)}
+		jobs <- request{name: "nodeInspection", url: fmt.Sprintf("http://%s.%s:%d/json_metrics", node.Name, nameSpacedName.Namespace, node.Spec.MetricsPort)}
+
+		close(jobs)
+
+		var aptosStatResponseDto struct {
+			CurrentBlock string  `json:"currentBlock"`
+			PeerCount    float64 `json:"peerCount"`
+		}
+
+		newAptosResponse := aptosStatResponseDto
+
+		for i := 0; i < reqCount; i++ {
+			resp := <-results
+			if resp.err != nil {
+				c.WriteJSON(fiber.Map{
+					"error": err.Error(),
+				})
+				continue
+			}
+
+			switch resp.name {
+			case "ledgerInfo":
+				var responseBody map[string]interface{}
+				err = json.Unmarshal(resp.data, &responseBody)
+				if err != nil {
+					c.WriteJSON(fiber.Map{
+						"error": err.Error(),
+					})
+					break
+				}
+				newAptosResponse.CurrentBlock = responseBody["block_height"].(string)
+				break
+			case "nodeInspection":
+
+				var responseBody map[string]interface{}
+				err = json.Unmarshal(resp.data, &responseBody)
+				if err != nil {
+					c.WriteJSON(fiber.Map{
+						"error": err.Error(),
+					})
+					break
+				}
+				for key, value := range responseBody {
+					if strings.HasPrefix(key, "aptos_connections.outbound.Public") {
+						newAptosResponse.PeerCount = value.(float64)
+						break
+					}
+				}
+				break
+			}
+
+		}
+		close(results)
+
+		err := c.WriteJSON(newAptosResponse)
 		if err != nil {
-			c.WriteJSON(fiber.Map{
-				"error": err.Error(),
-			})
+			return
+		}
+
+		time.Sleep(time.Second * 3)
+	}
+}
+
+// worker is a  collection of threads for the aptos node stats
+func worker(jobs <-chan request, results chan<- result) {
+	chanRes := result{}
+	for job := range jobs {
+		chanRes.name = job.name
+
+		client := http.Client{
+			Timeout: 4 * time.Second,
+		}
+		req, err := http.NewRequest(http.MethodGet, job.url, bytes.NewReader([]byte(nil)))
+		if err != nil {
+			chanRes.err = err
 			return
 		}
 		resp, err := client.Do(req)
 		if err != nil {
-			c.WriteJSON(fiber.Map{
-				"error": err.Error(),
-			})
+			chanRes.err = err
 			return
 		}
 
 		responseData, err := ioutil.ReadAll(resp.Body)
 		if err != nil {
-			c.WriteJSON(fiber.Map{
-				"error": err.Error(),
-			})
+			chanRes.err = err
 			return
 		}
-		var responseBody map[string]interface{}
-		err = json.Unmarshal(responseData, &responseBody)
-		if err != nil {
-			c.WriteJSON(fiber.Map{
-				"error": err.Error(),
-			})
-			break
-		}
-
-		newAptosResponse := new(Result)
-		newAptosResponse.CurrentBlock = responseBody["block_height"].(string)
-		err = c.WriteJSON(newAptosResponse)
-		if err != nil {
-			return
-		}
-		time.Sleep(time.Second * 3)
+		chanRes.data = responseData
+		results <- chanRes
 	}
 }
 

@@ -198,7 +198,7 @@ func MapUrl(app *fiber.App, handlers ...fiber.Handler) {
 	aptosGroup := v1.Group("aptos")
 	aptosNodesGroup := aptosGroup.Group("nodes")
 	aptosNodesGroup.Post("/", middleware.IsDuplicated, aptos.Create)
-	aptosNodesGroup.Get("/:name", stacks.ValidateNodeExist, aptos.Get)
+	aptosNodesGroup.Get("/:name", aptos.ValidateNodeExist, aptos.Get)
 	aptosNodesGroup.Get("/", aptos.List)
 	aptosNodesGroup.Head("/", aptos.Count)
 	aptosNodesGroup.Put("/:name", aptos.ValidateNodeExist, aptos.Update)
