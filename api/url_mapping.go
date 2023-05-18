@@ -3,6 +3,7 @@ package api
 import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/websocket/v2"
+	"github.com/kotalco/community-api/api/handlers/aptos"
 	"github.com/kotalco/community-api/api/handlers/bitcoin"
 	"github.com/kotalco/community-api/api/handlers/chainlink"
 	"github.com/kotalco/community-api/api/handlers/core/secret"
@@ -193,5 +194,18 @@ func MapUrl(app *fiber.App, handlers ...fiber.Handler) {
 	stacksNodesGroup.Get("/:name/logs", websocket.New(shared.Logger))
 	stacksNodesGroup.Get("/:name/status", websocket.New(shared.Status))
 	stacksNodesGroup.Get("/:name/metrics", websocket.New(shared.Metrics))
+
+	aptosGroup := v1.Group("aptos")
+	aptosNodesGroup := aptosGroup.Group("nodes")
+	aptosNodesGroup.Post("/", middleware.IsDuplicated, aptos.Create)
+	aptosNodesGroup.Get("/:name", aptos.ValidateNodeExist, aptos.Get)
+	aptosNodesGroup.Get("/", aptos.List)
+	aptosNodesGroup.Head("/", aptos.Count)
+	aptosNodesGroup.Put("/:name", aptos.ValidateNodeExist, aptos.Update)
+	aptosNodesGroup.Delete("/:name", aptos.ValidateNodeExist, aptos.Delete)
+	aptosNodesGroup.Get("/:name/logs", websocket.New(shared.Logger))
+	aptosNodesGroup.Get("/:name/status", websocket.New(shared.Status))
+	aptosNodesGroup.Get("/:name/metrics", websocket.New(shared.Metrics))
+	aptosNodesGroup.Get("/:name/stats", websocket.New(aptos.Stats))
 
 }
