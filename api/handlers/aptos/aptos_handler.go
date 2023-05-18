@@ -121,7 +121,7 @@ func Delete(c *fiber.Ctx) error {
 	return c.SendStatus(http.StatusNoContent)
 }
 
-// Stats returns a websocket that emits peers,pin and files stats
+// Stats returns a websocket stats
 func Stats(c *websocket.Conn) {
 	defer c.Close()
 
