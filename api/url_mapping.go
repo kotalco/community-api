@@ -206,5 +206,6 @@ func MapUrl(app *fiber.App, handlers ...fiber.Handler) {
 	aptosNodesGroup.Get("/:name/logs", websocket.New(shared.Logger))
 	aptosNodesGroup.Get("/:name/status", websocket.New(shared.Status))
 	aptosNodesGroup.Get("/:name/metrics", websocket.New(shared.Metrics))
+	aptosNodesGroup.Get("/:name/stats", websocket.New(aptos.Stats))
 
 }

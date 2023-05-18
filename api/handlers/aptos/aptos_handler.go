@@ -1,23 +1,34 @@
 package aptos
 
 import (
+	"bytes"
+	"context"
+	"encoding/json"
 	"fmt"
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/websocket/v2"
 	"github.com/kotalco/community-api/internal/aptos"
 	restErrors "github.com/kotalco/community-api/pkg/errors"
+	"github.com/kotalco/community-api/pkg/k8s"
 	"github.com/kotalco/community-api/pkg/shared"
 	aptosv1alpha1 "github.com/kotalco/kotal/apis/aptos/v1alpha1"
+	"io/ioutil"
+	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/types"
 	"net/http"
 	"sort"
 	"strconv"
+	"time"
 )
 
 const (
 	nameKeyword = "name"
 )
 
-var service = aptos.NewAptosService()
+var (
+	service   = aptos.NewAptosService()
+	k8sClient = k8s.NewClientService()
+)
 
 // Get returns a single aptos node by name
 func Get(c *fiber.Ctx) error {
@@ -108,6 +119,89 @@ func Delete(c *fiber.Ctx) error {
 	}
 
 	return c.SendStatus(http.StatusNoContent)
+}
+
+// Stats returns a websocket that emits peers,pin and files stats
+func Stats(c *websocket.Conn) {
+	defer c.Close()
+
+	type Result struct {
+		CurrentBlock string `json:"currentBlock,omitempty"`
+	}
+
+	name := c.Params("name")
+	node := &aptosv1alpha1.Node{}
+	nameSpacedName := types.NamespacedName{
+		Namespace: c.Locals("namespace").(string),
+		Name:      name,
+	}
+	err := k8sClient.Get(context.Background(), nameSpacedName, node)
+	if err != nil {
+		if errors.IsNotFound(err) {
+			c.WriteJSON(fiber.Map{
+				"error": fmt.Sprintf("node by name %s doesn't exist", name),
+			})
+			return
+		}
+		c.WriteJSON(fiber.Map{
+			"error": err.Error(),
+		})
+		return
+	}
+
+	if !node.Spec.API {
+		c.WriteJSON(fiber.Map{
+			"error": "node api is not enabled",
+		})
+		return
+	}
+
+	client := http.Client{
+		Timeout: 4 * time.Second,
+	}
+	baseUrl := fmt.Sprintf("http://%s:%d/v1", "localhost", node.Spec.APIPort)
+
+	for {
+
+		req, err := http.NewRequest(http.MethodGet, baseUrl, bytes.NewReader([]byte(nil)))
+		if err != nil {
+			c.WriteJSON(fiber.Map{
+				"error": err.Error(),
+			})
+			return
+		}
+		resp, err := client.Do(req)
+		if err != nil {
+			c.WriteJSON(fiber.Map{
+				"error": err.Error(),
+			})
+			return
+		}
+
+		responseData, err := ioutil.ReadAll(resp.Body)
+		if err != nil {
+			c.WriteJSON(fiber.Map{
+				"error": err.Error(),
+			})
+			return
+		}
+		var responseBody map[string]interface{}
+		err = json.Unmarshal(responseData, &responseBody)
+		if err != nil {
+			c.WriteJSON(fiber.Map{
+				"error": err.Error(),
+			})
+			break
+		}
+
+		newAptosResponse := new(Result)
+		newAptosResponse.CurrentBlock = responseBody["block_height"].(string)
+		err = c.WriteJSON(newAptosResponse)
+		if err != nil {
+			return
+		}
+		time.Sleep(time.Second * 3)
+	}
 }
 
 func ValidateNodeExist(c *fiber.Ctx) error {
