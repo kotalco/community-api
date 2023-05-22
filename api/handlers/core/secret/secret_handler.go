@@ -59,6 +59,9 @@ func List(c *fiber.Ctx) error {
 		secretListDto = append(secretListDto, secret.SecretDto{}.FromCoreSecret(sec))
 	}
 
+	c.Set("Access-Control-Expose-Headers", "X-Total-Count")
+	c.Set("X-Total-Count", fmt.Sprintf("%d", len(secrets.Items)))
+
 	return c.Status(http.StatusOK).JSON(shared.NewResponse(secretListDto))
 }
 
