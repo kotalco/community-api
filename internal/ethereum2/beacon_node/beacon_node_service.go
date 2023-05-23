@@ -63,6 +63,7 @@ func (service beaconNodeService) Create(dto BeaconNodeDto) (node ethereum2v1alph
 		ExecutionEngineEndpoint: dto.ExecutionEngineEndpoint,
 		JWTSecretName:           dto.JWTSecretName,
 		Image:                   dto.Image,
+		REST:                    true,
 		Resources: sharedAPIs.Resources{
 			StorageClass: dto.StorageClass,
 		},

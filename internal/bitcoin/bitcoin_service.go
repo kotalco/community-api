@@ -75,6 +75,7 @@ func (service bitcoinService) Create(dto BitcoinDto) (node bitcoinv1alpha1.Node,
 	node.ObjectMeta = dto.ObjectMetaFromMetadataDto()
 	node.Spec = bitcoinv1alpha1.NodeSpec{
 		Network: dto.Network,
+		RPC:     true,
 		RPCUsers: []bitcoinv1alpha1.RPCUser{
 			{
 				Username:           BitcoinJsonRpcDefaultUserName,

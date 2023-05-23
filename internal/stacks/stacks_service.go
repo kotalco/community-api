@@ -39,6 +39,7 @@ func (service stacksService) Create(dto StacksDto) (node stacksv1alpha1.Node, re
 		Network:     dto.Network,
 		Image:       dto.Image,
 		BitcoinNode: *dto.BitcoinNode,
+		RPC:         true,
 	}
 
 	k8s.DefaultResources(&node.Spec.Resources)
