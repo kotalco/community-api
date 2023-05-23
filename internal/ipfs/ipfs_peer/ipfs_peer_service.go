@@ -60,6 +60,7 @@ func (service ipfsPeerService) Create(dto PeerDto) (peer ipfsv1alpha1.Peer, rest
 	peer.Spec = ipfsv1alpha1.PeerSpec{
 		InitProfiles: initProfiles,
 		Image:        dto.Image,
+		API:          true,
 		Resources: sharedAPIs.Resources{
 			StorageClass: dto.StorageClass,
 		},

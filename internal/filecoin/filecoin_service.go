@@ -55,6 +55,7 @@ func (service filecoinService) Create(dto FilecoinDto) (node filecoinv1alpha1.No
 	node.Spec = filecoinv1alpha1.NodeSpec{
 		Network: filecoinv1alpha1.FilecoinNetwork(dto.Network),
 		Image:   dto.Image,
+		API:     true,
 		Resources: sharedAPIs.Resources{
 			StorageClass: dto.StorageClass,
 		},
