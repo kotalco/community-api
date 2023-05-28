@@ -13,6 +13,7 @@ type StacksDto struct {
 	k8s.MetaDataDto
 	Image                    string                       `json:"image"`
 	Network                  stacksv1alpha1.StacksNetwork `json:"network"`
+	RPC                      *bool                        `json:"rpc"`
 	P2PPort                  uint                         `json:"p2pPort"`
 	RPCPort                  uint                         `json:"rpcPort"`
 	NodePrivateKeySecretName *string                      `json:"nodePrivateKeySecretName"`
@@ -30,6 +31,7 @@ func (dto StacksDto) FromStacksNode(n stacksv1alpha1.Node) StacksDto {
 	dto.Time = models.Time{CreatedAt: n.CreationTimestamp.UTC().Format(shared.JavascriptISOString)}
 	dto.Image = n.Spec.Image
 	dto.Network = n.Spec.Network
+	dto.RPC = &n.Spec.RPC
 	dto.P2PPort = n.Spec.P2PPort
 	dto.RPCPort = n.Spec.RPCPort
 	dto.NodePrivateKeySecretName = &n.Spec.NodePrivateKeySecretName
