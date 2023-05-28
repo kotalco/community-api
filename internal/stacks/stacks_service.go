@@ -102,6 +102,9 @@ func (service stacksService) Update(dto StacksDto, node *stacksv1alpha1.Node) (r
 	if dto.Image != "" {
 		node.Spec.Image = dto.Image
 	}
+	if dto.RPC != nil {
+		node.Spec.RPC = *dto.RPC
+	}
 	if dto.P2PPort != 0 {
 		node.Spec.P2PPort = dto.P2PPort
 	}
