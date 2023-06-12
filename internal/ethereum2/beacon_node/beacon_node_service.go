@@ -56,6 +56,7 @@ func (service beaconNodeService) Create(dto BeaconNodeDto) (node ethereum2v1alph
 	client := ethereum2v1alpha1.Ethereum2Client(dto.Client)
 
 	node.ObjectMeta = dto.ObjectMetaFromMetadataDto()
+
 	node.Spec = ethereum2v1alpha1.BeaconNodeSpec{
 		Network:                 dto.Network,
 		Client:                  client,
@@ -63,8 +64,8 @@ func (service beaconNodeService) Create(dto BeaconNodeDto) (node ethereum2v1alph
 		ExecutionEngineEndpoint: dto.ExecutionEngineEndpoint,
 		JWTSecretName:           dto.JWTSecretName,
 		Image:                   dto.Image,
-		REST:                    true,
 		CheckpointSyncURL:       dto.CheckpointSyncURL,
+		REST:                    client != ethereum2v1alpha1.PrysmClient,
 		Resources: sharedAPIs.Resources{
 			StorageClass: dto.StorageClass,
 		},
