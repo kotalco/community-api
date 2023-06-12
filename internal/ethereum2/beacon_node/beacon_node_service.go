@@ -64,6 +64,7 @@ func (service beaconNodeService) Create(dto BeaconNodeDto) (node ethereum2v1alph
 		JWTSecretName:           dto.JWTSecretName,
 		Image:                   dto.Image,
 		REST:                    true,
+		CheckpointSyncURL:       dto.CheckpointSyncURL,
 		Resources: sharedAPIs.Resources{
 			StorageClass: dto.StorageClass,
 		},
@@ -143,6 +144,9 @@ func (service beaconNodeService) Update(dto BeaconNodeDto, node *ethereum2v1alph
 	}
 	if dto.Image != "" {
 		node.Spec.Image = dto.Image
+	}
+	if dto.CheckpointSyncURL != "" {
+		node.Spec.CheckpointSyncURL = dto.CheckpointSyncURL
 	}
 
 	if os.Getenv("MOCK") == "true" {
