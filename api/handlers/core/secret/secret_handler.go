@@ -60,7 +60,7 @@ func List(c *fiber.Ctx) error {
 	}
 
 	c.Set("Access-Control-Expose-Headers", "X-Total-Count")
-	c.Set("X-Total-Count", fmt.Sprintf("%d", len(secrets.Items)))
+	c.Set("X-Total-Count", fmt.Sprintf("%d", len(secretListDto)))
 
 	return c.Status(http.StatusOK).JSON(shared.NewResponse(secretListDto))
 }
