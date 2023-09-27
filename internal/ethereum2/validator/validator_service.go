@@ -51,18 +51,11 @@ func (service validatorService) Get(namespacedName types.NamespacedName) (valida
 
 // Create creates ethereum 2.0 beacon node from spec
 func (service validatorService) Create(dto ValidatorDto) (validator ethereum2v1alpha1.Validator, restErr restErrors.IRestErr) {
-	keystores := []ethereum2v1alpha1.Keystore{}
-	for _, keystore := range dto.Keystores {
-		keystores = append(keystores, ethereum2v1alpha1.Keystore{
-			SecretName: keystore.SecretName,
-		})
-	}
-
 	validator.ObjectMeta = dto.ObjectMetaFromMetadataDto()
 	validator.Spec = ethereum2v1alpha1.ValidatorSpec{
 		Network:   dto.Network,
 		Client:    ethereum2v1alpha1.Ethereum2Client(dto.Client),
-		Keystores: keystores,
+		Keystores: dto.Keystores,
 		Image:     dto.Image,
 		Resources: sharedAPIs.Resources{
 			StorageClass: dto.StorageClass,

@@ -11,37 +11,26 @@ import (
 type ValidatorDto struct {
 	models.Time
 	k8s.MetaDataDto
-	Network                  string        `json:"network"`
-	Client                   string        `json:"client"`
-	Graffiti                 string        `json:"graffiti"`
-	BeaconEndpoints          []string      `json:"beaconEndpoints"`
-	WalletPasswordSecretName string        `json:"walletPasswordSecretName"`
-	Keystores                []KeystoreDto `json:"keystores"`
-	Image                    string        `json:"image"`
+	Network                  string                       `json:"network"`
+	Client                   string                       `json:"client"`
+	Graffiti                 string                       `json:"graffiti"`
+	BeaconEndpoints          []string                     `json:"beaconEndpoints"`
+	WalletPasswordSecretName string                       `json:"walletPasswordSecretName"`
+	Keystores                []ethereum2v1alpha1.Keystore `json:"keystores"`
+	Image                    string                       `json:"image"`
 	sharedAPI.Resources
-}
-
-type KeystoreDto struct {
-	SecretName string `json:"secretName"`
 }
 
 type ValidatorListDto []ValidatorDto
 
 func (dto ValidatorDto) FromEthereum2Validator(validator ethereum2v1alpha1.Validator) ValidatorDto {
-	keystores := []KeystoreDto{}
-	for _, keystore := range validator.Spec.Keystores {
-		keystores = append(keystores, KeystoreDto{
-			SecretName: keystore.SecretName,
-		})
-	}
-
 	dto.Name = validator.Name
 	dto.Time = models.Time{CreatedAt: validator.CreationTimestamp.UTC().Format(shared.JavascriptISOString)}
 	dto.Network = validator.Spec.Network
 	dto.Client = string(validator.Spec.Client)
 	dto.Graffiti = validator.Spec.Graffiti
 	dto.BeaconEndpoints = validator.Spec.BeaconEndpoints
-	dto.Keystores = keystores
+	dto.Keystores = validator.Spec.Keystores
 	dto.CPU = validator.Spec.CPU
 	dto.CPULimit = validator.Spec.CPULimit
 	dto.Memory = validator.Spec.Memory
