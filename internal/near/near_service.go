@@ -84,12 +84,12 @@ func (service nearService) Create(dto NearDto) (node nearv1alpha1.Node, restErr 
 // Update updates near node by name from spec
 func (service nearService) Update(dto NearDto, node *nearv1alpha1.Node) (restErr restErrors.IRestErr) {
 
-	if dto.NodePrivateKeySecretName != "" {
-		node.Spec.NodePrivateKeySecretName = dto.NodePrivateKeySecretName
+	if dto.NodePrivateKeySecretName != nil {
+		node.Spec.NodePrivateKeySecretName = *dto.NodePrivateKeySecretName
 	}
 
-	if dto.ValidatorSecretName != "" {
-		node.Spec.ValidatorSecretName = dto.ValidatorSecretName
+	if dto.ValidatorSecretName != nil {
+		node.Spec.ValidatorSecretName = *dto.ValidatorSecretName
 	}
 
 	if dto.MinPeers != 0 {
@@ -113,8 +113,8 @@ func (service nearService) Update(dto NearDto, node *nearv1alpha1.Node) (restErr
 		node.Spec.PrometheusPort = dto.PrometheusPort
 	}
 
-	if dto.TelemetryURL != "" {
-		node.Spec.TelemetryURL = dto.TelemetryURL
+	if dto.TelemetryURL != nil {
+		node.Spec.TelemetryURL = *dto.TelemetryURL
 	}
 
 	if bootnodes := dto.Bootnodes; bootnodes != nil {
