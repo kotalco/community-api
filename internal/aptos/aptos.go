@@ -14,7 +14,7 @@ type AptosDto struct {
 	Network                  aptosv1alpha1.AptosNetwork `json:"network"`
 	Image                    string                     `json:"image"`
 	Validator                *bool                      `json:"validator"`
-	NodePrivateKeySecretName string                     `json:"nodePrivateKeySecretName"`
+	NodePrivateKeySecretName *string                    `json:"nodePrivateKeySecretName"`
 	API                      *bool                      `json:"api"`
 	APIPort                  uint                       `json:"apiPort"`
 	MetricsPort              uint                       `json:"metricsPort"`
@@ -30,7 +30,7 @@ func (dto AptosDto) FromAptosNode(n aptosv1alpha1.Node) AptosDto {
 	dto.Image = n.Spec.Image
 	dto.Network = n.Spec.Network
 	dto.Validator = &n.Spec.Validator
-	dto.NodePrivateKeySecretName = n.Spec.NodePrivateKeySecretName
+	dto.NodePrivateKeySecretName = &n.Spec.NodePrivateKeySecretName
 	dto.API = &n.Spec.API
 	dto.APIPort = n.Spec.APIPort
 	dto.P2PPort = n.Spec.P2PPort
