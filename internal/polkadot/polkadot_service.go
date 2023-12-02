@@ -80,8 +80,8 @@ func (service polkadtoService) Create(dto PolkadotDto) (node polkadotv1alpha1.No
 
 // Update updates polkadot node by name from spec
 func (service polkadtoService) Update(dto PolkadotDto, node *polkadotv1alpha1.Node) (restErr restErrors.IRestErr) {
-	if dto.NodePrivateKeySecretName != "" {
-		node.Spec.NodePrivateKeySecretName = dto.NodePrivateKeySecretName
+	if dto.NodePrivateKeySecretName != nil {
+		node.Spec.NodePrivateKeySecretName = *dto.NodePrivateKeySecretName
 	}
 
 	if dto.Validator != nil {
