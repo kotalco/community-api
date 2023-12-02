@@ -85,24 +85,8 @@ func (service ipfsClusterPeerService) Create(dto ClusterPeerDto) (peer ipfsv1alp
 		peer.Spec.BootstrapPeers = dto.BootstrapPeers
 	}
 
-	if dto.ClusterSecretName != "" {
-		peer.Spec.ClusterSecretName = dto.ClusterSecretName
-	}
-
-	if dto.CPU != "" {
-		peer.Spec.CPU = dto.CPU
-	}
-	if dto.CPULimit != "" {
-		peer.Spec.CPULimit = dto.CPULimit
-	}
-	if dto.Memory != "" {
-		peer.Spec.Memory = dto.Memory
-	}
-	if dto.MemoryLimit != "" {
-		peer.Spec.MemoryLimit = dto.MemoryLimit
-	}
-	if dto.Storage != "" {
-		peer.Spec.Storage = dto.Storage
+	if dto.ClusterSecretName != nil {
+		peer.Spec.ClusterSecretName = *dto.ClusterSecretName
 	}
 
 	if os.Getenv("MOCK") == "true" {
@@ -130,6 +114,10 @@ func (service ipfsClusterPeerService) Update(dto ClusterPeerDto, peer *ipfsv1alp
 
 	if len(dto.BootstrapPeers) != 0 {
 		peer.Spec.BootstrapPeers = dto.BootstrapPeers
+	}
+
+	if dto.ClusterSecretName != nil {
+		peer.Spec.ClusterSecretName = *dto.ClusterSecretName
 	}
 
 	if dto.CPU != "" {

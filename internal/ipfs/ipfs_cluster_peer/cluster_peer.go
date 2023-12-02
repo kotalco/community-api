@@ -16,7 +16,7 @@ type ClusterPeerDto struct {
 	TrustedPeers         []string `json:"trustedPeers"`
 	BootstrapPeers       []string `json:"bootstrapPeers"`
 	Consensus            string   `json:"consensus"`
-	ClusterSecretName    string   `json:"clusterSecretName"`
+	ClusterSecretName    *string  `json:"clusterSecretName"`
 	PeerEndpoint         string   `json:"peerEndpoint"`
 	Image                string   `json:"image"`
 	sharedAPI.Resources
@@ -31,7 +31,7 @@ func (dto ClusterPeerDto) FromIPFSClusterPeer(peer ipfsv1alpha1.ClusterPeer) Clu
 	dto.TrustedPeers = peer.Spec.TrustedPeers
 	dto.BootstrapPeers = peer.Spec.BootstrapPeers
 	dto.Consensus = string(peer.Spec.Consensus)
-	dto.ClusterSecretName = peer.Spec.ClusterSecretName
+	dto.ClusterSecretName = &peer.Spec.ClusterSecretName
 	dto.PeerEndpoint = peer.Spec.PeerEndpoint
 	dto.CPU = peer.Spec.CPU
 	dto.CPULimit = peer.Spec.CPULimit
