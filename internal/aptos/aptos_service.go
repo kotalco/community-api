@@ -101,8 +101,8 @@ func (service aptosService) Update(dto AptosDto, node *aptosv1alpha1.Node) (rest
 		node.Spec.Validator = *dto.Validator
 	}
 
-	if dto.NodePrivateKeySecretName != "" {
-		node.Spec.NodePrivateKeySecretName = dto.NodePrivateKeySecretName
+	if dto.NodePrivateKeySecretName != nil {
+		node.Spec.NodePrivateKeySecretName = *dto.NodePrivateKeySecretName
 	}
 
 	if dto.API != nil {
