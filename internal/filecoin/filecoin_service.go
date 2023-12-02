@@ -102,8 +102,8 @@ func (service filecoinService) Update(dto FilecoinDto, node *filecoinv1alpha1.No
 		node.Spec.P2PPort = dto.P2PPort
 	}
 
-	if dto.IPFSPeerEndpoint != "" {
-		node.Spec.IPFSPeerEndpoint = dto.IPFSPeerEndpoint
+	if dto.IPFSPeerEndpoint != nil {
+		node.Spec.IPFSPeerEndpoint = *dto.IPFSPeerEndpoint
 	}
 
 	if dto.IPFSOnlineMode != nil {
