@@ -12,7 +12,7 @@ type PolkadotDto struct {
 	models.Time
 	k8s.MetaDataDto
 	Network                  string   `json:"network"`
-	NodePrivateKeySecretName string   `json:"nodePrivateKeySecretName"`
+	NodePrivateKeySecretName *string  `json:"nodePrivateKeySecretName"`
 	Validator                *bool    `json:"validator"`
 	SyncMode                 string   `json:"syncMode"`
 	P2PPort                  uint     `json:"p2pPort"`
@@ -38,7 +38,7 @@ func (dto PolkadotDto) FromPolkadotNode(node polkadotv1alpha1.Node) PolkadotDto 
 	dto.Time = models.Time{CreatedAt: node.CreationTimestamp.UTC().Format(shared.JavascriptISOString)}
 	dto.Name = node.Name
 	dto.Network = node.Spec.Network
-	dto.NodePrivateKeySecretName = node.Spec.NodePrivateKeySecretName
+	dto.NodePrivateKeySecretName = &node.Spec.NodePrivateKeySecretName
 	dto.Validator = &node.Spec.Validator
 	dto.SyncMode = string(node.Spec.SyncMode)
 	dto.P2PPort = node.Spec.P2PPort
