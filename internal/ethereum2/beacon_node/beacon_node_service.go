@@ -61,8 +61,8 @@ func (service beaconNodeService) Create(dto BeaconNodeDto) (node ethereum2v1alph
 		Network:                 dto.Network,
 		Client:                  client,
 		RPC:                     client == ethereum2v1alpha1.PrysmClient,
-		ExecutionEngineEndpoint: *dto.ExecutionEngineEndpoint,
-		JWTSecretName:           *dto.JWTSecretName,
+		ExecutionEngineEndpoint: dto.ExecutionEngineEndpoint,
+		JWTSecretName:           dto.JWTSecretName,
 		Image:                   dto.Image,
 		CheckpointSyncURL:       *dto.CheckpointSyncURL,
 		REST:                    client != ethereum2v1alpha1.PrysmClient,
@@ -137,11 +137,11 @@ func (service beaconNodeService) Update(dto BeaconNodeDto, node *ethereum2v1alph
 	if dto.Storage != "" {
 		node.Spec.Storage = dto.Storage
 	}
-	if dto.ExecutionEngineEndpoint != nil {
-		node.Spec.ExecutionEngineEndpoint = *dto.ExecutionEngineEndpoint
+	if dto.ExecutionEngineEndpoint != "" {
+		node.Spec.ExecutionEngineEndpoint = dto.ExecutionEngineEndpoint
 	}
-	if dto.JWTSecretName != nil {
-		node.Spec.JWTSecretName = *dto.JWTSecretName
+	if dto.JWTSecretName != "" {
+		node.Spec.JWTSecretName = dto.JWTSecretName
 	}
 	if dto.Image != "" {
 		node.Spec.Image = dto.Image
