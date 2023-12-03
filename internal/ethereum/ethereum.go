@@ -18,31 +18,31 @@ type ImportedAccount struct {
 type EthereumDto struct {
 	models.Time
 	k8s.MetaDataDto
-	Network                  string           `json:"network"`
-	Client                   string           `json:"client"`
-	Logging                  string           `json:"logging"`
-	NodePrivateKeySecretName string           `json:"nodePrivateKeySecretName"`
-	SyncMode                 string           `json:"syncMode"`
-	P2PPort                  uint             `json:"p2pPort"`
-	StaticNodes              *[]string        `json:"staticNodes"`
-	Bootnodes                *[]string        `json:"bootnodes"`
-	Miner                    *bool            `json:"miner"`
-	Coinbase                 string           `json:"coinbase"`
-	Import                   *ImportedAccount `json:"import"`
-	RPC                      *bool            `json:"rpc"`
-	RPCPort                  uint             `json:"rpcPort"`
-	RPCAPI                   []string         `json:"rpcAPI"`
-	WS                       *bool            `json:"ws"`
-	WSPort                   uint             `json:"wsPort"`
-	WSAPI                    []string         `json:"wsAPI"`
-	GraphQL                  *bool            `json:"graphql"`
-	GraphQLPort              uint             `json:"graphqlPort"`
-	Hosts                    []string         `json:"hosts"`
-	CORSDomains              []string         `json:"corsDomains"`
-	Engine                   *bool            `json:"engine"`
-	EnginePort               uint             `json:"enginePort"`
-	JWTSecretName            string           `json:"jwtSecretName"`
-	Image                    string           `json:"image"`
+	Network                  string                                `json:"network"`
+	Client                   string                                `json:"client"`
+	Logging                  string                                `json:"logging"`
+	NodePrivateKeySecretName *string                               `json:"nodePrivateKeySecretName"`
+	SyncMode                 *ethereumv1alpha1.SynchronizationMode `json:"syncMode"`
+	P2PPort                  uint                                  `json:"p2pPort"`
+	StaticNodes              *[]string                             `json:"staticNodes"`
+	Bootnodes                *[]string                             `json:"bootnodes"`
+	Miner                    *bool                                 `json:"miner"`
+	Coinbase                 string                                `json:"coinbase"`
+	Import                   *ImportedAccount                      `json:"import"`
+	RPC                      *bool                                 `json:"rpc"`
+	RPCPort                  uint                                  `json:"rpcPort"`
+	RPCAPI                   []string                              `json:"rpcAPI"`
+	WS                       *bool                                 `json:"ws"`
+	WSPort                   uint                                  `json:"wsPort"`
+	WSAPI                    []string                              `json:"wsAPI"`
+	GraphQL                  *bool                                 `json:"graphql"`
+	GraphQLPort              uint                                  `json:"graphqlPort"`
+	Hosts                    []string                              `json:"hosts"`
+	CORSDomains              []string                              `json:"corsDomains"`
+	Engine                   *bool                                 `json:"engine"`
+	EnginePort               uint                                  `json:"enginePort"`
+	JWTSecretName            string                                `json:"jwtSecretName"`
+	Image                    string                                `json:"image"`
 	sharedAPI.Resources
 }
 type EthereumListDto []EthereumDto
@@ -53,8 +53,8 @@ func (dto EthereumDto) FromEthereumNode(node ethereumv1alpha1.Node) EthereumDto 
 	dto.Network = node.Spec.Network
 	dto.Client = string(node.Spec.Client)
 	dto.Logging = string(node.Spec.Logging)
-	dto.NodePrivateKeySecretName = node.Spec.NodePrivateKeySecretName
-	dto.SyncMode = string(node.Spec.SyncMode)
+	dto.NodePrivateKeySecretName = &node.Spec.NodePrivateKeySecretName
+	dto.SyncMode = &node.Spec.SyncMode
 	dto.P2PPort = node.Spec.P2PPort
 	dto.Miner = &node.Spec.Miner
 	dto.Coinbase = string(node.Spec.Coinbase)

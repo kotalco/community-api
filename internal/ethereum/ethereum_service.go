@@ -55,14 +55,10 @@ func (service ethereumService) Get(namespacedName types.NamespacedName) (node et
 func (service ethereumService) Create(dto EthereumDto) (node ethereumv1alpha1.Node, restErr restErrors.IRestErr) {
 	node.ObjectMeta = dto.ObjectMetaFromMetadataDto()
 	node.Spec = ethereumv1alpha1.NodeSpec{
-		Network:                  dto.Network,
-		Client:                   ethereumv1alpha1.EthereumClient(dto.Client),
-		RPC:                      true,
-		NodePrivateKeySecretName: dto.NodePrivateKeySecretName,
-		Image:                    dto.Image,
-		Resources: sharedAPI.Resources{
-			StorageClass: dto.StorageClass,
-		},
+		Network: dto.Network,
+		Client:  ethereumv1alpha1.EthereumClient(dto.Client),
+		RPC:     true,
+		Image:   dto.Image,
 	}
 
 	k8s.DefaultResources(&node.Spec.Resources)
@@ -91,11 +87,11 @@ func (service ethereumService) Update(dto EthereumDto, node *ethereumv1alpha1.No
 	if dto.Logging != "" {
 		node.Spec.Logging = sharedAPI.VerbosityLevel(dto.Logging)
 	}
-	if dto.NodePrivateKeySecretName != "" {
-		node.Spec.NodePrivateKeySecretName = dto.NodePrivateKeySecretName
+	if dto.NodePrivateKeySecretName != nil {
+		node.Spec.NodePrivateKeySecretName = *dto.NodePrivateKeySecretName
 	}
-	if dto.SyncMode != "" {
-		node.Spec.SyncMode = ethereumv1alpha1.SynchronizationMode(dto.SyncMode)
+	if dto.SyncMode != nil {
+		node.Spec.SyncMode = *dto.SyncMode
 	}
 	if dto.P2PPort != 0 {
 		node.Spec.P2PPort = dto.P2PPort
