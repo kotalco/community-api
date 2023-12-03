@@ -12,16 +12,16 @@ import (
 type FilecoinDto struct {
 	models.Time
 	k8s.MetaDataDto
-	Network            string `json:"network"`
-	API                *bool  `json:"api"`
-	APIPort            uint   `json:"apiPort"`
-	APIRequestTimeout  uint   `json:"apiRequestTimeout"`
-	DisableMetadataLog *bool  `json:"disableMetadataLog"`
-	P2PPort            uint   `json:"p2pPort"`
-	IPFSPeerEndpoint   string `json:"ipfsPeerEndpoint"`
-	IPFSOnlineMode     *bool  `json:"ipfsOnlineMode"`
-	IPFSForRetrieval   *bool  `json:"ipfsForRetrieval"`
-	Image              string `json:"image"`
+	Network            string  `json:"network"`
+	API                *bool   `json:"api"`
+	APIPort            uint    `json:"apiPort"`
+	APIRequestTimeout  uint    `json:"apiRequestTimeout"`
+	DisableMetadataLog *bool   `json:"disableMetadataLog"`
+	P2PPort            uint    `json:"p2pPort"`
+	IPFSPeerEndpoint   *string `json:"ipfsPeerEndpoint"`
+	IPFSOnlineMode     *bool   `json:"ipfsOnlineMode"`
+	IPFSForRetrieval   *bool   `json:"ipfsForRetrieval"`
+	Image              string  `json:"image"`
 	sharedAPI.Resources
 }
 
@@ -38,7 +38,7 @@ func (dto FilecoinDto) FromFilecoinNode(node filecoinv1alpha1.Node) FilecoinDto 
 	dto.APIRequestTimeout = node.Spec.APIRequestTimeout
 	dto.DisableMetadataLog = &node.Spec.DisableMetadataLog
 	dto.P2PPort = node.Spec.P2PPort
-	dto.IPFSPeerEndpoint = node.Spec.IPFSPeerEndpoint
+	dto.IPFSPeerEndpoint = &node.Spec.IPFSPeerEndpoint
 	dto.IPFSOnlineMode = &node.Spec.IPFSOnlineMode
 	dto.IPFSForRetrieval = &node.Spec.IPFSForRetrieval
 	dto.CPU = node.Spec.CPU
