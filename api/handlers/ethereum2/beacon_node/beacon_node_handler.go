@@ -197,9 +197,9 @@ func Stats(c *websocket.Conn) {
 		return
 	}
 
-	if !beaconnode.Spec.REST {
+	if !beaconnode.Spec.GRPC {
 		c.WriteJSON(fiber.Map{
-			"error": "REST API sever is not enabled",
+			"error": "gRPC sever is not enabled",
 		})
 		return
 	}
@@ -212,7 +212,8 @@ func Stats(c *websocket.Conn) {
 			go worker(jobs, results)
 		}
 
-		baseUrl := fmt.Sprintf("http://%s.%s:%d/eth/v1/node/", beaconnode.Name, nameSpacedName.Namespace, beaconnode.Spec.RESTPort)
+		baseUrl := fmt.Sprintf("http://%s.%s:%d", nameSpacedName.Name, nameSpacedName.Namespace, beaconnode.Spec.GRPCPort)
+
 		jobs <- request{name: "peers", url: fmt.Sprintf("%speer_count", baseUrl)}
 		jobs <- request{name: "isSyncing", url: fmt.Sprintf("%ssyncing", baseUrl)}
 
