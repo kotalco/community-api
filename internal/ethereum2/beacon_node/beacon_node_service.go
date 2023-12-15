@@ -64,8 +64,13 @@ func (service beaconNodeService) Create(dto BeaconNodeDto) (node ethereum2v1alph
 		ExecutionEngineEndpoint: dto.ExecutionEngineEndpoint,
 		JWTSecretName:           dto.JWTSecretName,
 		Image:                   dto.Image,
-		CheckpointSyncURL:       *dto.CheckpointSyncURL,
-		REST:                    client != ethereum2v1alpha1.PrysmClient,
+		CheckpointSyncURL: func() string {
+			if dto.CheckpointSyncURL != nil {
+				return *dto.CheckpointSyncURL
+			}
+			return ""
+		}(),
+		REST: client != ethereum2v1alpha1.PrysmClient,
 		Resources: sharedAPIs.Resources{
 			StorageClass: dto.StorageClass,
 		},
