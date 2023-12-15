@@ -212,7 +212,7 @@ func Stats(c *websocket.Conn) {
 			go worker(jobs, results)
 		}
 
-		baseUrl := fmt.Sprintf("http://%s.%s:%d", nameSpacedName.Name, nameSpacedName.Namespace, beaconnode.Spec.GRPCPort)
+		baseUrl := fmt.Sprintf("http://%s.%s:%d/eth/v1/node/", nameSpacedName.Name, nameSpacedName.Namespace, beaconnode.Spec.GRPCPort)
 
 		jobs <- request{name: "peers", url: fmt.Sprintf("%speer_count", baseUrl)}
 		jobs <- request{name: "isSyncing", url: fmt.Sprintf("%ssyncing", baseUrl)}
