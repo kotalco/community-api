@@ -197,11 +197,25 @@ func Stats(c *websocket.Conn) {
 		return
 	}
 
-	if !beaconnode.Spec.GRPC {
-		c.WriteJSON(fiber.Map{
-			"error": "gRPC sever is not enabled",
-		})
-		return
+	var baseUrl string
+	//Prysm client implements its API by using gRPC
+	if beaconnode.Spec.Client == ethereum2v1alpha1.PrysmClient {
+		if !beaconnode.Spec.GRPC {
+			c.WriteJSON(fiber.Map{
+				"error": "gRPC sever is not enabled",
+			})
+			return
+		}
+		baseUrl = fmt.Sprintf("http://%s.%s:%d/eth/v1/node/", nameSpacedName.Name, nameSpacedName.Namespace, beaconnode.Spec.GRPCPort)
+		//The remaining clients uses RestApi
+	} else {
+		if !beaconnode.Spec.REST {
+			c.WriteJSON(fiber.Map{
+				"error": "REST API sever is not enabled",
+			})
+			return
+		}
+		baseUrl = fmt.Sprintf("http://%s.%s:%d/eth/v1/node/", nameSpacedName.Name, nameSpacedName.Namespace, beaconnode.Spec.RESTPort)
 	}
 
 	for {
@@ -211,8 +225,6 @@ func Stats(c *websocket.Conn) {
 		for i := 0; i < 2; i++ {
 			go worker(jobs, results)
 		}
-
-		baseUrl := fmt.Sprintf("http://%s.%s:%d/eth/v1/node/", nameSpacedName.Name, nameSpacedName.Namespace, beaconnode.Spec.GRPCPort)
 
 		jobs <- request{name: "peers", url: fmt.Sprintf("%speer_count", baseUrl)}
 		jobs <- request{name: "isSyncing", url: fmt.Sprintf("%ssyncing", baseUrl)}
