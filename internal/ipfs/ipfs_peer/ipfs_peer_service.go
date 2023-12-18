@@ -38,7 +38,7 @@ func NewIpfsPeerService() IService {
 func (service ipfsPeerService) Get(namespacedName types.NamespacedName) (peer ipfsv1alpha1.Peer, restErr restErrors.IRestErr) {
 	if err := k8sClient.Get(context.Background(), namespacedName, &peer); err != nil {
 		if apiErrors.IsNotFound(err) {
-			restErr = restErrors.NewBadRequestError(fmt.Sprintf("peer by name %s doesn't exit", namespacedName.Name))
+			restErr = restErrors.NewNotFoundError(fmt.Sprintf("peer by name %s doesn't exit", namespacedName.Name))
 			return
 		}
 		go logger.Error(service.Get, err)
