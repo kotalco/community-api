@@ -38,7 +38,7 @@ func NewNearService() IService {
 func (service nearService) Get(namespacedName types.NamespacedName) (node nearv1alpha1.Node, restErr restErrors.IRestErr) {
 	if err := k8sClient.Get(context.Background(), namespacedName, &node); err != nil {
 		if apiErrors.IsNotFound(err) {
-			restErr = restErrors.NewBadRequestError(fmt.Sprintf("node by name %s doesn't exit", namespacedName))
+			restErr = restErrors.NewNotFoundError(fmt.Sprintf("node by name %s doesn't exit", namespacedName))
 			return
 		}
 		go logger.Error(service.Get, err)
